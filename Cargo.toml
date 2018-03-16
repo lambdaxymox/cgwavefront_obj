@@ -1,6 +1,24 @@
 [package]
-name = "wavefront-obj"
+name = "wavefront_obj"
 version = "0.1.0"
 authors = ["Stallmanifold <stallmanifold@gmail.com>"]
+readme = "README.md"
+repository = "https://github.com/stallmanifold/libtga"
+keywords = ["wavefront", "obj", "geometry processing", "vertex shading", "graphics"]
+
+[lib]
+name = "wavefront_obj"
 
 [dependencies]
+
+[dev-dependencies]
+criterion = "0.2"
+
+[profile.bench]
+opt-level = 2
+debug = false
+rpath = false
+lto = false
+debug-assertions = false
+codegen-units = 1
+panic = 'unwind'
