@@ -6,7 +6,7 @@ type Token = Vec<u8>;
 
 #[inline]
 fn is_whitespace(ch: u8) -> bool {
-    ch == b' ' || ch == b'\\' || c == b'\t'
+    ch == b' ' || ch == b'\\' || ch == b'\t'
 }
 
 #[inline]
@@ -21,7 +21,7 @@ fn is_whitespace_or_newline(ch: u8) -> bool {
 
 struct Lexer<'a> {
     current_line_number: usize,
-    stream: iter::Peakable<str::Bytes<'a>>>,
+    stream: iter::Peekable<str::Bytes<'a>>,
 }
 
 impl<'a> Lexer<'a> {
@@ -33,15 +33,15 @@ impl<'a> Lexer<'a> {
     }
 
     #[inline]
-    fn peek(&self) -> Option<u8> {
+    fn peek(&mut self) -> Option<u8> {
         self.stream.peek().map(|&x| x)
     }
 
-    fn advance(&mut self) -> usize {
+    fn advance(&mut self) {
         match self.stream.next() {
             Some(ch) if is_newline(ch) => {
                 self.current_line_number += 1;
-            }
+            },
             _ => {}
         }
     }
@@ -116,3 +116,18 @@ impl<'a> Lexer<'a> {
     }
 }
 
+impl<'a> Iterator for Lexer<'a> {
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next_token().map(|token| {
+            match String::from_utf8(token) {
+                Ok(st) => st,
+                Err(err) => panic!(
+                    "Lexical Error: Found invalid UTF-8 token on line {}.",
+                    self.current_line_number
+                )
+            }
+        })
+    }
+}
