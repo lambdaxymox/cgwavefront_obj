@@ -50,17 +50,17 @@ impl<'a> Lexer<'a> {
         let mut skipped: usize = 0;
         loop {
             match self.peek() {
-                Some(ch) if ch == b'#' => {
-                    self.advance();
-                    skipped += 1;
-                }
                 Some(ch) if is_newline(ch) => {
                     self.advance();
                     skipped += 1;
                     break;
                 }
-                _ => {
+                None => {
                     break;
+                }
+                _ => {
+                    self.advance();
+                    skipped += 1;
                 }
             }
         }
@@ -100,7 +100,6 @@ impl<'a> Lexer<'a> {
                 Some(ch) => {
                     token.push(ch);
                     self.advance();
-                    consumed += 1;
                 }
                 None => {
                     break;
@@ -108,10 +107,11 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        if consumed == 0 {
-            None
-        } else {
+        if token.len() != 0 {
+            debug_assert!(consumed != 0);
             Some(token)
+        } else {
+            None
         }
     }
 }
