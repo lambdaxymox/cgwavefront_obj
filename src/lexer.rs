@@ -2,7 +2,7 @@ use std::iter;
 use std::str;
 
 
-type Token = Vec<u8>;
+pub type Token = Vec<u8>;
 
 #[inline]
 fn is_whitespace(ch: u8) -> bool {
@@ -19,13 +19,13 @@ fn is_whitespace_or_newline(ch: u8) -> bool {
     is_whitespace(ch) || is_newline(ch)
 }
 
-struct Lexer<'a> {
+pub struct Lexer<'a> {
     current_line_number: usize,
     stream: iter::Peekable<str::Bytes<'a>>,
 }
 
 impl<'a> Lexer<'a> {
-    fn new(stream: &str) -> Lexer {
+    pub fn new(stream: &str) -> Lexer {
         Lexer {
             current_line_number: 1,
             stream: stream.bytes().peekable(),
@@ -47,7 +47,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn skip_comment(&mut self) -> usize {
-        let mut skipped = 0;
+        let mut skipped: usize = 0;
         loop {
             match self.peek() {
                 Some(ch) if ch == b'#' => {
@@ -69,7 +69,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn skip_whitespace(&mut self) -> usize {
-        let mut skipped = 0;
+        let mut skipped: usize = 0;
         loop {
             match self.peek() {
                 Some(ch) if is_whitespace_or_newline(ch) => {
@@ -123,7 +123,7 @@ impl<'a> Iterator for Lexer<'a> {
         self.next_token().map(|token| {
             match String::from_utf8(token) {
                 Ok(st) => st,
-                Err(err) => panic!(
+                Err(_) => panic!(
                     "Lexical Error: Found invalid UTF-8 token on line {}.",
                     self.current_line_number
                 )
@@ -131,3 +131,4 @@ impl<'a> Iterator for Lexer<'a> {
         })
     }
 }
+
