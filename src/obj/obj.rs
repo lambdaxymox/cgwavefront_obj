@@ -1,3 +1,7 @@
+use std::slice;
+use std::ops;
+
+
 #[derive(Clone, Copy, Debug)]
 pub struct Vertex {
     pub x: f32,
@@ -20,34 +24,65 @@ pub struct NormalVertex {
     pub k: f32,
 }
 
-type VertexIndex = u32;
-struct VertexSet(Vec<Vertex>);
+macro_rules! set_impl {
+    ($set_item:ty, $set_type:ident, $set_iter:ident, $set_idx:ident) => {
+        type $set_idx = u32;
 
-type TextureIndex = u32;
-struct TextureVertexSet(Vec<TextureVertex>);
+        struct $set_type(Vec<$set_item>);
 
-type NormalVertexIndex = u32;
-struct NormalVertexSet(Vec<NormalVertex>);
+        impl $set_type {
+            fn new() -> $set_type {
+                $set_type(Vec::new())
+            }
+
+            fn iter(&self) -> $set_iter {
+                $set_iter {
+                    inner: self.0.iter(),
+                }
+            }
+        }
+
+        struct $set_iter<'a> {
+            inner: slice::Iter<'a, $set_item>,
+        }
+
+        impl<'a> Iterator for $set_iter<'a> {
+            type Item = &'a $set_item;
+
+            #[inline]
+            fn next(&mut self) -> Option<Self::Item> {
+                self.inner.next()
+            }
+        }
+
+        impl ops::Index<$set_idx> for $set_type {
+            type Output = $set_item;
+
+            #[inline]
+            fn index(&self, index: $set_idx) -> &Self::Output {
+                &self.0[index as usize]
+            }
+        }
+    }
+}
 
 type GroupName = String;
-type GroupIndex = u32;
-struct GroupSet(Vec<GroupName>);
-
-type ShapeIndex = u32;
-struct ShapeSet(Vec<Shape>);
-
-type ElementIndex = u32;
-struct ElementSet(Vec<Element>);
-
 type SmoothingGroupName = String;
-type SmoothingGroupIndex = u32;
-struct SmoothingGroupSet(Vec<SmoothingGroupName>);
 
+set_impl!(Vertex, VertexSet, VertexSetIter, VertexIndex);
+set_impl!(TextureVertex, TextureVertexSet, TextureVertexSetIter, TextureVertexIndex);
+set_impl!(NormalVertex, NormalVertexSet, NormalVertexSetIter, NormalVertexIndex);
+set_impl!(GroupName, GroupSet, GroupSetIter, GroupIndex);
+set_impl!(Shape, ShapeSet, ShapeSetIter, ShapeIndex);
+set_impl!(Element, ElementSet, ElementSetIter, ElementIndex);
+set_impl!(SmoothingGroupName, SmoothingGroupSet, SmoothingGroupSetIter, SmoothingGroupIndex);
+
+type VTNIndex = (VertexIndex, Option<TextureVertexIndex>, Option<NormalVertexIndex>);
 
 enum Element {
-    Point(VertexIndex),
-    Line(VertexIndex, VertexIndex),
-    Face(VertexIndex, VertexIndex, VertexIndex),
+    Point(VTNIndex),
+    Line(VTNIndex, VTNIndex),
+    Face(VTNIndex, VTNIndex, VTNIndex),
 }
 
 struct Shape {
