@@ -24,6 +24,7 @@ fn is_whitespace_or_newline(ch: u8) -> bool {
 ///
 /// A OBJ file lexer tokenizes an input byte stream.
 ///
+#[derive(Clone)]
 pub struct Lexer<'a> {
     /// The current line position in the token stream.
     current_line_number: usize,
