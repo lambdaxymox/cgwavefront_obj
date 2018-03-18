@@ -4,8 +4,7 @@ use std::str;
 
 /// The return type from the lexer.
 pub type Token = Vec<u8>;
-
-// 
+ 
 #[inline]
 fn is_whitespace(ch: u8) -> bool {
     ch == b' ' || ch == b'\\' || ch == b'\t'
