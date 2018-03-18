@@ -98,7 +98,7 @@ impl<'a> Lexer<'a> {
 
     fn next_token(&mut self) -> Option<Token> {
         let mut consumed: usize = 0;
-        let mut skipped: usize = self.skip_whitespace();
+        let mut skipped: usize = 0;
         let mut token: Vec<u8> = Vec::new();
         loop {
             match self.peek() {
