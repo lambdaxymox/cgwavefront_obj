@@ -66,6 +66,18 @@ macro_rules! set_impl {
     }
 }
 
+enum Element {
+    Point(VTNIndex),
+    Line(VTNIndex, VTNIndex),
+    Face(VTNIndex, VTNIndex, VTNIndex),
+}
+
+struct Shape {
+    element: ElementIndex,
+    groups: Vec<GroupIndex>,
+    smoothing_groups: Vec<SmoothingGroupIndex>,
+}
+
 type GroupName = String;
 type SmoothingGroupName = String;
 
@@ -79,27 +91,20 @@ set_impl!(SmoothingGroupName, SmoothingGroupSet, SmoothingGroupSetIter, Smoothin
 
 type VTNIndex = (VertexIndex, Option<TextureVertexIndex>, Option<NormalVertexIndex>);
 
-enum Element {
-    Point(VTNIndex),
-    Line(VTNIndex, VTNIndex),
-    Face(VTNIndex, VTNIndex, VTNIndex),
-}
-
-struct Shape {
-    element: ElementIndex,
-    groups: Vec<GroupIndex>,
-    smoothing_groups: Vec<SmoothingGroupIndex>,
-}
 
 pub struct Object {
     name: String,
-    vertex_set: Vec<Vertex>,
-    texture_vertex_set: Vec<TextureVertex>,
-    normal_vertex_set: Vec<NormalVertex>,
-    group_set: Vec<GroupName>,
-    smoothing_group_set: Vec<SmoothingGroupName>,
-    element_set: Vec<Element>,
-    shape_set: Vec<Shape>,
+    vertex_set: VertexSet,
+    texture_vertex_set: TextureVertexSet,
+    normal_vertex_set: NormalVertexSet,
+    group_set: GroupSet,
+    smoothing_group_set: SmoothingGroupSet,
+    element_set: ElementSet,
+    shape_set: ShapeSet,
+}
+
+impl Object {
+
 }
 
 pub struct ObjectSet {
