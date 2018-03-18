@@ -2,8 +2,10 @@ use std::iter;
 use std::str;
 
 
+/// The return type from the lexer.
 pub type Token = Vec<u8>;
 
+// 
 #[inline]
 fn is_whitespace(ch: u8) -> bool {
     ch == b' ' || ch == b'\\' || ch == b'\t'
@@ -19,12 +21,18 @@ fn is_whitespace_or_newline(ch: u8) -> bool {
     is_whitespace(ch) || is_newline(ch)
 }
 
+///
+/// A OBJ file lexer tokenizes an input byte stream.
+///
 pub struct Lexer<'a> {
+    /// The current line position in the token stream.
     current_line_number: usize,
+    /// The input stream.
     stream: iter::Peekable<str::Bytes<'a>>,
 }
 
 impl<'a> Lexer<'a> {
+    /// Create a new lexer.
     pub fn new(stream: &str) -> Lexer {
         Lexer {
             current_line_number: 1,
@@ -32,11 +40,18 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    ///
+    /// The function `peek` looks at the character at the current position
+    /// in the byte stream without advancing the stream.
     #[inline]
     fn peek(&mut self) -> Option<u8> {
         self.stream.peek().map(|&x| x)
     }
 
+    ///
+    /// the function `advance` advances the lexer by one
+    /// character in the byte stream.
+    ///
     fn advance(&mut self) {
         match self.stream.next() {
             Some(ch) if is_newline(ch) => {
@@ -46,6 +61,10 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    ///
+    /// The function `skip_comment` consumes a comment line
+    /// with returning it.
+    ///
     fn skip_comment(&mut self) -> usize {
         let mut skipped: usize = 0;
         loop {
@@ -67,6 +86,10 @@ impl<'a> Lexer<'a> {
         skipped
     }
 
+    ///
+    /// The function `skip_whitespace` consumes a string of whitespace
+    /// characters without returning them.
+    ///
     fn skip_whitespace(&mut self) -> usize {
         let mut skipped: usize = 0;
         loop {
@@ -84,6 +107,10 @@ impl<'a> Lexer<'a> {
         skipped
     }
 
+    ///
+    /// The function `ship_newline` consumes one or more newline characters
+    /// without returning them.
+    ///
     fn skip_newline(&mut self) -> usize {
         let mut skipped = 0;
         loop {
@@ -101,6 +128,9 @@ impl<'a> Lexer<'a> {
         skipped
     }
 
+    ///
+    /// The method `next_token` fetches the next token from the input stream.
+    ///
     fn next_token(&mut self) -> Option<Token> {
         let mut consumed: usize = 0;
         let mut token: Vec<u8> = Vec::new();
