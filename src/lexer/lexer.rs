@@ -63,7 +63,7 @@ impl<'a> Lexer<'a> {
 
     ///
     /// The function `skip_comment` consumes a comment line
-    /// with returning it.
+    /// without returning it.
     ///
     fn skip_comment(&mut self) -> usize {
         let mut skipped: usize = 0;
@@ -132,6 +132,7 @@ impl<'a> Lexer<'a> {
     /// The method `next_token` fetches the next token from the input stream.
     ///
     fn next_token(&mut self) -> Option<Token> {
+        // Count the number of bytes consumed for a token.
         let mut consumed: usize = 0;
         let mut token: Vec<u8> = Vec::new();
         loop {
@@ -140,6 +141,10 @@ impl<'a> Lexer<'a> {
                     self.skip_comment();
                 }
                 Some(ch) if is_whitespace_or_newline(ch) => {
+                    // If the cursor is pointing at a whitespace or newline character,
+                    // there are two possible situations:
+                    // (1) We are at the end of the token,
+                    // (2) We have no encountered a token yet.
                     if consumed != 0 {
                         // We are at the end of a token.
                         break;
@@ -161,6 +166,7 @@ impl<'a> Lexer<'a> {
         }
 
         if consumed != 0 {
+            // We consumed a token.
             debug_assert!(token.len() != 0);
             Some(token)
         } else {
