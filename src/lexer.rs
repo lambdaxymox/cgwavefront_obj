@@ -51,10 +51,11 @@ impl<'a> Lexer<'a> {
         loop {
             match self.peek() {
                 Some(ch) => {
-                    self.advance();
-                    skipped += 1;
                     if is_newline(ch) {
                         break;
+                    } else {
+                        self.advance();
+                        skipped += 1; 
                     }
                 }
                 None => {
@@ -96,24 +97,28 @@ impl<'a> Lexer<'a> {
     }
 
     fn next_token(&mut self) -> Option<Token> {
-        let mut consumed: usize = self.skip_whitespace();
+        let mut consumed: usize = 0;
+        let mut skipped: usize = self.skip_whitespace();
         let mut token: Vec<u8> = Vec::new();
         loop {
             match self.peek() {
                 Some(ch) if ch == b'#' => {
-                    consumed += self.skip_comment();
+                    skipped += self.skip_comment();
                 }
-                Some(ch) if is_whitespace(ch) => {
-                    consumed += self.skip_whitespace();
-                    break;
-                }
-                Some(ch) if is_newline(ch) => {
-                    consumed += self.skip_newline();
-                    break;
+                Some(ch) if is_whitespace_or_newline(ch) => {
+                    if consumed != 0 {
+                        // We are at the end of a token.
+                        break;
+                    } else {
+                        // We have consumed only whitespace. No token has been found yet.
+                        skipped += self.skip_whitespace();
+                        skipped += self.skip_newline();
+                    }
                 }
                 Some(ch) => {
-                    token.push(ch);
                     self.advance();
+                    token.push(ch);
+                    consumed += 1;
                 }
                 None => {
                     break;
@@ -121,10 +126,11 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        if token.len() != 0 {
-            debug_assert!(consumed != 0);
+        if consumed != 0 {
+            debug_assert!(token.len() != 0);
             Some(token)
         } else {
+            debug_assert!(token.len() == 0);
             None
         }
     }
