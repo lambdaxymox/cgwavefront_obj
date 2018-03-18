@@ -1,6 +1,4 @@
+#![crate_type = "lib"]
+
 mod lexer;
-
-
-#[cfg(test)]
-mod test_lexer;
 
