@@ -50,17 +50,15 @@ impl<'a> Lexer<'a> {
         let mut skipped: usize = 0;
         loop {
             match self.peek() {
-                Some(ch) if is_newline(ch) => {
+                Some(ch) => {
                     self.advance();
                     skipped += 1;
-                    break;
+                    if is_newline(ch) {
+                        break;
+                    }
                 }
                 None => {
                     break;
-                }
-                _ => {
-                    self.advance();
-                    skipped += 1;
                 }
             }
         }
@@ -72,7 +70,7 @@ impl<'a> Lexer<'a> {
         let mut skipped: usize = 0;
         loop {
             match self.peek() {
-                Some(ch) if is_whitespace_or_newline(ch) => {
+                Some(ch) if is_whitespace(ch) => {
                     self.advance();
                     skipped += 1;
                 }
@@ -85,6 +83,18 @@ impl<'a> Lexer<'a> {
         skipped
     }
 
+    fn skip_newline(&mut self) -> usize {
+        match self.peek() {
+            Some(ch) if is_newline(ch) => {
+                self.advance();
+                return 1;
+            }
+            _ => {
+                return 0;
+            }
+        }
+    }
+
     fn next_token(&mut self) -> Option<Token> {
         let mut consumed: usize = self.skip_whitespace();
         let mut token: Vec<u8> = Vec::new();
@@ -93,8 +103,12 @@ impl<'a> Lexer<'a> {
                 Some(ch) if ch == b'#' => {
                     consumed += self.skip_comment();
                 }
-                Some(ch) if is_whitespace_or_newline(ch) => {
+                Some(ch) if is_whitespace(ch) => {
                     consumed += self.skip_whitespace();
+                    break;
+                }
+                Some(ch) if is_newline(ch) => {
+                    consumed += self.skip_newline();
                     break;
                 }
                 Some(ch) => {
