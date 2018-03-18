@@ -1,5 +1,6 @@
 use std::slice;
 use std::ops;
+use std::convert;
 
 
 #[derive(Clone, Copy, Debug)]
@@ -24,6 +25,7 @@ pub struct NormalVertex {
     pub k: f32,
 }
 
+
 macro_rules! set_impl {
     ($set_item:ty, $set_type:ident, $set_iter:ident, $set_idx:ident) => {
         type $set_idx = u32;
@@ -39,6 +41,14 @@ macro_rules! set_impl {
                 $set_iter {
                     inner: self.0.iter(),
                 }
+            }
+
+            fn get(&self, index: $set_idx) -> Option<&$set_item> {
+                self.0.get(index as usize)
+            }
+
+            fn as_slice(&self) -> &[$set_item] {
+                self.0.as_slice()
             }
         }
 
@@ -63,15 +73,23 @@ macro_rules! set_impl {
                 &self.0[index as usize]
             }
         }
+
+        impl convert::AsRef<[$set_item]> for $set_type {
+            fn as_ref(&self) -> &[$set_item] {
+                self.0.as_ref()
+            }
+        }
     }
 }
 
+#[derive(Clone, Debug)]
 enum Element {
     Point(VTNIndex),
     Line(VTNIndex, VTNIndex),
     Face(VTNIndex, VTNIndex, VTNIndex),
 }
 
+#[derive(Clone, Debug)]
 struct Shape {
     element: ElementIndex,
     groups: Vec<GroupIndex>,
@@ -104,8 +122,11 @@ pub struct Object {
 }
 
 impl Object {
-
+    pub fn name(&self) -> &str { 
+        &self.name
+    }
 }
+
 
 pub struct ObjectSet {
     objects: Vec<Object>,
