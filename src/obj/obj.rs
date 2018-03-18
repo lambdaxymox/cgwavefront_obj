@@ -7,37 +7,42 @@ pub struct Vertex {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct NormalVertex {
-    pub i: f32,
-    pub j: f32,
-    pub k: f32,
-}
-
-#[derive(Clone, Copy, Debug)]
 pub struct TextureVertex {
     pub u: f32,
     pub v: f32,
     pub w: f32,
 }
 
-type GroupName = String;
-type SmoothingGroupName = String;
+#[derive(Clone, Copy, Debug)]
+pub struct NormalVertex {
+    pub i: f32,
+    pub j: f32,
+    pub k: f32,
+}
 
 type VertexIndex = u32;
-type TextureIndex = u32;
-type NormalIndex = u32;
-type GroupNameIndex = u32;
-type ShapeIndex = u32;
-type ElementIndex = u32;
-type SmoothingGroupIndex = u32;
-
 struct VertexSet(Vec<Vertex>);
+
+type TextureIndex = u32;
 struct TextureVertexSet(Vec<TextureVertex>);
+
+type NormalVertexIndex = u32;
 struct NormalVertexSet(Vec<NormalVertex>);
+
+type GroupName = String;
+type GroupIndex = u32;
 struct GroupSet(Vec<GroupName>);
-struct ElementSet(Vec<Element>);
-struct SmoothingGroupSet(Vec<SmoothingGroupName>);
+
+type ShapeIndex = u32;
 struct ShapeSet(Vec<Shape>);
+
+type ElementIndex = u32;
+struct ElementSet(Vec<Element>);
+
+type SmoothingGroupName = String;
+type SmoothingGroupIndex = u32;
+struct SmoothingGroupSet(Vec<SmoothingGroupName>);
+
 
 enum Element {
     Point(VertexIndex),
@@ -46,8 +51,8 @@ enum Element {
 }
 
 struct Shape {
-    element: Element,
-    groups: Vec<GroupNameIndex>,
+    element: ElementIndex,
+    groups: Vec<GroupIndex>,
     smoothing_groups: Vec<SmoothingGroupIndex>,
 }
 
