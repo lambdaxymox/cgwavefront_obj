@@ -103,12 +103,11 @@ impl<'a> Lexer<'a> {
 
     fn next_token(&mut self) -> Option<Token> {
         let mut consumed: usize = 0;
-        let mut skipped: usize = 0;
         let mut token: Vec<u8> = Vec::new();
         loop {
             match self.peek() {
                 Some(ch) if ch == b'#' => {
-                    skipped += self.skip_comment();
+                    self.skip_comment();
                 }
                 Some(ch) if is_whitespace_or_newline(ch) => {
                     if consumed != 0 {
@@ -116,8 +115,8 @@ impl<'a> Lexer<'a> {
                         break;
                     } else {
                         // We have consumed only whitespace. No token has been found yet.
-                        skipped += self.skip_whitespace();
-                        skipped += self.skip_newline();
+                        self.skip_whitespace();
+                        self.skip_newline();
                     }
                 }
                 Some(ch) => {
