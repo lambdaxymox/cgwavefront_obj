@@ -219,6 +219,8 @@ fn test_cases() -> Test {
     }
 }
 
+/// for each instance of sample data, the resulting token stream
+/// should match the expected output from the lexer.
 #[test]
 fn test_lexer1() {
     for test_case in test_cases().iter() {
