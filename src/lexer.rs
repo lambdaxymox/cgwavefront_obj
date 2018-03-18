@@ -85,15 +85,20 @@ impl<'a> Lexer<'a> {
     }
 
     fn skip_newline(&mut self) -> usize {
-        match self.peek() {
-            Some(ch) if is_newline(ch) => {
-                self.advance();
-                return 1;
-            }
-            _ => {
-                return 0;
-            }
+        let mut skipped = 0;
+        loop {
+            match self.peek() {
+                Some(ch) if is_newline(ch) => {
+                    self.advance();
+                    skipped += 1;
+                }
+                _ => {
+                    break;
+                }
+            }   
         }
+
+        skipped
     }
 
     fn next_token(&mut self) -> Option<Token> {
