@@ -1,7 +1,7 @@
 use std::slice;
 use std::ops;
 use std::convert;
-use obj::table::MeshTable;
+use obj::table::ObjectTable;
 
 
 #[derive(Clone, Copy, Debug)]
@@ -34,6 +34,13 @@ enum Element {
 }
 
 #[derive(Clone, Debug)]
+struct ShapeEntry {
+    element: ElementIndex,
+    groups: Vec<GroupIndex>,
+    smoothing_groups: Vec<SmoothingGroupIndex>,
+}
+
+#[derive(Clone, Debug)]
 struct Shape {
     element: ElementIndex,
     groups: Vec<GroupIndex>,
@@ -41,7 +48,9 @@ struct Shape {
 }
 
 type GroupName = String;
-type SmoothingGroupName = String;
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+struct SmoothingGroupName(String);
 
 type ElementIndex = usize;
 type VertexIndex = usize;
@@ -51,17 +60,18 @@ type GroupIndex = usize;
 type ShapeIndex = usize;
 type SmoothingGroupIndex = usize;
 
+type VertexSet = ObjectTable<Vertex>;
+type TextureVertexSet = ObjectTable<TextureVertex>;
+type NormalVertexSet = ObjectTable<NormalVertex>;
+type ElementSet = ObjectTable<Element>;
+type ShapeSet = ObjectTable<Shape>;
+type GroupSet = ObjectTable<GroupName>;
+type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
 
-type VTNIndex = (VertexIndex, Option<TextureVertexIndex>, Option<NormalVertexIndex>);
+#[derive(Copy, Clone, Debug)]
+struct VTNIndex(VertexIndex, Option<TextureVertexIndex>, Option<NormalVertexIndex>);
 
-type VertexSet = MeshTable<Vertex>;
-type TextureVertexSet = MeshTable<TextureVertex>;
-type NormalVertexSet = MeshTable<NormalVertex>;
-type ElementSet = MeshTable<Element>;
-type ShapeSet = MeshTable<Shape>;
-type GroupSet = MeshTable<GroupName>;
-type SmoothingGroupSet = MeshTable<SmoothingGroupName>;
-/*
+
 pub struct Object {
     name: String,
     vertex_set: VertexSet,
@@ -77,10 +87,49 @@ impl Object {
     pub fn name(&self) -> &str { 
         &self.name
     }
+
+    fn get_vtn_triple(&self, index: VTNIndex) -> Option<(&Vertex, Option<&TextureVertex>, Option<&NormalVertex>)> {
+        unimplemented!();
+    }
 }
 
-
-pub struct ObjectSet {
-    objects: Vec<Object>,
+trait ObjectQuery<K, V> {
+    fn query(&self, key: K) -> Option<V>;
 }
-*/
+
+impl ObjectQuery<VertexIndex, Vertex> for Object {
+    fn query(&self, key: VertexIndex) -> Option<Vertex> {
+         self.vertex_set.get(key).map(|&x| x)
+    }
+}
+
+impl ObjectQuery<TextureVertexIndex, TextureVertex> for Object {
+    fn query(&self, key: TextureVertexIndex) -> Option<TextureVertex> {
+         self.texture_vertex_set.get(key).map(|&x| x)
+    }
+}
+
+impl ObjectQuery<NormalVertexIndex, NormalVertex> for Object {
+    fn query(&self, key: NormalVertexIndex) -> Option<NormalVertex> {
+         self.normal_vertex_set.get(key).map(|&x| x)
+    }
+}
+
+impl ObjectQuery<ElementIndex, Element> for Object {
+    fn query(&self, key: ElementIndex) -> Option<Element> {
+         self.element_set.get(key).map(|x| x.clone())
+    }
+}
+
+impl ObjectQuery<GroupIndex, GroupName> for Object {
+    fn query(&self, key: GroupIndex) -> Option<GroupName> {
+        self.group_set.get(key).map(|x| x.clone())
+    }
+}
+
+impl ObjectQuery<SmoothingGroupIndex, SmoothingGroupName> for Object {
+    fn query(&self, key: SmoothingGroupIndex) -> Option<SmoothingGroupName> {
+        self.smoothing_group_set.get(key).map(|x| x.clone())
+    }
+}
+
