@@ -39,6 +39,7 @@ ObjectBody      ::= [AnyVertex | AnyElement]* [Group]*
 Object          ::= ObjectName ObjectBody
 ObjectSet       ::= ObjectBody [Object]*
 ```
+
 ### Notation
 The following notation describes the extragrammatical symbols used in the grammar.
 * A `[...]` without a `*` or `+` suffix denotes an optional field (zero or one instances).
