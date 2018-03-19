@@ -1,28 +1,29 @@
 # Wavefront OBJ Parser
 ### Introduction
-This document contains the grammar extracted from the Wavefront OBJ file format specification used to implement the parser and lexer.
+This document contains the grammar extracted from the Wavefront OBJ file format specification used to implement the parser and lexer. See the docs subdirectory of the source tree for details.
 
 ### Grammar
 ```
 ObjectSet ::= [Object]*
-Object ::=
+Object ::= ...
 
 Comment ::= '#' String '\n'
-Whitespace ::= [[' '] | Comment]+
+Whitespace ::= [' ' | '\t' | Comment]+
 Letter ::= <Ascii Letters>
 String ::= [Letter]+
 Digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 Digits ::= [Digit]+
-Float ::= Digits '.' Digits
+Float ::= ['-'] Digits '.' Digits
 Vertex ::= 'v' Float Float Float [Float]
 TextureVertex ::= 'vt' Float Float Float
 NormalVertex ::= 'vn' Float Float Float
 ParameterVertex ::= 'vp' Float [Float] [Float]
-V ::= Digits
-VN ::= Digits '//' Digits
-VT ::= Digits '/' Digits
-VTN ::= Digits '/' Digits '/' Digits
-Point ::= 'p' Digits [Digits]*
+Number ::= ['-'] Digits
+V ::= Number
+VN ::= Number '//' Number
+VT ::= Number '/' Number
+VTN ::= Number '/' Number '/' Number
+Point ::= 'p' Number [Number]*
 Line ::= 'l' (VT VT [VT]+ | V V [V]+)
 Face ::= 'f' V V V [V]*
        | 'f' VT VT VT [VT]*
@@ -31,4 +32,5 @@ Face ::= 'f' V V V [V]*
 Group ::= 'g' [String]*
 SmoothingGroup ::= 's' ('off' | Digits)
 ObjectName = 'o' String
+Element ::= Point | Line | Face
 ```
