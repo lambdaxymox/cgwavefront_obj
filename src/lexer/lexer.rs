@@ -149,6 +149,7 @@ impl<'a> Lexer<'a> {
                         // We are at the end of a token.
                         break;
                     } else if is_newline(ch) {
+                        // We are at the end of a line.
                         self.advance();
                         token.push(ch);
                         consumed += 1;
