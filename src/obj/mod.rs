@@ -1,2 +1,2 @@
-mod obj;
+mod object;
 mod table;
