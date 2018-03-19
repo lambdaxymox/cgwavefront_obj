@@ -7,7 +7,7 @@ repository = "https://github.com/stallmanifold/libtga"
 keywords = ["wavefront", "obj", "geometry processing", "vertex shading", "graphics"]
 
 [lib]
-name = "wavefront_obj"
+name = "wavefront"
 
 [dependencies]
 
