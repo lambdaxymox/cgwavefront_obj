@@ -167,3 +167,15 @@ impl ObjectQuery<ShapeIndex, ShapeEntry> for Object {
     }
 }
 
+pub struct ObjectSet {
+    objects: Vec<Object>,
+}
+
+impl ObjectSet {
+    fn new() -> ObjectSet {
+        ObjectSet {
+            objects: Vec::new(),
+        }    
+    }
+}
+
