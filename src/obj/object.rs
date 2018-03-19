@@ -65,7 +65,7 @@ type VertexSet = ObjectTable<Vertex>;
 type TextureVertexSet = ObjectTable<TextureVertex>;
 type NormalVertexSet = ObjectTable<NormalVertex>;
 type ElementSet = ObjectTable<Element>;
-type ShapeSet = ObjectTable<Shape>;
+type ShapeSet = ObjectTable<ShapeEntry>;
 type GroupSet = ObjectTable<GroupName>;
 type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
 
@@ -158,6 +158,12 @@ impl ObjectQuery<GroupIndex, GroupName> for Object {
 impl ObjectQuery<SmoothingGroupIndex, SmoothingGroupName> for Object {
     fn query(&self, key: SmoothingGroupIndex) -> Option<SmoothingGroupName> {
         self.smoothing_group_set.get(key).map(|x| x.clone())
+    }
+}
+
+impl ObjectQuery<ShapeIndex, ShapeEntry> for Object {
+    fn query(&self, key: ShapeIndex) -> Option<ShapeEntry> {
+        self.shape_set.get(key).map(|x| x.clone())
     }
 }
 
