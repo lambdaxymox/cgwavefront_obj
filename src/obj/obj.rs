@@ -90,7 +90,30 @@ impl Object {
     }
 
     fn get_vtn_triple(&self, index: VTNIndex) -> Option<(&Vertex, Option<&TextureVertex>, Option<&NormalVertex>)> {
-        unimplemented!();
+        let vertex = match self.vertex_set.get(index.0) {
+            Some(v) => v,
+            None => { return None; }
+        };
+        let texture_vertex = match index.1 {
+            Some(tv_idx) => {
+                match self.texture_vertex_set.get(tv_idx) {
+                    Some(tv) => Some(tv),
+                    None => { return None; }
+                } 
+            }
+            None => None
+        };
+        let normal_vertex = match index.2 {
+            Some(nv_idx) => {
+                match self.normal_vertex_set.get(nv_idx) {
+                    Some(nv) => Some(nv),
+                    None => { return None; }
+                }
+            }
+            None => None
+        };
+
+        Some((vertex, texture_vertex, normal_vertex))
     }
 
     fn get_shape(&self, entry: &ShapeEntry) -> Option<&Shape> {
