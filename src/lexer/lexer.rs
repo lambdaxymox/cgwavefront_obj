@@ -144,14 +144,18 @@ impl<'a> Lexer<'a> {
                     // If the cursor is pointing at a whitespace or newline character,
                     // there are two possible situations:
                     // (1) We are at the end of the token,
-                    // (2) We have no encountered a token yet.
+                    // (2) We have not encountered a token yet.
                     if consumed != 0 {
                         // We are at the end of a token.
+                        break;
+                    } else if is_newline(ch) {
+                        self.advance();
+                        token.push(ch);
+                        consumed += 1;
                         break;
                     } else {
                         // We have consumed only whitespace. No token has been found yet.
                         self.skip_whitespace();
-                        self.skip_newline();
                     }
                 }
                 Some(ch) => {
@@ -191,4 +195,3 @@ impl<'a> Iterator for Lexer<'a> {
         })
     }
 }
-
