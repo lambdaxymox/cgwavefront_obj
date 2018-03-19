@@ -1,15 +1,15 @@
-# Wavefront OBJ Parser
+# Wavefront OBJ Parser Grammar
 ### Introduction
 This document contains the grammar extracted from the Wavefront OBJ file format specification used to implement the parser and lexer. See the docs subdirectory of the source tree for details. At this time the grammar centers mainly on parsing polygonal geometry, not free-form geometry. The grammar will not parse free-form geometry data.
 
 ### Grammar
-The grammar is written in Backus-Naur form.
+The grammar is written in Backus-Naur form. An `ObjectSet` is the collection of geometry that results from parsing an OBJ file.
 ```
 Empty           ::= ''
 Comment         ::= '#' String '\n'
 Whitespace      ::= [' ' | '\t' | Comment]+
-Letter          ::= <Ascii Letters>
-String          ::= [Letter]+
+Letter          ::= a | b | ... | z | A | B | ... | Z
+String          ::= [Letter]+ [Digit | Letter]*
 Digit           ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 Digits          ::= [Digit]+
 Number          ::= ['-'] Digits
@@ -32,10 +32,11 @@ Face            ::= 'f' V V V [V]*
 Element         ::= Point | Line | Face
 GroupName       ::= 'g' [String]*
 SmoothingGroup  ::= 's' ('off' | 0 | Digits)
-Group           ::= GroupName [AnyVertex | Element]*
+AnyElement      ::= [Element]* | SmoothingGroup [Element]*
+Group           ::= GroupName [AnyVertex | AnyElement]*
 ObjectName      ::= 'o' String
-ObjectBody      ::= [AnyVertex | Element]* | [Group]*
-Object          ::= ObjectBody [ObjectName ObjectBody]*
+ObjectBody      ::= [AnyVertex | AnyElement]* [Group]*
+Object          ::= ObjectBody | ObjectName ObjectBody
 ObjectSet       ::= [Object]*
 ```
 ### Notation
@@ -44,3 +45,4 @@ The following notation describes the extragrammatical symbols used in the gramma
 * A `[...]*` means zero or more symbols of that form.
 * A `[...]+` means one or more symbols of that form.
 * A `(...)` exists to disambiguate how to group a set of symbols. It lies outside the grammar per se.
+* A `[...]` has no other suffixes, and a `(...)` has no suffixes.
