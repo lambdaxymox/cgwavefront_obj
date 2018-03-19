@@ -42,12 +42,13 @@ struct ShapeEntry {
 
 #[derive(Clone, Debug)]
 struct Shape {
-    element: ElementIndex,
-    groups: Vec<GroupIndex>,
-    smoothing_groups: Vec<SmoothingGroupIndex>,
+    element: Element,
+    groups: Vec<GroupName>,
+    smoothing_groups: Vec<SmoothingGroupName>,
 }
 
-type GroupName = String;
+#[derive(Clone, Eq, PartialEq, Debug)]
+struct GroupName(String);
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 struct SmoothingGroupName(String);
@@ -89,6 +90,10 @@ impl Object {
     }
 
     fn get_vtn_triple(&self, index: VTNIndex) -> Option<(&Vertex, Option<&TextureVertex>, Option<&NormalVertex>)> {
+        unimplemented!();
+    }
+
+    fn get_shape(&self, entry: &ShapeEntry) -> Option<&Shape> {
         unimplemented!();
     }
 }
