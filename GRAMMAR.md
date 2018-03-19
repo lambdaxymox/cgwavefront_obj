@@ -36,12 +36,12 @@ AnyElement      ::= [Element]* | SmoothingGroup [Element]*
 Group           ::= GroupName [AnyVertex | AnyElement]*
 ObjectName      ::= 'o' String
 ObjectBody      ::= [AnyVertex | AnyElement]* [Group]*
-Object          ::= ObjectBody | ObjectName ObjectBody
-ObjectSet       ::= [Object]*
+Object          ::= ObjectName ObjectBody
+ObjectSet       ::= ObjectBody [Object]*
 ```
 ### Notation
 The following notation describes the extragrammatical symbols used in the grammar.
-* A `[...]` without a `*` or `+` suffix denotes an optional field.
+* A `[...]` without a `*` or `+` suffix denotes an optional field (zero or one instances).
 * A `[...]*` means zero or more symbols of that form.
 * A `[...]+` means one or more symbols of that form.
 * A `(...)` exists to disambiguate how to group a set of symbols. It lies outside the grammar per se.
