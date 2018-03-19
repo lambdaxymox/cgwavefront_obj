@@ -6,12 +6,12 @@ This document contains the grammar extracted from the Wavefront OBJ file format 
 The grammar is written in Backus-Naur form. An `ObjectSet` is the collection of geometry that results from parsing an OBJ file.
 ```
 Empty           ::= ''
-Comment         ::= '#' String '\n'
-Whitespace      ::= [' ' | '\t' | Comment]+
+Digit           ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 Letter          ::= a | b | ... | z | A | B | ... | Z
 String          ::= [Letter]+ [Digit | Letter]*
-Digit           ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 Digits          ::= [Digit]+
+Comment         ::= '#' String '\n'
+Whitespace      ::= [' ' | '\t' | Comment]+
 Number          ::= ['-'] Digits
 Float           ::= Number '.' Digits
 Vertex          ::= 'v' Float Float Float [Float]
