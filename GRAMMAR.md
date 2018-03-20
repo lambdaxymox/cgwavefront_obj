@@ -1,4 +1,5 @@
 # Wavefront OBJ Parser Grammar
+
 ### Introduction
 This document contains the grammar extracted from the Wavefront OBJ file format specification used to implement the parser and lexer. See the docs subdirectory of the source tree for details. At this time the grammar centers mainly on parsing polygonal geometry, not free-form geometry. The grammar will not parse free-form geometry data.
 
@@ -40,7 +41,7 @@ Group           ::= GroupName [AnyVertex | AnyElement]*
 ObjectName      ::= 'o' String
 ObjectBody      ::= [AnyVertex | AnyElement]* [Group]*
 Object          ::= ObjectName ObjectBody
-ObjectSet       ::= ObjectBody [Object]*
+ObjectSet       ::= [Object | ObjectBody] [Object]*
 ```
 
 ### Notation
