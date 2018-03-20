@@ -108,27 +108,6 @@ impl<'a> Lexer<'a> {
     }
 
     ///
-    /// The function `ship_newline` consumes one or more newline characters
-    /// without returning them.
-    ///
-    fn skip_newline(&mut self) -> usize {
-        let mut skipped = 0;
-        loop {
-            match self.peek() {
-                Some(ch) if is_newline(ch) => {
-                    self.advance();
-                    skipped += 1;
-                }
-                _ => {
-                    break;
-                }
-            }   
-        }
-
-        skipped
-    }
-
-    ///
     /// The method `next_token` fetches the next token from the input stream.
     ///
     fn next_token(&mut self) -> Option<Token> {
