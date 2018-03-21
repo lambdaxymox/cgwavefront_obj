@@ -1,7 +1,7 @@
 use obj::object::{
     ObjectSet, Object, 
     Vertex, TextureVertex, NormalVertex,
-    Element
+    Element, VTNIndex,
 };
 use lexer::Lexer;
 use std::iter;
@@ -174,6 +174,37 @@ impl<'a> Parser<'a> {
             _ => Ok(String::from(""))
         }
     }
+
+    fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
+        try!(self.parse_statement("p"));
+        let v_index = try!(self.parse_u32());
+        elements.push(Element::Point(VTNIndex::new(v_index as usize, None, None)));
+        loop {
+            match self.parse_string().as_ref().map(|st| &st[..]) {
+                Ok("\n") | Err(_) => break,
+                Ok(st) => match st.parse::<usize>() {
+                    Ok(v_index) => elements.push(
+                        Element::Point(VTNIndex::new(v_index, None, None))
+                    ),
+                    Err(_) => return self.error(format!("Expected integer but got `{}`.", st))
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
+        unimplemented!();
+    }
+
+    fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
+        unimplemented!();
+    }
+
+    fn parse_element(&mut self) -> Result<Element, ParseError> {
+        unimplemented!();
+    }
 }
 
 #[cfg(test)]
@@ -308,7 +339,19 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_object1() {
+    fn test_parse_point1() {
+        let mut parser = super::Parser::new("p 1 2 3 4 \n");
+        let mut result = Vec::new();
+        parser.parse_point(&mut result).unwrap();
+        let expected = vec![
+            Element::Point(VTNIndex::new(1, None, None)), Element::Point(VTNIndex::new(2, None, None)),
+            Element::Point(VTNIndex::new(3, None, None)), Element::Point(VTNIndex::new(4, None, None)),
+        ];
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_object_set1() {
         let obj_file = r"
             o object1
             g cube
