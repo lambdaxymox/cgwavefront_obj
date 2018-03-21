@@ -26,8 +26,8 @@ pub struct NormalVertex {
     pub k: f32,
 }
 
-#[derive(Clone, Debug)]
-enum Element {
+#[derive(Clone, Debug, PartialEq)]
+pub enum Element {
     Point(VTNIndex),
     Line(VTNIndex, VTNIndex),
     Face(VTNIndex, VTNIndex, VTNIndex),
@@ -69,9 +69,17 @@ type ShapeSet = ObjectTable<ShapeEntry>;
 type GroupSet = ObjectTable<GroupName>;
 type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
 
-#[derive(Copy, Clone, Debug)]
-struct VTNIndex(VertexIndex, Option<TextureVertexIndex>, Option<NormalVertexIndex>);
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct VTNIndex(VertexIndex, Option<TextureVertexIndex>, Option<NormalVertexIndex>);
 
+impl VTNIndex {
+    pub fn new(
+        vertex_index: VertexIndex, 
+        tv_index: Option<TextureVertexIndex>, nv_index: Option<NormalVertexIndex>) -> VTNIndex {
+
+        VTNIndex(vertex_index, tv_index, nv_index)
+    }
+}
 
 pub struct Object {
     name: String,

@@ -1,6 +1,7 @@
 use obj::object::{
     ObjectSet, Object, 
-    Vertex, TextureVertex, NormalVertex
+    Vertex, TextureVertex, NormalVertex,
+    Element
 };
 use lexer::Lexer;
 use std::iter;
@@ -145,11 +146,18 @@ impl<'a> Parser<'a> {
 
         Ok(NormalVertex { i: i, j: j, k: k })
     }
+
+
 }
 
 #[cfg(test)]
 mod tests {
-    use obj::object::{ObjectSet, Object, TextureVertex, NormalVertex, Vertex};
+    use obj::object::{
+        ObjectSet, Object, 
+        TextureVertex, NormalVertex, Vertex,
+        Element,
+        VTNIndex
+    };
 
     #[test]
     fn test_parse_f32() {
