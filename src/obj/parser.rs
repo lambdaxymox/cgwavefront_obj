@@ -3,7 +3,7 @@ use lexer::Lexer;
 use std::iter;
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 struct ParseError {
     line_number: usize,
     message: String,
@@ -101,4 +101,18 @@ impl<'a> Parser<'a> {
 
 #[cfg(test)]
 mod tests {
+    use obj::object::{ObjectSet, Object, Vertex};
+
+    #[test]
+    fn test_parse_f32() {
+        let mut parser = super::Parser::new("-1.929448");
+        assert_eq!(parser.parse_f32(), Ok(-1.929448));
+    }
+
+    #[test]
+    fn test_parse_vertex1() {
+        let mut parser = super::Parser::new("v -1.929448 13.329624 -5.221914\n");
+        let vertex = Vertex { x: -1.929448, y: 13.329624, z: -5.221914, w: 1.0 };
+        assert_eq!(parser.parse_vertex(), Ok(vertex));
+    }
 }

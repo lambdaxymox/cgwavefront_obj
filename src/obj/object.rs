@@ -4,7 +4,7 @@ use std::convert;
 use obj::table::ObjectTable;
 
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vertex {
     pub x: f32,
     pub y: f32,
