@@ -121,11 +121,11 @@ impl<'a> Parser<'a> {
             Some(st1) => {
                 match st1.parse() {
                     Ok(v) => { 
-                        self.next();
+                        self.advance();
                         match self.peek() {
                             Some(st2) => {
                                 let w = st2.parse().unwrap_or(0.0);
-                                self.next();
+                                self.advance();
                                 Ok(TextureVertex { u: u, v: v, w: w })
                             }
                             None => Ok(TextureVertex { u: u, v: v, w: 0.0 }),
