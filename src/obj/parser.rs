@@ -93,33 +93,28 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn try_once<P, T>(&mut self, parser: P) -> Option<T> where P: FnOnce(&str) -> Option<T> {
+        match self.peek() {
+            Some(st) => {
+                parser(&st).map(|got| { self.advance(); got })
+            },
+            None => None,
+        }
+    }
+
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
         try!(self.parse_statement("v"));
  
         let x = try!(self.parse_f32());
         let y = try!(self.parse_f32());
         let z = try!(self.parse_f32());
-        match self.peek() {
-            Some(st) => {
-                match st.parse() {
-                    Ok(w) => Ok(Vertex { x: x, y: y, z: z, w: w }),
-                    Err(_) => Ok(Vertex { x: x, y: y, z: z, w: 1.0 }),
-                }
-            },
-            None => {
-                Ok(Vertex { x: x, y: y, z: z, w: 1.0 })
-            }
-        }
-    }
+        let mw = self.try_once(|st| st.parse::<f32>().ok());
+        let w = match mw {
+            Some(val) => val,
+            None => return Ok(Vertex { x: x, y: y, z: z, w: 1. })
+        };
 
-    fn try_once<P, T>(&mut self, parser: P) -> Option<T> where P: FnOnce(&str) -> Option<T> {
-        match self.peek() {
-            Some(st) => {
-                self.advance();
-                parser(&st)
-            },
-            None => None,
-        }
+        Ok(Vertex { x: x, y: y, z: z, w: w })
     }
 
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
@@ -197,7 +192,7 @@ mod tests {
     #[test]
     fn test_parse_vertex5() {
         let mut parser = super::Parser::new(
-            r"v -6.207583 1.699077 8.466142
+             "v -6.207583 1.699077 8.466142
               v -14.299248 1.700244 8.468981 1.329624"
         );
         assert_eq!(
