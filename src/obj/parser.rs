@@ -183,10 +183,44 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_texture_vertex2() {
+        let mut parser = super::Parser::new(
+            "vt -1.929448 13.329624 -5.221914
+             vt -27.6068  31.1438    27.2099"
+        );
+        assert_eq!(
+            parser.parse_texture_vertex(), 
+            Ok(TextureVertex { u: -1.929448, v: 13.329624, w: -5.221914 })
+        );
+        assert_eq!(parser.next(), Some(String::from("\n")));
+        assert_eq!(
+            parser.parse_texture_vertex(),
+            Ok(TextureVertex { u: -27.6068, v: 31.1438, w: 27.2099 })
+        );        
+    }
+
+    #[test]
     fn test_parse_normal_vertex1() {
         let mut parser = super::Parser::new("vn  -0.966742  -0.255752  9.97231e-09");
         let vn = NormalVertex { i: -0.966742, j: -0.255752, k: 9.97231e-09 };
         assert_eq!(parser.parse_normal_vertex(), Ok(vn));
+    }
+
+    #[test]
+    fn test_parse_normal_vertex2() {
+        let mut parser = super::Parser::new(
+            "vn -1.929448 13.329624 -5.221914
+             vn -27.6068  31.1438    27.2099"
+        );
+        assert_eq!(
+            parser.parse_normal_vertex(), 
+            Ok(NormalVertex { i: -1.929448, j: 13.329624, k: -5.221914 })
+        );
+        assert_eq!(parser.next(), Some(String::from("\n")));
+        assert_eq!(
+            parser.parse_normal_vertex(),
+            Ok(NormalVertex { i: -27.6068, j: 31.1438, k: 27.2099 })
+        );        
     }
 }
 
