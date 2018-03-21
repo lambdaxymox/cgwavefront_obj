@@ -1,4 +1,4 @@
-use obj::object::{ObjectSet, Object};
+use obj::object::{ObjectSet, Object, Vertex};
 use lexer::Lexer;
 use std::iter;
 
@@ -37,7 +37,6 @@ impl<'a> Parser<'a> {
 
     fn next(&mut self) -> Option<String> {
         let token = self.lexer.next();
-
         match token {
             Some(ref val) => {
                 if val == "\n" {
@@ -48,6 +47,10 @@ impl<'a> Parser<'a> {
         }
 
         token
+    }
+
+    fn advance(&mut self) {
+        self.next();
     }
 
     fn error<T>(&mut self, err: String) -> Result<T, ParseError> {
@@ -61,9 +64,8 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_float(&mut self) -> Result<f32, ParseError> {
+    fn parse_f32(&mut self) -> Result<f32, ParseError> {
         let st = try!(self.parse_string());
-
         match st.parse() {
             Ok(val) => Ok(val),
             Err(_) => self.error(
@@ -72,13 +74,28 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_number(&mut self) -> Result<i32, ParseError> {
+    fn parse_u32(&mut self) -> Result<u32, ParseError> {
         let st = try!(self.parse_string());
-
         match st.parse() {
             Ok(val) => Ok(val),
             Err(_) => self.error(format!("Expected integer but got: {}.", st)),
         }
+    }
+
+    fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
+        let st = try!(self.parse_string());
+        match st.as_ref() {
+            "v" => {},
+            _ => { 
+                return self.error(format!("Expected Vertex tag but got: {}.", st));
+            }
+        }
+
+        let x = try!(self.parse_f32());
+        let y = try!(self.parse_f32());
+        let z = try!(self.parse_f32());
+
+        Ok(Vertex { x: x, y: y, z: z, w: 1.0 })
     }
 }
 
