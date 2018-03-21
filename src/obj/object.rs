@@ -12,14 +12,14 @@ pub struct Vertex {
     pub w: f32,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TextureVertex {
     pub u: f32,
     pub v: f32,
     pub w: f32,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct NormalVertex {
     pub i: f32,
     pub j: f32,

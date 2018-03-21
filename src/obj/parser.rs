@@ -1,4 +1,4 @@
-use obj::object::{ObjectSet, Object, Vertex};
+use obj::object::{ObjectSet, Object, Vertex, TextureVertex, NormalVertex};
 use lexer::Lexer;
 use std::iter;
 
@@ -106,11 +106,19 @@ impl<'a> Parser<'a> {
             }
         }
     }
+
+    fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
+        unimplemented!();
+    }
+
+    fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
+        unimplemented!();
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use obj::object::{ObjectSet, Object, Vertex};
+    use obj::object::{ObjectSet, Object, TextureVertex, NormalVertex, Vertex};
 
     #[test]
     fn test_parse_f32() {
@@ -165,6 +173,20 @@ mod tests {
             parser.parse_vertex(), 
             Ok(Vertex { x: -14.299248, y: 1.700244, z: 8.468981, w: 1.329624 })
         );
+    }
+
+    #[test]
+    fn test_parse_texture_vertex1() {
+        let mut parser = super::Parser::new("vt -1.929448 13.329624 -5.221914");
+        let vt = TextureVertex { u: -1.929448, v: 13.329624, w: -5.221914 };
+        assert_eq!(parser.parse_texture_vertex(), Ok(vt));        
+    }
+
+    #[test]
+    fn test_parse_normal_vertex1() {
+        let mut parser = super::Parser::new("vn  -0.966742  -0.255752  9.97231e-09");
+        let vn = NormalVertex { i: -0.966742, j: -0.255752, k: 9.97231e-09 };
+        assert_eq!(parser.parse_normal_vertex(), Ok(vn));
     }
 }
 
