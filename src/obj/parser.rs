@@ -1,4 +1,7 @@
-use obj::object::{ObjectSet, Object, Vertex, TextureVertex, NormalVertex};
+use obj::object::{
+    ObjectSet, Object, 
+    Vertex, TextureVertex, NormalVertex
+};
 use lexer::Lexer;
 use std::iter;
 
@@ -64,6 +67,14 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_statement(&mut self, tag: &str) -> Result<String, ParseError> {
+        let st = try!(self.parse_string());
+        match st == tag {
+            true => Ok(st),
+            false => self.error(format!("Expected `{}` statement but got: {}.", tag, st))
+        }
+    }
+
     fn parse_f32(&mut self) -> Result<f32, ParseError> {
         let st = try!(self.parse_string());
         match st.parse() {
@@ -83,14 +94,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
-        let st = try!(self.parse_string());
-        match st.as_ref() {
-            "v" => {},
-            _ => { 
-                return self.error(format!("Expected `v` statement but got: {}.", st));
-            }
-        }
-
+        try!(self.parse_statement("v"));
+ 
         let x = try!(self.parse_f32());
         let y = try!(self.parse_f32());
         let z = try!(self.parse_f32());
@@ -108,13 +113,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
-        let st = try!(self.parse_string());
-        match st.as_ref() {
-            "vt" => {},
-            _ => { 
-                return self.error(format!("Expected `vt` statement but got: {}.", st));
-            }
-        }
+        try!(self.parse_statement("vt"));
 
         let u = try!(self.parse_f32());
         match self.peek() {
@@ -139,13 +138,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
-        let st = try!(self.parse_string());
-        match st.as_ref() {
-            "vn" => {},
-            _ => { 
-                return self.error(format!("Expected `vn` statement but got: {}.", st));
-            }
-        }
+        try!(self.parse_statement("vn"));
 
         let i = try!(self.parse_f32());
         let j = try!(self.parse_f32());
