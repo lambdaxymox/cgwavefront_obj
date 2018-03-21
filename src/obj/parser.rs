@@ -94,6 +94,7 @@ impl<'a> Parser<'a> {
         let x = try!(self.parse_f32());
         let y = try!(self.parse_f32());
         let z = try!(self.parse_f32());
+        let st = self.peek();
 
         Ok(Vertex { x: x, y: y, z: z, w: 1.0 })
     }
@@ -110,9 +111,35 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_u32() {
+        let mut parser = super::Parser::new("    763   ");
+        assert_eq!(parser.parse_u32(), Ok(763));
+    }
+
+    #[test]
     fn test_parse_vertex1() {
         let mut parser = super::Parser::new("v -1.929448 13.329624 -5.221914\n");
         let vertex = Vertex { x: -1.929448, y: 13.329624, z: -5.221914, w: 1.0 };
         assert_eq!(parser.parse_vertex(), Ok(vertex));
     }
+
+    #[test]
+    fn test_parse_vertex2() {
+        let mut parser = super::Parser::new("v -1.929448 13.329624 -5.221914 1.329624\n");
+        let vertex = Vertex { x: -1.929448, y: 13.329624, z: -5.221914, w: 1.329624 };
+        assert_eq!(parser.parse_vertex(), Ok(vertex));
+    }
+
+    #[test]
+    fn test_parse_vertex3() {
+        let mut parser = super::Parser::new("v -1.929448 13.329624 \n");
+        assert!(parser.parse_vertex().is_err());
+    }
+
+    #[test]
+    fn test_parse_vertex4() {
+        let mut parser = super::Parser::new("v -1.929448 13.329624 -5.221914 1.329624\n v");
+        assert!(parser.parse_vertex().is_ok());
+    }
 }
+
