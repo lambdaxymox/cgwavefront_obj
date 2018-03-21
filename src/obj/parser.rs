@@ -139,7 +139,19 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
-        unimplemented!();
+        let st = try!(self.parse_string());
+        match st.as_ref() {
+            "vn" => {},
+            _ => { 
+                return self.error(format!("Expected `vn` tag but got: {}.", st));
+            }
+        }
+
+        let i = try!(self.parse_f32());
+        let j = try!(self.parse_f32());
+        let k = try!(self.parse_f32());
+
+        Ok(NormalVertex { i: i, j: j, k: k })
     }
 }
 
