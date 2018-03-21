@@ -112,29 +112,33 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn try_once<P, T>(&mut self, parser: P) -> Option<T> where P: FnOnce(&str) -> Option<T> {
+        match self.peek() {
+            Some(st) => {
+                self.advance();
+                parser(&st)
+            },
+            None => None,
+        }
+    }
+
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
         try!(self.parse_statement("vt"));
 
         let u = try!(self.parse_f32());
-        match self.peek() {
-            Some(st1) => {
-                match st1.parse() {
-                    Ok(v) => { 
-                        self.advance();
-                        match self.peek() {
-                            Some(st2) => {
-                                let w = st2.parse().unwrap_or(0.0);
-                                self.advance();
-                                Ok(TextureVertex { u: u, v: v, w: w })
-                            }
-                            None => Ok(TextureVertex { u: u, v: v, w: 0.0 }),
-                        }
-                    },
-                    Err(_) => Ok(TextureVertex { u: u, v: 0.0, w: 0.0 }),
-                }
-            },
-            None => Ok(TextureVertex { u: u, v: 0.0, w: 0.0 }),
-        }
+        let mv = self.try_once(|st| st.parse::<f32>().ok());
+        let v = match mv {
+            Some(val) => val,
+            None => return Ok(TextureVertex { u: u, v: 0., w: 0. })
+        };
+
+        let mw = self.try_once(|st| st.parse::<f32>().ok());
+        let w = match mw {
+            Some(val) => val,
+            None => return Ok(TextureVertex { u: u, v: v, w: 0. })
+        };
+
+        Ok(TextureVertex { u: u, v: v, w: w })
     }
 
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
