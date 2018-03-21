@@ -94,9 +94,17 @@ impl<'a> Parser<'a> {
         let x = try!(self.parse_f32());
         let y = try!(self.parse_f32());
         let z = try!(self.parse_f32());
-        let st = self.peek();
-
-        Ok(Vertex { x: x, y: y, z: z, w: 1.0 })
+        match self.peek() {
+            Some(st) => {
+                match st.parse() {
+                    Ok(w) => Ok(Vertex { x: x, y: y, z: z, w: w }),
+                    Err(_) => Ok(Vertex { x: x, y: y, z: z, w: 1.0 }),
+                }
+            },
+            None => {
+                Ok(Vertex { x: x, y: y, z: z, w: 1.0 })
+            }
+        }
     }
 }
 
@@ -140,6 +148,23 @@ mod tests {
     fn test_parse_vertex4() {
         let mut parser = super::Parser::new("v -1.929448 13.329624 -5.221914 1.329624\n v");
         assert!(parser.parse_vertex().is_ok());
+    }
+
+    #[test]
+    fn test_parse_vertex5() {
+        let mut parser = super::Parser::new(
+            r"v -6.207583 1.699077 8.466142
+              v -14.299248 1.700244 8.468981 1.329624"
+        );
+        assert_eq!(
+            parser.parse_vertex(), 
+            Ok(Vertex { x: -6.207583, y: 1.699077, z: 8.466142, w: 1.0 })
+        );
+        assert_eq!(parser.next(), Some(String::from("\n")));
+        assert_eq!(
+            parser.parse_vertex(), 
+            Ok(Vertex { x: -14.299248, y: 1.700244, z: 8.468981, w: 1.329624 })
+        );
     }
 }
 
