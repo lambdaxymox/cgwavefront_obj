@@ -147,7 +147,33 @@ impl<'a> Parser<'a> {
         Ok(NormalVertex { i: i, j: j, k: k })
     }
 
+    fn skip_zero_or_more_newlines(&mut self) {
+        loop {
+            match self.peek().as_ref().map(|st| &st[..]) {
+                Some("\n") => {},
+                Some(_) | None => break,
+            }
+            self.advance();
+        }
+    }
 
+    fn skip_one_or_more_newlines(&mut self) -> Result<(), ParseError> {
+        try!(self.parse_statement("\n"));
+        self.skip_zero_or_more_newlines();
+        Ok(())
+    }
+
+    fn parse_object_name(&mut self) -> Result<String, ParseError> {
+        match self.peek().as_ref().map(|st| &st[..]) {
+            Some("o") => {
+                try!(self.parse_statement("o"));
+                let object_name = self.parse_string();
+                try!(self.skip_one_or_more_newlines());
+                object_name
+            }
+            _ => Ok(String::from(""))
+        }
+    }
 }
 
 #[cfg(test)]
@@ -267,6 +293,55 @@ mod tests {
             parser.parse_normal_vertex(),
             Ok(NormalVertex { i: -27.6068, j: 31.1438, k: 27.2099 })
         );        
+    }
+
+    #[test]
+    fn test_parse_object_name1() {
+        let mut parser = super::Parser::new("o object_name \n\n");
+        assert_eq!(parser.parse_object_name(), Ok(String::from("object_name")));
+    }
+
+    #[test]
+    fn test_parse_object_name2() {
+        let mut parser = super::Parser::new("o object_name");
+        assert!(parser.parse_object_name().is_err());
+    }
+
+    #[test]
+    fn test_parse_object1() {
+        let obj_file = r"
+            o object1
+            g cube
+            v  0.0  0.0  0.0
+            v  0.0  0.0  1.0
+            v  0.0  1.0  0.0
+            v  0.0  1.0  1.0
+            v  1.0  0.0  0.0
+            v  1.0  0.0  1.0
+            v  1.0  1.0  0.0
+            v  1.0  1.0  1.0
+
+            vn  0.0  0.0  1.0
+            vn  0.0  0.0 -1.0
+            vn  0.0  1.0  0.0
+            vn  0.0 -1.0  0.0
+            vn  1.0  0.0  0.0
+            vn -1.0  0.0  0.0
+ 
+            f  1//2  7//2  5//2
+            f  1//2  3//2  7//2 
+            f  1//6  4//6  3//6
+            f  1//6  2//6  4//6 
+            f  3//3  8//3  7//3 
+            f  3//3  4//3  8//3 
+            f  5//5  7//5  8//5 
+            f  5//5  8//5  6//5 
+            f  1//4  5//4  6//4 
+            f  1//4  6//4  2//4 
+            f  2//1  6//1  8//1 
+            f  2//1  8//1  4//1 
+        ";
+        assert!(false);
     }
 }
 
