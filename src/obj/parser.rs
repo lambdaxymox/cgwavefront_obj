@@ -69,7 +69,7 @@ impl<'a> Parser<'a> {
         match st.parse() {
             Ok(val) => Ok(val),
             Err(_) => self.error(
-                format!("Expected floating point number but got: {}.", st)
+                format!("Expected `f32` but got `{}`.", st)
             ),
         }
     }
@@ -78,7 +78,7 @@ impl<'a> Parser<'a> {
         let st = try!(self.parse_string());
         match st.parse() {
             Ok(val) => Ok(val),
-            Err(_) => self.error(format!("Expected integer but got: {}.", st)),
+            Err(_) => self.error(format!("Expected integer but got `{}`.", st)),
         }
     }
 
@@ -87,7 +87,7 @@ impl<'a> Parser<'a> {
         match st.as_ref() {
             "v" => {},
             _ => { 
-                return self.error(format!("Expected Vertex tag but got: {}.", st));
+                return self.error(format!("Expected `v` statement but got: {}.", st));
             }
         }
 
@@ -112,7 +112,7 @@ impl<'a> Parser<'a> {
         match st.as_ref() {
             "vt" => {},
             _ => { 
-                return self.error(format!("Expected TextureVertex tag but got: {}.", st));
+                return self.error(format!("Expected `vt` statement but got: {}.", st));
             }
         }
 
@@ -143,7 +143,7 @@ impl<'a> Parser<'a> {
         match st.as_ref() {
             "vn" => {},
             _ => { 
-                return self.error(format!("Expected `vn` tag but got: {}.", st));
+                return self.error(format!("Expected `vn` statement but got: {}.", st));
             }
         }
 
