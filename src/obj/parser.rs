@@ -351,6 +351,30 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_line1() {
+        let mut parser = super::Parser::new("l 297 38 118 108 \n");
+        let mut result = Vec::new();
+        parser.parse_line(&mut result).unwrap();
+        let expected = vec![
+            Element::Line(VTNIndex::new(297, None, None), VTNIndex::new(38,  None, None)), 
+            Element::Line(VTNIndex::new(38,  None, None), VTNIndex::new(118, None, None)),
+            Element::Line(VTNIndex::new(118, None, None), VTNIndex::new(4,   None, None)),
+        ];
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_line2() {
+        let mut parser = super::Parser::new("l 297/38 118/108 \n");
+        let mut result = Vec::new();
+        parser.parse_line(&mut result).unwrap();
+        let expected = vec![
+            Element::Line(VTNIndex::new(297, Some(38), None), VTNIndex::new(118, Some(108), None)),
+        ];
+        assert_eq!(result, expected);
+    }
+
+    #[test]
     fn test_parse_object_set1() {
         let obj_file = r"
             o object1
