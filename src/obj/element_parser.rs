@@ -60,10 +60,10 @@ mod tests {
 
     #[test]
     fn test_parse_point1() {
-        let mut parser_state = ParserState::new("p 1 2 3 4 \n");
+        let mut state = ParserState::new("p 1 2 3 4 \n");
         let parser = super::ElementParser::new();
         let mut result = Vec::new();
-        parser.parse(&mut parser_state, &mut result).unwrap();
+        parser.parse(&mut state, &mut result).unwrap();
         let expected = vec![
             Element::Point(VTNIndex::new(1, None, None)), Element::Point(VTNIndex::new(2, None, None)),
             Element::Point(VTNIndex::new(3, None, None)), Element::Point(VTNIndex::new(4, None, None)),
@@ -73,10 +73,10 @@ mod tests {
 
     #[test]
     fn test_parse_line1() {
-        let mut parser_state = ParserState::new("l 297 38 118 108 \n");
+        let mut state = ParserState::new("l 297 38 118 108 \n");
         let parser = super::ElementParser::new();
         let mut result = Vec::new();
-        parser.parse(&mut parser_state, &mut result).unwrap();
+        parser.parse(&mut state, &mut result).unwrap();
         let expected = vec![
             Element::Line(VTNIndex::new(297, None, None), VTNIndex::new(38,  None, None)), 
             Element::Line(VTNIndex::new(38,  None, None), VTNIndex::new(118, None, None)),
@@ -87,10 +87,10 @@ mod tests {
 
     #[test]
     fn test_parse_line2() {
-        let mut parser_state = ParserState::new("l 297/38 118/108 \n");
+        let mut state = ParserState::new("l 297/38 118/108 \n");
         let parser = super::ElementParser::new();
         let mut result = Vec::new();
-        parser.parse(&mut parser_state, &mut result).unwrap();
+        parser.parse(&mut state, &mut result).unwrap();
         let expected = vec![
             Element::Line(VTNIndex::new(297, Some(38), None), VTNIndex::new(118, Some(108), None)),
         ];
@@ -99,10 +99,10 @@ mod tests {
 
     #[test]
     fn test_parse_line3() {
-        let mut parser_state = ParserState::new("l 297/38 118/108 324/398 \n");
+        let mut state = ParserState::new("l 297/38 118/108 324/398 \n");
         let parser = super::ElementParser::new();
         let mut result = Vec::new();
-        parser.parse(&mut parser_state, &mut result).unwrap();
+        parser.parse(&mut state, &mut result).unwrap();
         let expected = vec![
             Element::Line(VTNIndex::new(297, Some(38),  None), VTNIndex::new(118, Some(108), None)),
             Element::Line(VTNIndex::new(118, Some(108), None), VTNIndex::new(324, Some(398), None)),
