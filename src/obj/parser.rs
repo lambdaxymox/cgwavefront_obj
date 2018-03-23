@@ -121,6 +121,22 @@ impl<'a> ParserState<'a> {
             None => None,
         }
     }
+
+    pub fn skip_zero_or_more_newlines(&mut self) {
+        loop {
+            match self.peek().as_ref().map(|st| &st[..]) {
+                Some("\n") => {},
+                Some(_) | None => break,
+            }
+            self.advance();
+        }
+    }
+
+    pub fn skip_one_or_more_newlines(&mut self) -> Result<(), ParseError> {
+        try!(self.parse_statement("\n"));
+        self.skip_zero_or_more_newlines();
+        Ok(())
+    }
 }
 
 struct StartParser {}
