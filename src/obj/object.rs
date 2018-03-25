@@ -132,25 +132,25 @@ trait ObjectQuery<K, V> {
 
 impl ObjectQuery<VertexIndex, Vertex> for Object {
     fn query(&self, key: VertexIndex) -> Option<Vertex> {
-         self.vertex_set.get(key).map(|&x| x)
+        self.vertex_set.get(key).map(|&x| x)
     }
 }
 
 impl ObjectQuery<TextureVertexIndex, TextureVertex> for Object {
     fn query(&self, key: TextureVertexIndex) -> Option<TextureVertex> {
-         self.texture_vertex_set.get(key).map(|&x| x)
+        self.texture_vertex_set.get(key).map(|&x| x)
     }
 }
 
 impl ObjectQuery<NormalVertexIndex, NormalVertex> for Object {
     fn query(&self, key: NormalVertexIndex) -> Option<NormalVertex> {
-         self.normal_vertex_set.get(key).map(|&x| x)
+        self.normal_vertex_set.get(key).map(|&x| x)
     }
 }
 
 impl ObjectQuery<ElementIndex, Element> for Object {
     fn query(&self, key: ElementIndex) -> Option<Element> {
-         self.element_set.get(key).map(|x| x.clone())
+        self.element_set.get(key).map(|x| x.clone())
     }
 }
 

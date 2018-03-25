@@ -289,7 +289,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        Ok(())   
+        Ok(())
     }
 
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
@@ -514,6 +514,20 @@ mod tests {
             Element::Line(VTNIndex::new(118, Some(108), None), VTNIndex::new(324, Some(398), None)),
         ];
         assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_line4() {
+        let mut parser = super::Parser::new("l 297/38 118 324 \n");
+        let mut result = Vec::new();
+        assert!(parser.parse_line(&mut result).is_err());
+    }
+
+    #[test]
+    fn test_parse_line5() {
+        let mut parser = super::Parser::new("l 297 118/108 324/398 \n");
+        let mut result = Vec::new();
+        assert!(parser.parse_line(&mut result).is_err());
     }
 
     #[test]
