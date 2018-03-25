@@ -275,18 +275,24 @@ impl<'a> Parser<'a> {
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
         try!(self.expect("l"));
 
-        let mut current_vtn_index = try!(self.parse_vtn_index());
-        let mut next_vtn_index = try!(self.parse_vtn_index());
-        elements.push(Element::Line(current_vtn_index, next_vtn_index));
+        let current_vtn_index = try!(self.parse_vtn_index());
+        let next_vtn_index = try!(self.parse_vtn_index());
+        let mut vtn_indices = Vec::new();
+        vtn_indices.push(current_vtn_index);
+        vtn_indices.push(next_vtn_index);
         loop {
             match self.parse_vtn_index() {
-                Err(_) => break,
                 Ok(vtn_index) => {
-                    current_vtn_index = next_vtn_index;
-                    next_vtn_index = vtn_index;
-                    elements.push(Element::Line(current_vtn_index, next_vtn_index));
+                    vtn_indices.push(vtn_index);
+                },
+                Err(_) => {
+                    break;
                 }
             }
+        }
+
+        for i in 0..vtn_indices.len()-1 {
+            elements.push(Element::Line(vtn_indices[i], vtn_indices[i + 1]));
         }
 
         Ok(())
