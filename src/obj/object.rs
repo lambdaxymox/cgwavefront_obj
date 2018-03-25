@@ -1,6 +1,3 @@
-use std::slice;
-use std::ops;
-use std::convert;
 use obj::table::ObjectTable;
 
 
