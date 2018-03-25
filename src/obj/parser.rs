@@ -291,6 +291,15 @@ impl<'a> Parser<'a> {
             }
         }
 
+        // Verify that each VTN index has the same type and if of a valid form.
+        for i in 1..vtn_indices.len() {
+            if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
+                return self.error(
+                    format!("Every vertex/texture/normal index must have the same form.")
+                );
+            }
+        }
+
         for i in 0..vtn_indices.len()-1 {
             elements.push(Element::Line(vtn_indices[i], vtn_indices[i + 1]));
         }

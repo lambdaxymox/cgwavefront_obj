@@ -74,6 +74,18 @@ pub enum VTNIndex {
     VTN(VertexIndex, TextureVertexIndex, NormalVertexIndex),
 }
 
+impl VTNIndex {
+    pub fn has_same_type_as(&self, other: &VTNIndex) -> bool {
+        match (self, other) {
+            (&VTNIndex::V(_),   &VTNIndex::V(_)) |
+            (&VTNIndex::VT(_,_),  &VTNIndex::VT(_,_)) | 
+            (&VTNIndex::VN(_,_),  &VTNIndex::VN(_,_)) | 
+            (&VTNIndex::VTN(_,_,_), &VTNIndex::VTN(_,_,_)) => true,
+            _ => false,
+        }
+    }
+}
+
 pub struct Object {
     name: String,
     vertex_set: VertexSet,
