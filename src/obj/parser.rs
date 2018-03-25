@@ -175,6 +175,10 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
+        unimplemented!();
+    }
+
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
         try!(self.parse_statement("p"));
         let v_index = try!(self.parse_u32());
@@ -341,6 +345,38 @@ mod tests {
     fn test_parse_object_name2() {
         let mut parser = super::Parser::new("o object_name");
         assert!(parser.parse_object_name().is_err());
+    }
+
+    #[test]
+    fn test_parse_vtn_index1() {
+        let mut parser = super::Parser::new("1291");
+        let expected = VTNIndex::new(1291, None, None);
+        let result = parser.parse_vtn_index();
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn test_parse_vtn_index2() {
+        let mut parser = super::Parser::new("1291/1315");
+        let expected = VTNIndex::new(1291, Some(1315), None);
+        let result = parser.parse_vtn_index();
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn test_parse_vtn_index3() {
+        let mut parser = super::Parser::new("1291/1315/1314");
+        let expected = VTNIndex::new(1291, Some(1315), Some(1314));
+        let result = parser.parse_vtn_index();
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn test_parse_vtn_index4() {
+        let mut parser = super::Parser::new("1291//1315");
+        let expected = VTNIndex::new(1291, None, Some(1315));
+        let result = parser.parse_vtn_index();
+        assert_eq!(result, Ok(expected));
     }
 
     #[test]
