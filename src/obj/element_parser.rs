@@ -65,9 +65,14 @@ impl ElementParser {
 
     fn parse(&self, 
         state: &mut ParserState,
-        elements: &mut Vec<Element>) -> Result<Element, ParseError> {
+        elements: &mut Vec<Element>) -> Result<(), ParseError> {
         
-        unimplemented!();
+        match state.peek().as_ref().map(|st| &st[..]) {
+            Some("p") => self.parse_point(state, elements),
+            Some("l") => self.parse_line(state, elements),
+            Some("f") => self.parse_face(state, elements),
+            _ => unimplemented!(),
+        }
     }
 }
 
