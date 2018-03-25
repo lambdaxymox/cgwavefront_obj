@@ -231,6 +231,7 @@ impl<'a> Parser<'a> {
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         let st = try!(self.next_string());
+        
         match self.parse_vn(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
@@ -253,6 +254,7 @@ impl<'a> Parser<'a> {
 
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
         try!(self.expect("p"));
+
         let v_index = try!(self.parse_u32());
         elements.push(Element::Point(VTNIndex::new(v_index as usize, None, None)));
         loop {
@@ -272,17 +274,17 @@ impl<'a> Parser<'a> {
 
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
         try!(self.expect("l"));
-        
-        let vtn_index1 = try!(self.parse_vtn_index());
-        let vtn_index2 = try!(self.parse_vtn_index());
-        elements.push(Element::Line(vtn_index1, vtn_index2));
-        let mut current_vtn_index = vtn_index2;
+
+        let mut current_vtn_index = try!(self.parse_vtn_index());
+        let mut next_vtn_index = try!(self.parse_vtn_index());
+        elements.push(Element::Line(current_vtn_index, next_vtn_index));
         loop {
             match self.parse_vtn_index() {
                 Err(_) => break,
-                Ok(next_vtn_index) => {
-                    elements.push(Element::Line(current_vtn_index, next_vtn_index));
+                Ok(vtn_index) => {
                     current_vtn_index = next_vtn_index;
+                    next_vtn_index = vtn_index;
+                    elements.push(Element::Line(current_vtn_index, next_vtn_index));
                 }
             }
         }
