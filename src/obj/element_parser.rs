@@ -41,13 +41,16 @@ impl ElementParser {
             VTNIndex::new(v_index1 as usize, None, None),
             VTNIndex::new(v_index2 as usize, None, None)
         ));
+        let mut vtn_index1 = VTNIndex::new(v_index2 as usize, None, None);
         loop {
             match state.parse_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(st) => match st.parse::<usize>() {
-                    Ok(v_index) => elements.push(
-                        Element::Point(VTNIndex::new(v_index, None, None))
-                    ),
+                    Ok(v_index) => { 
+                        let vtn_index2 = VTNIndex::new(v_index, None, None);
+                        elements.push(Element::Line(vtn_index1, vtn_index2));
+                        vtn_index1 = vtn_index2;
+                    },
                     Err(_) => return state.error(format!("Expected integer but got `{}`.", st))
                 }
             }
@@ -105,7 +108,7 @@ mod tests {
         let expected = vec![
             Element::Line(VTNIndex::new(297, None, None), VTNIndex::new(38,  None, None)), 
             Element::Line(VTNIndex::new(38,  None, None), VTNIndex::new(118, None, None)),
-            Element::Line(VTNIndex::new(118, None, None), VTNIndex::new(4,   None, None)),
+            Element::Line(VTNIndex::new(118, None, None), VTNIndex::new(108,   None, None)),
         ];
         assert_eq!(result, expected);
     }
