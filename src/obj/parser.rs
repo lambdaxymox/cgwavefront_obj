@@ -175,7 +175,6 @@ impl<'a> Parser<'a> {
         }
     }
 
-    #[inline(always)]
     fn parse_vn(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
         if let Some(v_index_in_str) = st.find("//") {
             let v_index = match st[0..v_index_in_str].parse::<usize>() {
@@ -193,7 +192,6 @@ impl<'a> Parser<'a> {
         }
     }
 
-    #[inline(always)]
     fn parse_vt(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
         if let Some(v_index_in_str) = st.find("/") {
             let v_index = match st[0..v_index_in_str].parse::<usize>() {
@@ -211,7 +209,6 @@ impl<'a> Parser<'a> {
         }
     }
 
-    #[inline(always)]
     fn parse_vtn(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
         let v_index_in_str = match st.find("/") {
             Some(val) => val,
@@ -237,7 +234,6 @@ impl<'a> Parser<'a> {
         Ok(VTNIndex::new(v_index, Some(vt_index), Some(vn_index)))
     }
 
-    #[inline(always)]
     fn parse_v(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
         match st.parse::<usize>() {
             Ok(val) => Ok(VTNIndex::new(val, None, None)),
