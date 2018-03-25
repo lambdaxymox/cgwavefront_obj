@@ -61,24 +61,24 @@ impl<'a> Parser<'a> {
         Err(ParseError::new(self.line_number, err))
     }
 
-    fn parse_string(&mut self) -> Result<String, ParseError> {
+    fn next_string(&mut self) -> Result<String, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
-            None => self.error(format!("Expected string but got `end of line`."))
+            None => self.error(format!("Expected string but got `end of file`."))
         }
     }
 
-    fn parse_statement(&mut self, tag: &str) -> Result<String, ParseError> {
-        let st = try!(self.parse_string());
+    fn expect(&mut self, tag: &str) -> Result<String, ParseError> {
+        let st = try!(self.next_string());
         match st == tag {
             true => Ok(st),
-            false => self.error(format!("Expected `{}` statement but got: {}.", tag, st))
+            false => self.error(format!("Expected `{}` statement but got: `{}`.", tag, st))
         }
     }
 
     fn parse_f32(&mut self) -> Result<f32, ParseError> {
-        let st = try!(self.parse_string());
-        match st.parse() {
+        let st = try!(self.next_string());
+        match st.parse::<f32>() {
             Ok(val) => Ok(val),
             Err(_) => self.error(
                 format!("Expected `f32` but got `{}`.", st)
@@ -87,8 +87,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_u32(&mut self) -> Result<u32, ParseError> {
-        let st = try!(self.parse_string());
-        match st.parse() {
+        let st = try!(self.next_string());
+        match st.parse::<u32>() {
             Ok(val) => Ok(val),
             Err(_) => self.error(format!("Expected integer but got `{}`.", st)),
         }
@@ -104,7 +104,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
-        try!(self.parse_statement("v"));
+        try!(self.expect("v"));
  
         let x = try!(self.parse_f32());
         let y = try!(self.parse_f32());
@@ -112,33 +112,33 @@ impl<'a> Parser<'a> {
         let mw = self.try_once(|st| st.parse::<f32>().ok());
         let w = match mw {
             Some(val) => val,
-            None => return Ok(Vertex { x: x, y: y, z: z, w: 1. })
+            None => 1.,
         };
 
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }
 
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
-        try!(self.parse_statement("vt"));
+        try!(self.expect("vt"));
 
         let u = try!(self.parse_f32());
         let mv = self.try_once(|st| st.parse::<f32>().ok());
         let v = match mv {
             Some(val) => val,
-            None => return Ok(TextureVertex { u: u, v: 0., w: 0. })
+            None => 0.,
         };
 
         let mw = self.try_once(|st| st.parse::<f32>().ok());
         let w = match mw {
             Some(val) => val,
-            None => return Ok(TextureVertex { u: u, v: v, w: 0. })
+            None => 0.,
         };
 
         Ok(TextureVertex { u: u, v: v, w: w })
     }
 
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
-        try!(self.parse_statement("vn"));
+        try!(self.expect("vn"));
 
         let i = try!(self.parse_f32());
         let j = try!(self.parse_f32());
@@ -158,7 +158,7 @@ impl<'a> Parser<'a> {
     }
 
     fn skip_one_or_more_newlines(&mut self) -> Result<(), ParseError> {
-        try!(self.parse_statement("\n"));
+        try!(self.expect("\n"));
         self.skip_zero_or_more_newlines();
         Ok(())
     }
@@ -166,8 +166,8 @@ impl<'a> Parser<'a> {
     fn parse_object_name(&mut self) -> Result<String, ParseError> {
         match self.peek().as_ref().map(|st| &st[..]) {
             Some("o") => {
-                try!(self.parse_statement("o"));
-                let object_name = self.parse_string();
+                try!(self.expect("o"));
+                let object_name = self.next_string();
                 try!(self.skip_one_or_more_newlines());
                 object_name
             }
@@ -242,7 +242,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
-        let st = try!(self.parse_string());
+        let st = try!(self.next_string());
         match self.parse_vn(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
@@ -264,11 +264,11 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
-        try!(self.parse_statement("p"));
+        try!(self.expect("p"));
         let v_index = try!(self.parse_u32());
         elements.push(Element::Point(VTNIndex::new(v_index as usize, None, None)));
         loop {
-            match self.parse_string().as_ref().map(|st| &st[..]) {
+            match self.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(st) => match st.parse::<usize>() {
                     Ok(v_index) => elements.push(
@@ -283,7 +283,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
-        try!(self.parse_statement("l"));
+        try!(self.expect("l"));
         
         let vtn_index1 = try!(self.parse_vtn_index());
         let vtn_index2 = try!(self.parse_vtn_index());

@@ -3,7 +3,7 @@ use std::str;
 
 
 /// The return type from the lexer.
-pub type Token = Vec<u8>;
+pub type Token = String;
  
 #[inline]
 fn is_whitespace(ch: u8) -> bool {
@@ -29,9 +29,6 @@ pub struct Lexer<'a> {
     current_line_number: usize,
     /// The input stream.
     stream: iter::Peekable<str::Bytes<'a>>,
-    // The currently unprocessed tokens.
-    token_buffer: [Token; 1],
-    token_index: usize,
 }
 
 impl<'a> Lexer<'a> {
@@ -40,8 +37,6 @@ impl<'a> Lexer<'a> {
         Lexer {
             current_line_number: 1,
             stream: stream.bytes().peekable(),
-            token_buffer: [Vec::new(); 1],
-            token_index: 0,
         }
     }
 
@@ -116,6 +111,9 @@ impl<'a> Lexer<'a> {
     /// The method `next_token` fetches the next token from the input stream.
     ///
     fn next_token(&mut self) -> Option<Token> {
+        // The lexer has processed each token it has seen so far. 
+        // We must fetch and then buffer another token from the stream.
+
         // Count the number of bytes consumed for a token.
         let mut consumed: usize = 0;
         let mut token: Vec<u8> = Vec::new();
@@ -157,7 +155,13 @@ impl<'a> Lexer<'a> {
         if consumed != 0 {
             // We consumed a token.
             debug_assert!(token.len() != 0);
-            Some(token)
+            match String::from_utf8(token) {
+                Ok(st) => Some(st),
+                Err(_) => panic!(
+                    "Lexical Error: Found invalid UTF-8 token on line {}.",
+                    self.current_line_number
+                )
+            }
         } else {
             debug_assert!(token.len() == 0);
             None
@@ -166,18 +170,10 @@ impl<'a> Lexer<'a> {
 }
 
 impl<'a> Iterator for Lexer<'a> {
-    type Item = String;
+    type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.next_token().map(|token| {
-            match String::from_utf8(token) {
-                Ok(st) => st,
-                Err(_) => panic!(
-                    "Lexical Error: Found invalid UTF-8 token on line {}.",
-                    self.current_line_number
-                )
-            }
-        })
+        self.next_token()
     }
 }
 
@@ -221,7 +217,7 @@ mod tests {
         Test {
             test_cases: vec![
                 TestCase {
-                    data: String::from(r"                              
+                    data: String::from(r"                              \
                         v -2.300000  1.950000  0.000000                \
                         v -2.200000  0.790000  0.000000                \
                         v -2.340000 -1.510000  0.000000                \
