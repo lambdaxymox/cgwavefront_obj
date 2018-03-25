@@ -285,23 +285,16 @@ impl<'a> Parser<'a> {
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
         try!(self.parse_statement("l"));
         
-        let vtn_index1 = try!(self.parse_u32());
-        let vtn_index2 = try!(self.parse_u32());
-        elements.push(Element::Line(
-            VTNIndex::new(vtn_index1 as usize, None, None),
-            VTNIndex::new(vtn_index2 as usize, None, None)
-        ));
-        let mut vtn_index1 = VTNIndex::new(vtn_index2 as usize, None, None);
+        let vtn_index1 = try!(self.parse_vtn_index());
+        let vtn_index2 = try!(self.parse_vtn_index());
+        elements.push(Element::Line(vtn_index1, vtn_index2));
+        let mut current_vtn_index = vtn_index2;
         loop {
-            match self.parse_string().as_ref().map(|st| &st[..]) {
-                Ok("\n") | Err(_) => break,
-                Ok(st) => match st.parse::<usize>() {
-                    Ok(v_index) => { 
-                        let vtn_index2 = VTNIndex::new(v_index, None, None);
-                        elements.push(Element::Line(vtn_index1, vtn_index2));
-                        vtn_index1 = vtn_index2;
-                    },
-                    Err(_) => return self.error(format!("Expected integer but got `{}`.", st))
+            match self.parse_vtn_index() {
+                Err(_) => break,
+                Ok(next_vtn_index) => {
+                    elements.push(Element::Line(current_vtn_index, next_vtn_index));
+                    current_vtn_index = next_vtn_index;
                 }
             }
         }
@@ -326,7 +319,6 @@ impl<'a> Parser<'a> {
 #[cfg(test)]
 mod tests {
     use obj::object::{
-        ObjectSet, Object, 
         TextureVertex, NormalVertex, Vertex,
         Element,
         VTNIndex
