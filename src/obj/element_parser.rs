@@ -35,13 +35,13 @@ impl ElementParser {
         
         try!(state.parse_statement("l"));
         
-        let v_index1 = try!(state.parse_u32());
-        let v_index2 = try!(state.parse_u32());
+        let vtn_index1 = try!(state.parse_u32());
+        let vtn_index2 = try!(state.parse_u32());
         elements.push(Element::Line(
-            VTNIndex::new(v_index1 as usize, None, None),
-            VTNIndex::new(v_index2 as usize, None, None)
+            VTNIndex::new(vtn_index1 as usize, None, None),
+            VTNIndex::new(vtn_index2 as usize, None, None)
         ));
-        let mut vtn_index1 = VTNIndex::new(v_index2 as usize, None, None);
+        let mut vtn_index1 = VTNIndex::new(vtn_index2 as usize, None, None);
         loop {
             match state.parse_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,

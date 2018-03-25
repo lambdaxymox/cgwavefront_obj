@@ -31,7 +31,7 @@ impl TextureVertexParser {
 #[cfg(test)]
 mod tests {
     use obj::object::TextureVertex;
-    use obj::parser::{ParserState, ParseError};
+    use obj::parser::ParserState;
 
 
     #[test]

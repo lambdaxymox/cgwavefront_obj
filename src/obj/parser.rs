@@ -1,8 +1,3 @@
-use obj::object::{
-    ObjectSet, Object, 
-    Vertex, TextureVertex, NormalVertex,
-    Element, VTNIndex
-};
 use lexer::Lexer;
 use std::iter;
 use std::collections::HashMap;
