@@ -496,6 +496,13 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_point2() {
+        let mut parser = super::Parser::new("p 1 1/2 3 4/5");
+        let mut result = Vec::new();
+        assert!(parser.parse_point(&mut result).is_err());
+    }
+
+    #[test]
     fn test_parse_line1() {
         let mut parser = super::Parser::new("l 297 38 118 108 \n");
         let mut result = Vec::new();
