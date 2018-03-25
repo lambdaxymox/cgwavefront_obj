@@ -96,9 +96,7 @@ impl<'a> Parser<'a> {
 
     fn try_once<P, T>(&mut self, parser: P) -> Option<T> where P: FnOnce(&str) -> Option<T> {
         match self.peek() {
-            Some(st) => {
-                parser(&st).map(|got| { self.advance(); got })
-            },
+            Some(st) => parser(&st).map(|got| { self.advance(); got }),
             None => None,
         }
     }
@@ -110,10 +108,7 @@ impl<'a> Parser<'a> {
         let y = try!(self.parse_f32());
         let z = try!(self.parse_f32());
         let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = match mw {
-            Some(val) => val,
-            None => 1.,
-        };
+        let w = mw.unwrap_or(1.);
 
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }
@@ -123,16 +118,9 @@ impl<'a> Parser<'a> {
 
         let u = try!(self.parse_f32());
         let mv = self.try_once(|st| st.parse::<f32>().ok());
-        let v = match mv {
-            Some(val) => val,
-            None => 0.,
-        };
-
+        let v = mv.unwrap_or(0.);
         let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = match mw {
-            Some(val) => val,
-            None => 0.,
-        };
+        let w = mw.unwrap_or(0.);
 
         Ok(TextureVertex { u: u, v: v, w: w })
     }
