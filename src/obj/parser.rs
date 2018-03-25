@@ -202,8 +202,13 @@ impl<'a> Parser<'a> {
         unimplemented!();
     }
 
-    fn parse_element(&mut self) -> Result<Element, ParseError> {
-        unimplemented!();
+    fn parse_element(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {  
+        match self.peek().as_ref().map(|st| &st[..]) {
+            Some("p") => self.parse_point(elements),
+            Some("l") => self.parse_line(elements),
+            Some("f") => self.parse_face(elements),
+            _ => unimplemented!(),
+        }
     }
 }
 
