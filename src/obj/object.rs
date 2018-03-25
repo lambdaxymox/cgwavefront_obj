@@ -67,15 +67,11 @@ type GroupSet = ObjectTable<GroupName>;
 type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct VTNIndex(VertexIndex, Option<TextureVertexIndex>, Option<NormalVertexIndex>);
-
-impl VTNIndex {
-    pub fn new(
-        vertex_index: VertexIndex, 
-        tv_index: Option<TextureVertexIndex>, nv_index: Option<NormalVertexIndex>) -> VTNIndex {
-
-        VTNIndex(vertex_index, tv_index, nv_index)
-    }
+pub enum VTNIndex { 
+    V(TextureVertexIndex),
+    VT(VertexIndex, TextureVertexIndex), 
+    VN(VertexIndex, NormalVertexIndex),
+    VTN(VertexIndex, TextureVertexIndex, NormalVertexIndex),
 }
 
 pub struct Object {
@@ -95,30 +91,56 @@ impl Object {
     }
 
     fn get_vtn_triple(&self, index: VTNIndex) -> Option<(&Vertex, Option<&TextureVertex>, Option<&NormalVertex>)> {
-        let vertex = match self.vertex_set.get(index.0) {
-            Some(v) => v,
-            None => { return None; }
-        };
-        let texture_vertex = match index.1 {
-            Some(tv_idx) => {
-                match self.texture_vertex_set.get(tv_idx) {
-                    Some(tv) => Some(tv),
-                    None => { return None; }
-                } 
-            }
-            None => None
-        };
-        let normal_vertex = match index.2 {
-            Some(nv_idx) => {
-                match self.normal_vertex_set.get(nv_idx) {
-                    Some(nv) => Some(nv),
-                    None => { return None; }
-                }
-            }
-            None => None
-        };
+        match index {
+            VTNIndex::V(v_index) => {
+                let vertex = match self.vertex_set.get(v_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
 
-        Some((vertex, texture_vertex, normal_vertex))
+                Some((vertex, None, None))
+            },
+            VTNIndex::VT(v_index, vt_index) => { 
+                let vertex = match self.vertex_set.get(v_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
+                let texture_vertex = match self.texture_vertex_set.get(vt_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
+
+                Some((vertex, Some(texture_vertex), None))
+            },
+            VTNIndex::VN(v_index, vn_index) => {
+                let vertex = match self.vertex_set.get(v_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
+                let normal_vertex = match self.normal_vertex_set.get(vn_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
+
+                Some((vertex, None, Some(normal_vertex)))
+            },
+            VTNIndex::VTN(v_index, vt_index, vn_index) => {
+                let vertex = match self.vertex_set.get(v_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
+                let texture_vertex = match self.texture_vertex_set.get(vt_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
+                let normal_vertex = match self.normal_vertex_set.get(vn_index) {
+                    Some(val) => val,
+                    None => return None,
+                };
+
+                Some((vertex, Some(texture_vertex), Some(normal_vertex)))
+            },
+        }
     }
 
     fn get_shape(&self, entry: &ShapeEntry) -> Option<&Shape> {

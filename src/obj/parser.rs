@@ -174,7 +174,7 @@ impl<'a> Parser<'a> {
                 Err(_) => return self.error(format!("Expected `normal` index but got `{}`", st))
             };
 
-            return Ok(VTNIndex::new(v_index, None, Some(vn_index)));
+            return Ok(VTNIndex::VN(v_index, vn_index));
         } else {
             return self.error(format!("Expected `vertex//normal` index but got `{}`", st))
         }
@@ -191,7 +191,7 @@ impl<'a> Parser<'a> {
                 Err(_) => return self.error(format!("Expected `texture` index but got `{}`", st))
             };
 
-            return Ok(VTNIndex::new(v_index, Some(vt_index), None));
+            return Ok(VTNIndex::VT(v_index, vt_index));
         } else {
             return self.error(format!("Expected `vertex/texture` index but got `{}`", st))
         }
@@ -219,12 +219,12 @@ impl<'a> Parser<'a> {
             Err(_) => return self.error(format!("Expected `normal` index but got `{}`", st))
         };
    
-        Ok(VTNIndex::new(v_index, Some(vt_index), Some(vn_index)))
+        Ok(VTNIndex::VTN(v_index, vt_index, vn_index))
     }
 
     fn parse_v(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
         match st.parse::<usize>() {
-            Ok(val) => Ok(VTNIndex::new(val, None, None)),
+            Ok(val) => Ok(VTNIndex::V(val)),
             Err(_) => return self.error(format!("Expected `vertex` index but got `{}`", st))
         }
     }
@@ -256,13 +256,13 @@ impl<'a> Parser<'a> {
         try!(self.expect("p"));
 
         let v_index = try!(self.parse_u32());
-        elements.push(Element::Point(VTNIndex::new(v_index as usize, None, None)));
+        elements.push(Element::Point(VTNIndex::V(v_index as usize)));
         loop {
             match self.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(st) => match st.parse::<usize>() {
                     Ok(v_index) => elements.push(
-                        Element::Point(VTNIndex::new(v_index, None, None))
+                        Element::Point(VTNIndex::V(v_index as usize))
                     ),
                     Err(_) => return self.error(format!("Expected integer but got `{}`.", st))
                 }
@@ -445,7 +445,7 @@ mod tests {
     #[test]
     fn test_parse_vtn_index1() {
         let mut parser = super::Parser::new("1291");
-        let expected = VTNIndex::new(1291, None, None);
+        let expected = VTNIndex::V(1291);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -453,7 +453,7 @@ mod tests {
     #[test]
     fn test_parse_vtn_index2() {
         let mut parser = super::Parser::new("1291/1315");
-        let expected = VTNIndex::new(1291, Some(1315), None);
+        let expected = VTNIndex::VT(1291, 1315);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -461,7 +461,7 @@ mod tests {
     #[test]
     fn test_parse_vtn_index3() {
         let mut parser = super::Parser::new("1291/1315/1314");
-        let expected = VTNIndex::new(1291, Some(1315), Some(1314));
+        let expected = VTNIndex::VTN(1291, 1315, 1314);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -469,7 +469,7 @@ mod tests {
     #[test]
     fn test_parse_vtn_index4() {
         let mut parser = super::Parser::new("1291//1315");
-        let expected = VTNIndex::new(1291, None, Some(1315));
+        let expected = VTNIndex::VN(1291, 1315);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -480,8 +480,8 @@ mod tests {
         let mut result = Vec::new();
         parser.parse_point(&mut result).unwrap();
         let expected = vec![
-            Element::Point(VTNIndex::new(1, None, None)), Element::Point(VTNIndex::new(2, None, None)),
-            Element::Point(VTNIndex::new(3, None, None)), Element::Point(VTNIndex::new(4, None, None)),
+            Element::Point(VTNIndex::V(1)), Element::Point(VTNIndex::V(2)),
+            Element::Point(VTNIndex::V(3)), Element::Point(VTNIndex::V(4)),
         ];
         assert_eq!(result, expected);
     }
@@ -492,9 +492,9 @@ mod tests {
         let mut result = Vec::new();
         parser.parse_line(&mut result).unwrap();
         let expected = vec![
-            Element::Line(VTNIndex::new(297, None, None), VTNIndex::new(38,  None, None)), 
-            Element::Line(VTNIndex::new(38,  None, None), VTNIndex::new(118, None, None)),
-            Element::Line(VTNIndex::new(118, None, None), VTNIndex::new(108,   None, None)),
+            Element::Line(VTNIndex::V(297), VTNIndex::V(38)), 
+            Element::Line(VTNIndex::V(38), VTNIndex::V(118)),
+            Element::Line(VTNIndex::V(118), VTNIndex::V(108)),
         ];
         assert_eq!(result, expected);
     }
@@ -505,7 +505,7 @@ mod tests {
         let mut result = Vec::new();
         parser.parse_line(&mut result).unwrap();
         let expected = vec![
-            Element::Line(VTNIndex::new(297, Some(38), None), VTNIndex::new(118, Some(108), None)),
+            Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
         ];
         assert_eq!(result, expected);
     }
@@ -516,8 +516,8 @@ mod tests {
         let mut result = Vec::new();
         parser.parse_line(&mut result).unwrap();
         let expected = vec![
-            Element::Line(VTNIndex::new(297, Some(38),  None), VTNIndex::new(118, Some(108), None)),
-            Element::Line(VTNIndex::new(118, Some(108), None), VTNIndex::new(324, Some(398), None)),
+            Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
+            Element::Line(VTNIndex::VT(118, 108), VTNIndex::VT(324, 398)),
         ];
         assert_eq!(result, expected);
     }
