@@ -6,4 +6,5 @@ mod vertex_parser;
 mod texture_vertex_parser;
 mod normal_vertex_parser;
 mod element_parser;
+mod vtn_index_parser;
 

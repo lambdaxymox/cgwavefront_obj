@@ -1,7 +1,7 @@
 use obj::object::{
     ObjectSet, Object, 
     Vertex, TextureVertex, NormalVertex,
-    Element
+    Element, VTNIndex
 };
 use lexer::Lexer;
 use std::iter;

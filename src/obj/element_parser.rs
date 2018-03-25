@@ -33,7 +33,27 @@ impl ElementParser {
         state: &mut ParserState, 
         elements: &mut Vec<Element>) -> Result<(), ParseError> {
         
-        unimplemented!();
+        try!(state.parse_statement("l"));
+        
+        let v_index1 = try!(state.parse_u32());
+        let v_index2 = try!(state.parse_u32());
+        elements.push(Element::Line(
+            VTNIndex::new(v_index1 as usize, None, None),
+            VTNIndex::new(v_index2 as usize, None, None)
+        ));
+        loop {
+            match state.parse_string().as_ref().map(|st| &st[..]) {
+                Ok("\n") | Err(_) => break,
+                Ok(st) => match st.parse::<usize>() {
+                    Ok(v_index) => elements.push(
+                        Element::Point(VTNIndex::new(v_index, None, None))
+                    ),
+                    Err(_) => return state.error(format!("Expected integer but got `{}`.", st))
+                }
+            }
+        }
+
+        Ok(())     
     }
 
     fn parse_face(&self,
