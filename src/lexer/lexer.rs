@@ -29,6 +29,9 @@ pub struct Lexer<'a> {
     current_line_number: usize,
     /// The input stream.
     stream: iter::Peekable<str::Bytes<'a>>,
+    // The currently unprocessed tokens.
+    token_buffer: [Token; 1],
+    token_index: usize,
 }
 
 impl<'a> Lexer<'a> {
@@ -37,14 +40,16 @@ impl<'a> Lexer<'a> {
         Lexer {
             current_line_number: 1,
             stream: stream.bytes().peekable(),
+            token_buffer: [Vec::new(); 1],
+            token_index: 0,
         }
     }
 
     ///
-    /// The function `peek` looks at the character at the current position
+    /// The function `peek_u8` looks at the character at the current position
     /// in the byte stream without advancing the stream.
     #[inline]
-    fn peek(&mut self) -> Option<u8> {
+    fn peek_byte(&mut self) -> Option<u8> {
         self.stream.peek().map(|&x| x)
     }
 
@@ -68,7 +73,7 @@ impl<'a> Lexer<'a> {
     fn skip_comment(&mut self) -> usize {
         let mut skipped: usize = 0;
         loop {
-            match self.peek() {
+            match self.peek_byte() {
                 Some(ch) => {
                     if is_newline(ch) {
                         break;
@@ -93,7 +98,7 @@ impl<'a> Lexer<'a> {
     fn skip_whitespace(&mut self) -> usize {
         let mut skipped: usize = 0;
         loop {
-            match self.peek() {
+            match self.peek_byte() {
                 Some(ch) if is_whitespace(ch) => {
                     self.advance();
                     skipped += 1;
@@ -115,7 +120,7 @@ impl<'a> Lexer<'a> {
         let mut consumed: usize = 0;
         let mut token: Vec<u8> = Vec::new();
         loop {
-            match self.peek() {
+            match self.peek_byte() {
                 Some(ch) if ch == b'#' => {
                     self.skip_comment();
                 }
