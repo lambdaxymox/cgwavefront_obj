@@ -843,18 +843,18 @@ mod objectset_tests {
         ])
         .with_group_set(vec![GroupName::new("cube")])
         .with_shape_set(vec![
-                    ShapeEntry { element: 1,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 2,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 3,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 4,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 5,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 6,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 7,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 8,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 9,  groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 10, groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 11, groups: vec![1], smoothing_groups: vec![] },
-                    ShapeEntry { element: 12, groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 1,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 2,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 3,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 4,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 5,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 6,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 7,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 8,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 9,  groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 10, groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 11, groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 12, groups: vec![1], smoothing_groups: vec![] },
         ]);
         let expected = ObjectSet::new(vec![builder.build()]);
         let mut parser = super::Parser::new(obj_file);
