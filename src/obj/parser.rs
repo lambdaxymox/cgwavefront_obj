@@ -393,7 +393,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse(&mut self) -> Result<ObjectSet, ParseError> {
-        unimplemented!();
+        self.parse_object().map(|obj| ObjectSet::new(vec![obj]))
     }
 }
 
