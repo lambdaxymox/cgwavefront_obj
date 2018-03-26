@@ -68,7 +68,7 @@ type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VTNIndex { 
-    V(TextureVertexIndex),
+    V(VertexIndex),
     VT(VertexIndex, TextureVertexIndex), 
     VN(VertexIndex, NormalVertexIndex),
     VTN(VertexIndex, TextureVertexIndex, NormalVertexIndex),
@@ -84,6 +84,14 @@ impl VTNIndex {
             _ => false,
         }
     }
+}
+
+#[derive(Clone, Debug)]
+pub enum VTNTriple<'a> {
+    V(&'a Vertex),
+    VT(&'a Vertex, &'a TextureVertex), 
+    VN(&'a Vertex, &'a NormalVertex),
+    VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
 pub struct Object {
@@ -102,7 +110,7 @@ impl Object {
         &self.name
     }
 
-    fn get_vtn_triple(&self, index: VTNIndex) -> Option<(&Vertex, Option<&TextureVertex>, Option<&NormalVertex>)> {
+    fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
                 let vertex = match self.vertex_set.get(v_index) {
@@ -110,7 +118,7 @@ impl Object {
                     None => return None,
                 };
 
-                Some((vertex, None, None))
+                Some(VTNTriple::V(vertex))
             },
             VTNIndex::VT(v_index, vt_index) => { 
                 let vertex = match self.vertex_set.get(v_index) {
@@ -122,7 +130,7 @@ impl Object {
                     None => return None,
                 };
 
-                Some((vertex, Some(texture_vertex), None))
+                Some(VTNTriple::VT(vertex, texture_vertex))
             },
             VTNIndex::VN(v_index, vn_index) => {
                 let vertex = match self.vertex_set.get(v_index) {
@@ -134,7 +142,7 @@ impl Object {
                     None => return None,
                 };
 
-                Some((vertex, None, Some(normal_vertex)))
+                Some(VTNTriple::VN(vertex, normal_vertex))
             },
             VTNIndex::VTN(v_index, vt_index, vn_index) => {
                 let vertex = match self.vertex_set.get(v_index) {
@@ -150,7 +158,7 @@ impl Object {
                     None => return None,
                 };
 
-                Some((vertex, Some(texture_vertex), Some(normal_vertex)))
+                Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
             },
         }
     }
