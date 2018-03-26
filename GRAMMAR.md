@@ -4,7 +4,7 @@
 This document contains the grammar extracted from the Wavefront OBJ file format specification used to implement the parser and lexer. See the docs subdirectory of the source tree for details. At this time the grammar centers mainly on parsing polygonal geometry, not free-form geometry. The grammar will not parse free-form geometry data.
 
 ### Grammar
-The grammar is written in Backus-Naur form. An `ObjectSet` is the collection of geometry that results from parsing an OBJ file.
+The grammar is written in Backus-Naur form. An `ObjectSet` is the collection of meshes that are extracted from a *.obj file. Typically there is only one object in an object set, but there can be more than one if the `o` tag is used to split them up.
 ```
 Empty           ::= ''
 Digit           ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
