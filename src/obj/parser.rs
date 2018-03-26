@@ -602,6 +602,18 @@ mod tests {
 
     #[test]
     fn test_parse_face2() {
+        let mut parser = super::Parser::new("f 297 118 108 324\n");
+        let mut result = Vec::new();
+        let expected = vec![
+            Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
+            Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
+        ];
+        parser.parse_face(&mut result);
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_face3() {
         let mut parser = super::Parser::new("f 297 118 108 324 398 \n");
         let mut result = Vec::new();
         let expected = vec![
@@ -611,6 +623,31 @@ mod tests {
         ];
         parser.parse_face(&mut result);
         assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_face4() {
+        let mut parser = super::Parser::new("f 297 118 \n");
+        let mut result = Vec::new();
+        parser.parse_face(&mut result);
+        assert!(parser.parse_face(&mut result).is_err());
+    }
+
+    #[test]
+    fn test_parse_face5() {
+        let mut parser = super::Parser::new(
+            "f 34184//34184 34088//34088 34079//34079 34084//34084 34091//34091 34076//34076\n"
+        );
+        let mut result = Vec::new();
+        let expected = vec![
+            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34088,34088), VTNIndex::VN(34079,34079)),
+            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34079,34079), VTNIndex::VN(34084,34084)),
+            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34084,34084), VTNIndex::VN(34091,34091)),
+            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34091,34091), VTNIndex::VN(34076,34076)),
+
+        ];
+        parser.parse_face(&mut result);
+        assert!(parser.parse_face(&mut result).is_err());
     }
 
     #[test]
