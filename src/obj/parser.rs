@@ -1,7 +1,7 @@
 use obj::object::{
     ObjectSet, Object, 
     Vertex, TextureVertex, NormalVertex,
-    Element, VTNIndex,
+    GroupName, Element, VTNIndex,
 };
 use lexer::Lexer;
 use std::iter;
@@ -356,6 +356,18 @@ impl<'a> Parser<'a> {
             _ => self.error(format!("Parser error: Line must be a point, line, or face.")),
         }
     }
+
+    fn parse_group_names(&mut self, groups: &mut Vec<GroupName>) -> Result<(), ParseError> {
+        try!(self.expect("g"));
+        loop {
+            match self.next_string().as_ref().map(|st| &st[..]) {
+                Ok("\n") | Err(_) => break,
+                Ok(name) => groups.push(GroupName::new(name)),
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -667,6 +679,31 @@ mod element_tests {
             Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34091,34091), VTNIndex::VN(34076,34076)),
         ];
         parser.parse_element(&mut result).unwrap();
+        assert_eq!(result, expected);
+    }
+}
+
+#[cfg(test)]
+mod group_name_tests {
+    use obj::object::GroupName;
+
+    #[test]
+    fn parse_group_name1() {
+        let mut parser = super::Parser::new("g group");
+        let mut result = Vec::new();
+        let expected = vec![GroupName::new("group")];
+        assert!(parser.parse_group_names(&mut result).is_ok());
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn parse_group_name2() {
+        let mut parser = super::Parser::new("g group1 group2 group3");
+        let mut result = Vec::new();
+        let expected = vec![
+            GroupName::new("group1"), GroupName::new("group2"), GroupName::new("group3")
+        ];
+        assert!(parser.parse_group_names(&mut result).is_ok());
         assert_eq!(result, expected);
     }
 }

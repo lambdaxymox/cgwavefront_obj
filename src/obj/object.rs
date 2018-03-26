@@ -45,7 +45,11 @@ struct Shape {
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]
-struct GroupName(String);
+pub struct GroupName(String);
+
+impl GroupName {
+    pub fn new(name: &str) -> GroupName { GroupName(String::from(name)) }
+}
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 struct SmoothingGroupName(String);
