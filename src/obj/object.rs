@@ -50,13 +50,13 @@ struct GroupName(String);
 #[derive(Clone, Eq, PartialEq, Debug)]
 struct SmoothingGroupName(String);
 
-type ElementIndex = usize;
-type VertexIndex = usize;
-type TextureVertexIndex = usize;
-type NormalVertexIndex = usize;
-type GroupIndex = usize;
-type ShapeIndex = usize;
-type SmoothingGroupIndex = usize;
+type ElementIndex = u32;
+type VertexIndex = u32;
+type TextureVertexIndex = u32;
+type NormalVertexIndex = u32;
+type GroupIndex = u32;
+type ShapeIndex = u32;
+type SmoothingGroupIndex = u32;
 
 type VertexSet = ObjectTable<Vertex>;
 type TextureVertexSet = ObjectTable<TextureVertex>;
@@ -113,7 +113,7 @@ impl Object {
     fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
-                let vertex = match self.vertex_set.get(v_index) {
+                let vertex = match self.vertex_set.get(v_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
@@ -121,11 +121,11 @@ impl Object {
                 Some(VTNTriple::V(vertex))
             },
             VTNIndex::VT(v_index, vt_index) => { 
-                let vertex = match self.vertex_set.get(v_index) {
+                let vertex = match self.vertex_set.get(v_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
-                let texture_vertex = match self.texture_vertex_set.get(vt_index) {
+                let texture_vertex = match self.texture_vertex_set.get(vt_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
@@ -133,11 +133,11 @@ impl Object {
                 Some(VTNTriple::VT(vertex, texture_vertex))
             },
             VTNIndex::VN(v_index, vn_index) => {
-                let vertex = match self.vertex_set.get(v_index) {
+                let vertex = match self.vertex_set.get(v_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
-                let normal_vertex = match self.normal_vertex_set.get(vn_index) {
+                let normal_vertex = match self.normal_vertex_set.get(vn_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
@@ -145,15 +145,15 @@ impl Object {
                 Some(VTNTriple::VN(vertex, normal_vertex))
             },
             VTNIndex::VTN(v_index, vt_index, vn_index) => {
-                let vertex = match self.vertex_set.get(v_index) {
+                let vertex = match self.vertex_set.get(v_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
-                let texture_vertex = match self.texture_vertex_set.get(vt_index) {
+                let texture_vertex = match self.texture_vertex_set.get(vt_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
-                let normal_vertex = match self.normal_vertex_set.get(vn_index) {
+                let normal_vertex = match self.normal_vertex_set.get(vn_index as usize) {
                     Some(val) => val,
                     None => return None,
                 };
@@ -174,43 +174,43 @@ trait ObjectQuery<K, V> {
 
 impl ObjectQuery<VertexIndex, Vertex> for Object {
     fn query(&self, key: VertexIndex) -> Option<Vertex> {
-        self.vertex_set.get(key).map(|&x| x)
+        self.vertex_set.get(key as usize).map(|&x| x)
     }
 }
 
 impl ObjectQuery<TextureVertexIndex, TextureVertex> for Object {
     fn query(&self, key: TextureVertexIndex) -> Option<TextureVertex> {
-        self.texture_vertex_set.get(key).map(|&x| x)
+        self.texture_vertex_set.get(key as usize).map(|&x| x)
     }
 }
 
 impl ObjectQuery<NormalVertexIndex, NormalVertex> for Object {
     fn query(&self, key: NormalVertexIndex) -> Option<NormalVertex> {
-        self.normal_vertex_set.get(key).map(|&x| x)
+        self.normal_vertex_set.get(key as usize).map(|&x| x)
     }
 }
 
 impl ObjectQuery<ElementIndex, Element> for Object {
     fn query(&self, key: ElementIndex) -> Option<Element> {
-        self.element_set.get(key).map(|x| x.clone())
+        self.element_set.get(key as usize).map(|x| x.clone())
     }
 }
 
 impl ObjectQuery<GroupIndex, GroupName> for Object {
     fn query(&self, key: GroupIndex) -> Option<GroupName> {
-        self.group_set.get(key).map(|x| x.clone())
+        self.group_set.get(key as usize).map(|x| x.clone())
     }
 }
 
 impl ObjectQuery<SmoothingGroupIndex, SmoothingGroupName> for Object {
     fn query(&self, key: SmoothingGroupIndex) -> Option<SmoothingGroupName> {
-        self.smoothing_group_set.get(key).map(|x| x.clone())
+        self.smoothing_group_set.get(key as usize).map(|x| x.clone())
     }
 }
 
 impl ObjectQuery<ShapeIndex, ShapeEntry> for Object {
     fn query(&self, key: ShapeIndex) -> Option<ShapeEntry> {
-        self.shape_set.get(key).map(|x| x.clone())
+        self.shape_set.get(key as usize).map(|x| x.clone())
     }
 }
 
