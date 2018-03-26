@@ -647,7 +647,7 @@ mod tests {
 
         ];
         parser.parse_face(&mut result);
-        assert!(parser.parse_face(&mut result).is_err());
+        assert_eq!(result, expected);
     }
 
     #[test]
