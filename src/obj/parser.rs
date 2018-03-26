@@ -309,6 +309,37 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
+        try!(self.expect("f"));
+
+        let mut vtn_indices = Vec::new();
+        loop {
+            match self.parse_vtn_index() {
+                Ok(vtn_index) => {
+                    vtn_indices.push(vtn_index);
+                },
+                Err(_) => {
+                    break;
+                }
+            }
+        }
+
+        // Check that there are enough vtn indices.
+        if vtn_indices.len() < 3 {
+            return self.error(
+                format!("A face element must have at least three vertices.")
+            );  
+        }
+
+        // Verify that each VTN index has the same type and if of a valid form.
+        for i in 1..vtn_indices.len() {
+            if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
+                return self.error(
+                    format!("Every vertex/texture/normal index must have the same form.")
+                );
+            }
+        }
+
+        // Triangulate the polygon.
         unimplemented!();
     }
 
