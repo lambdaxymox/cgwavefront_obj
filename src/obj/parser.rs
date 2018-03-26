@@ -524,7 +524,7 @@ mod tests {
     fn test_parse_point1() {
         let mut parser = super::Parser::new("p 1 2 3 4 \n");
         let mut result = Vec::new();
-        parser.parse_point(&mut result).unwrap();
+        parser.parse_element(&mut result).unwrap();
         let expected = vec![
             Element::Point(VTNIndex::V(1)), Element::Point(VTNIndex::V(2)),
             Element::Point(VTNIndex::V(3)), Element::Point(VTNIndex::V(4)),
@@ -536,14 +536,14 @@ mod tests {
     fn test_parse_point2() {
         let mut parser = super::Parser::new("p 1 1/2 3 4/5");
         let mut result = Vec::new();
-        assert!(parser.parse_point(&mut result).is_err());
+        assert!(parser.parse_element(&mut result).is_err());
     }
 
     #[test]
     fn test_parse_line1() {
         let mut parser = super::Parser::new("l 297 38 118 108 \n");
         let mut result = Vec::new();
-        parser.parse_line(&mut result).unwrap();
+        parser.parse_element(&mut result).unwrap();
         let expected = vec![
             Element::Line(VTNIndex::V(297), VTNIndex::V(38)), 
             Element::Line(VTNIndex::V(38), VTNIndex::V(118)),
@@ -556,7 +556,7 @@ mod tests {
     fn test_parse_line2() {
         let mut parser = super::Parser::new("l 297/38 118/108 \n");
         let mut result = Vec::new();
-        parser.parse_line(&mut result).unwrap();
+        parser.parse_element(&mut result).unwrap();
         let expected = vec![
             Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
         ];
@@ -567,7 +567,7 @@ mod tests {
     fn test_parse_line3() {
         let mut parser = super::Parser::new("l 297/38 118/108 324/398 \n");
         let mut result = Vec::new();
-        parser.parse_line(&mut result).unwrap();
+        parser.parse_element(&mut result).unwrap();
         let expected = vec![
             Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
             Element::Line(VTNIndex::VT(118, 108), VTNIndex::VT(324, 398)),
@@ -579,14 +579,14 @@ mod tests {
     fn test_parse_line4() {
         let mut parser = super::Parser::new("l 297/38 118 324 \n");
         let mut result = Vec::new();
-        assert!(parser.parse_line(&mut result).is_err());
+        assert!(parser.parse_element(&mut result).is_err());
     }
 
     #[test]
     fn test_parse_line5() {
         let mut parser = super::Parser::new("l 297 118/108 324/398 \n");
         let mut result = Vec::new();
-        assert!(parser.parse_line(&mut result).is_err());
+        assert!(parser.parse_element(&mut result).is_err());
     }
 
     #[test]
@@ -596,7 +596,7 @@ mod tests {
         let expected = vec![
             Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
         ];
-        parser.parse_face(&mut result);
+        parser.parse_element(&mut result);
         assert_eq!(result, expected);
     }
 
@@ -608,7 +608,7 @@ mod tests {
             Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
             Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
         ];
-        parser.parse_face(&mut result);
+        parser.parse_element(&mut result);
         assert_eq!(result, expected);
     }
 
@@ -621,7 +621,7 @@ mod tests {
             Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
             Element::Face(VTNIndex::V(297), VTNIndex::V(324), VTNIndex::V(398)),
         ];
-        parser.parse_face(&mut result);
+        parser.parse_element(&mut result);
         assert_eq!(result, expected);
     }
 
@@ -629,7 +629,7 @@ mod tests {
     fn test_parse_face4() {
         let mut parser = super::Parser::new("f 297 118 \n");
         let mut result = Vec::new();
-        parser.parse_face(&mut result);
+        parser.parse_element(&mut result);
         assert!(parser.parse_face(&mut result).is_err());
     }
 
@@ -644,9 +644,8 @@ mod tests {
             Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34079,34079), VTNIndex::VN(34084,34084)),
             Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34084,34084), VTNIndex::VN(34091,34091)),
             Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34091,34091), VTNIndex::VN(34076,34076)),
-
         ];
-        parser.parse_face(&mut result);
+        parser.parse_element(&mut result);
         assert_eq!(result, expected);
     }
 
