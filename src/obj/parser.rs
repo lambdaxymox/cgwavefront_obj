@@ -339,8 +339,13 @@ impl<'a> Parser<'a> {
             }
         }
 
-        // Triangulate the polygon.
-        unimplemented!();
+        // Triangulate the polygon with a triangle fan.
+        let vertex0 = vtn_indices[0];
+        for i in 0..vtn_indices.len()-1 {
+            elements.push(Element::Face(vertex0, vtn_indices[i+1], vtn_indices[i+2]));
+        }
+
+        Ok(())
     }
 
     fn parse_element(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {  
@@ -348,7 +353,7 @@ impl<'a> Parser<'a> {
             Some("p") => self.parse_point(elements),
             Some("l") => self.parse_line(elements),
             Some("f") => self.parse_face(elements),
-            _ => unimplemented!(),
+            _ => self.error(format!("Parser error: Line must be a point, line, or face.")),
         }
     }
 }
