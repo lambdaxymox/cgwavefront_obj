@@ -357,8 +357,9 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_group_names(&mut self, groups: &mut Vec<GroupName>) -> Result<(), ParseError> {
+    fn parse_groups(&mut self) -> Result<Vec<GroupName>, ParseError> {
         try!(self.expect("g"));
+        let mut groups = Vec::new();
         loop {
             match self.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
@@ -366,7 +367,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        Ok(())
+        Ok(groups)
     }
 
     fn parse_smoothing_group(&mut self) -> Result<SmoothingGroupName, ParseError> {
@@ -389,7 +390,43 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_object(&mut self) -> Result<Object, ParseError> {
-        unimplemented!();
+        let mut groups = Vec::new();
+        loop {
+            match self.peek().as_ref().map(|st| &st[..]) {
+                Some("o")  => { 
+                    self.parse_object_name();
+                }
+                Some("g")  => {
+                    groups = match self.parse_groups() {
+                        Ok(got) => got,
+                        Err(err) => return Err(err)
+                    };
+                }
+                Some("v")  => {
+
+                }
+                Some("vt") => {
+
+                }
+                Some("vn") => {
+
+                }
+                Some("p") | Some("l") | Some("f") => {
+
+                } 
+                Some("\n") => { 
+                    self.skip_one_or_more_newlines();
+                }
+                Some(other_st) => {
+                    return self.error(format!(
+                        "Parse error: Invalid element declaration in obj file. Got `{}`", other_st)
+                    );
+                }
+                None => {
+
+                }
+            }
+        }
     }
 
     fn parse(&mut self) -> Result<ObjectSet, ParseError> {
@@ -711,27 +748,29 @@ mod element_tests {
 }
 
 #[cfg(test)]
-mod group_name_tests {
+mod group_tests {
     use obj::object::GroupName;
 
     #[test]
     fn parse_group_name1() {
         let mut parser = super::Parser::new("g group");
-        let mut result = Vec::new();
         let expected = vec![GroupName::new("group")];
-        assert!(parser.parse_group_names(&mut result).is_ok());
-        assert_eq!(result, expected);
+        let result = parser.parse_groups();
+
+        assert!(result.is_ok());
+        assert_eq!(result, Ok(expected));
     }
 
     #[test]
     fn parse_group_name2() {
         let mut parser = super::Parser::new("g group1 group2 group3");
-        let mut result = Vec::new();
+        let result = parser.parse_groups();
         let expected = vec![
             GroupName::new("group1"), GroupName::new("group2"), GroupName::new("group3")
         ];
-        assert!(parser.parse_group_names(&mut result).is_ok());
-        assert_eq!(result, expected);
+
+        assert!(result.is_ok());
+        assert_eq!(result, Ok(expected));
     }
 }
 

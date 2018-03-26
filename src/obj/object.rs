@@ -118,6 +118,19 @@ pub struct Object {
 }
 
 impl Object {
+    pub fn new() -> Object {
+        Object {
+            name: String::from(""),
+            vertex_set: Default::default(),
+            texture_vertex_set: Default::default(),
+            normal_vertex_set: Default::default(),
+            group_set: Default::default(),
+            smoothing_group_set: Default::default(),
+            element_set: Default::default(),
+            shape_set: Default::default(),
+        }
+    }
+
     pub fn name(&self) -> &str { 
         &self.name
     }
