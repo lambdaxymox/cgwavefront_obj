@@ -52,7 +52,13 @@ impl GroupName {
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]
-struct SmoothingGroupName(String);
+pub struct SmoothingGroupName(u32);
+
+impl SmoothingGroupName {
+    pub fn new(name: u32) -> SmoothingGroupName { 
+        SmoothingGroupName(name)
+    }
+}
 
 type ElementIndex = u32;
 type VertexIndex = u32;

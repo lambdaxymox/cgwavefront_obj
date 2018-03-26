@@ -1,7 +1,7 @@
 use obj::object::{
     ObjectSet, Object, 
     Vertex, TextureVertex, NormalVertex,
-    GroupName, Element, VTNIndex,
+    GroupName, SmoothingGroupName, Element, VTNIndex,
 };
 use lexer::Lexer;
 use std::iter;
@@ -368,6 +368,25 @@ impl<'a> Parser<'a> {
 
         Ok(())
     }
+
+    fn parse_smoothing_group(&mut self) -> Result<SmoothingGroupName, ParseError> {
+        try!(self.expect("s"));
+        match self.next_string() {
+            Ok(name) => {
+                if name == "off" {
+                    return Ok(SmoothingGroupName::new(0));
+                }
+
+                match name.parse::<u32>() {
+                    Ok(number) => Ok(SmoothingGroupName::new(number)),
+                    Err(_) => self.error(format!(
+                        "Expected integer or `off` for smoothing group name but got `{}`", name)
+                    )
+                }
+            }
+            Err(_) => self.error(format!("Parser error: Invalid smoothing group name.")),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -579,7 +598,7 @@ mod element_tests {
         let mut result = Vec::new();
         let expected = vec![
             Element::Line(VTNIndex::V(297), VTNIndex::V(38)), 
-            Element::Line(VTNIndex::V(38), VTNIndex::V(118)),
+            Element::Line(VTNIndex::V(38),  VTNIndex::V(118)),
             Element::Line(VTNIndex::V(118), VTNIndex::V(108)),
         ];
         assert!(parser.parse_element(&mut result).is_ok());
@@ -705,6 +724,35 @@ mod group_name_tests {
         ];
         assert!(parser.parse_group_names(&mut result).is_ok());
         assert_eq!(result, expected);
+    }
+}
+
+#[cfg(test)]
+mod smoothing_group_tests {
+    use obj::object::SmoothingGroupName;
+
+    #[test]
+    fn test_smoothing_group_name1() {
+        let mut parser = super::Parser::new("s off");
+        let result = parser.parse_smoothing_group();
+        let expected = SmoothingGroupName::new(0);
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn test_smoothing_group_name2() {
+        let mut parser = super::Parser::new("s 0");
+        let result = parser.parse_smoothing_group();
+        let expected = SmoothingGroupName::new(0);
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn test_smoothing_group_name3() {
+        let mut parser = super::Parser::new("s 3434");
+        let result = parser.parse_smoothing_group();
+        let expected = SmoothingGroupName::new(3434);
+        assert_eq!(result, Ok(expected));
     }
 }
 
