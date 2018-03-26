@@ -300,6 +300,7 @@ impl<'a> Parser<'a> {
             }
         }
 
+        // Now that we have verified the indices, build the line elements.
         for i in 0..vtn_indices.len()-1 {
             elements.push(Element::Line(vtn_indices[i], vtn_indices[i + 1]));
         }
