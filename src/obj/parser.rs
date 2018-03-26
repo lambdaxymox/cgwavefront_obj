@@ -341,7 +341,7 @@ impl<'a> Parser<'a> {
 
         // Triangulate the polygon with a triangle fan.
         let vertex0 = vtn_indices[0];
-        for i in 0..vtn_indices.len()-1 {
+        for i in 0..vtn_indices.len()-2 {
             elements.push(Element::Face(vertex0, vtn_indices[i+1], vtn_indices[i+2]));
         }
 
@@ -587,6 +587,30 @@ mod tests {
         let mut parser = super::Parser::new("l 297 118/108 324/398 \n");
         let mut result = Vec::new();
         assert!(parser.parse_line(&mut result).is_err());
+    }
+
+    #[test]
+    fn test_parse_face1() {
+        let mut parser = super::Parser::new("f 297 118 108\n");
+        let mut result = Vec::new();
+        let expected = vec![
+            Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
+        ];
+        parser.parse_face(&mut result);
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_face2() {
+        let mut parser = super::Parser::new("f 297 118 108 324 398 \n");
+        let mut result = Vec::new();
+        let expected = vec![
+            Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
+            Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
+            Element::Face(VTNIndex::V(297), VTNIndex::V(324), VTNIndex::V(398)),
+        ];
+        parser.parse_face(&mut result);
+        assert_eq!(result, expected);
     }
 
     #[test]
