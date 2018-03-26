@@ -387,6 +387,14 @@ impl<'a> Parser<'a> {
             Err(_) => self.error(format!("Parser error: Invalid smoothing group name.")),
         }
     }
+
+    fn parse_object(&mut self) -> Result<Object, ParseError> {
+        unimplemented!();
+    }
+
+    fn parse(&mut self) -> Result<ObjectSet, ParseError> {
+        unimplemented!();
+    }
 }
 
 #[cfg(test)]
@@ -758,6 +766,11 @@ mod smoothing_group_tests {
 
 #[cfg(test)]
 mod objectset_tests {
+    use obj::object::{
+        ObjectSet, Object, ObjectBuilder,
+        GroupName, Vertex, NormalVertex, Element, VTNIndex, ShapeEntry,
+    };
+
     #[test]
     fn test_parse_object_set1() {
         let obj_file = r"
@@ -792,7 +805,62 @@ mod objectset_tests {
             f  2//1  6//1  8//1 
             f  2//1  8//1  4//1 
         ";
-        assert!(false);
+        let mut builder = ObjectBuilder::new(
+            vec![
+                Vertex { x: 0.0,  y: 0.0, z: 0.0, w: 1.0 },
+                Vertex { x: 0.0,  y: 0.0, z: 1.0, w: 1.0 },
+                Vertex { x: 0.0,  y: 1.0, z: 0.0, w: 1.0 },
+                Vertex { x: 0.0,  y: 1.0, z: 1.0, w: 1.0 },
+                Vertex { x: 1.0,  y: 0.0, z: 0.0, w: 1.0 },
+                Vertex { x: 1.0,  y: 0.0, z: 1.0, w: 1.0 },
+                Vertex { x: 1.0,  y: 1.0, z: 0.0, w: 1.0 },
+                Vertex { x: 1.0,  y: 1.0, z: 1.0, w: 1.0 },
+            ],
+            vec![
+                Element::Face(VTNIndex::VN(1,2), VTNIndex::VN(7,2), VTNIndex::VN(5,2)),
+                Element::Face(VTNIndex::VN(1,2), VTNIndex::VN(3,2), VTNIndex::VN(7,2)),
+                Element::Face(VTNIndex::VN(1,6), VTNIndex::VN(4,6), VTNIndex::VN(3,6)),
+                Element::Face(VTNIndex::VN(1,6), VTNIndex::VN(2,6), VTNIndex::VN(4,6)),
+                Element::Face(VTNIndex::VN(3,3), VTNIndex::VN(8,3), VTNIndex::VN(7,3)),
+                Element::Face(VTNIndex::VN(3,3), VTNIndex::VN(4,3), VTNIndex::VN(8,3)),
+                Element::Face(VTNIndex::VN(5,5), VTNIndex::VN(7,5), VTNIndex::VN(8,5)),
+                Element::Face(VTNIndex::VN(5,5), VTNIndex::VN(8,5), VTNIndex::VN(6,5)),
+                Element::Face(VTNIndex::VN(1,4), VTNIndex::VN(5,4), VTNIndex::VN(6,4)),
+                Element::Face(VTNIndex::VN(1,4), VTNIndex::VN(6,4), VTNIndex::VN(2,4)),
+                Element::Face(VTNIndex::VN(2,1), VTNIndex::VN(6,1), VTNIndex::VN(8,1)),
+                Element::Face(VTNIndex::VN(2,1), VTNIndex::VN(8,1), VTNIndex::VN(4,1)),
+            ],
+        );
+        builder
+        .with_name(String::from("object1"))
+        .with_normal_vertex_set(vec![
+            NormalVertex { i:  0.0, j:  0.0, k:  1.0 },
+            NormalVertex { i:  0.0, j:  0.0, k: -1.0 },
+            NormalVertex { i:  0.0, j:  1.0, k:  0.0 },
+            NormalVertex { i:  0.0, j: -1.0, k:  0.0 },
+            NormalVertex { i:  1.0, j:  0.0, k:  0.0 },
+            NormalVertex { i: -1.0, j:  0.0, k:  0.0 },
+        ])
+        .with_group_set(vec![GroupName::new("cube")])
+        .with_shape_set(vec![
+                    ShapeEntry { element: 1,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 2,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 3,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 4,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 5,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 6,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 7,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 8,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 9,  groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 10, groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 11, groups: vec![1], smoothing_groups: vec![] },
+                    ShapeEntry { element: 12, groups: vec![1], smoothing_groups: vec![] },
+        ]);
+        let expected = ObjectSet::new(vec![builder.build()]);
+        let mut parser = super::Parser::new(obj_file);
+        let result = parser.parse();
+
+        assert_eq!(result, Ok(expected));
     }
 }
 

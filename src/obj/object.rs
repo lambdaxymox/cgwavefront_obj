@@ -1,4 +1,5 @@
 use obj::table::ObjectTable;
+use std::default::Default;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -30,28 +31,28 @@ pub enum Element {
     Face(VTNIndex, VTNIndex, VTNIndex),
 }
 
-#[derive(Clone, Debug)]
-struct ShapeEntry {
-    element: ElementIndex,
-    groups: Vec<GroupIndex>,
-    smoothing_groups: Vec<SmoothingGroupIndex>,
+#[derive(Clone, Debug, PartialEq)]
+pub struct ShapeEntry {
+    pub element: ElementIndex,
+    pub groups: Vec<GroupIndex>,
+    pub smoothing_groups: Vec<SmoothingGroupIndex>,
 }
 
-#[derive(Clone, Debug)]
-struct Shape {
+#[derive(Clone, Debug, PartialEq)]
+pub struct Shape {
     element: Element,
     groups: Vec<GroupName>,
     smoothing_groups: Vec<SmoothingGroupName>,
 }
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GroupName(String);
 
 impl GroupName {
     pub fn new(name: &str) -> GroupName { GroupName(String::from(name)) }
 }
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroupName(u32);
 
 impl SmoothingGroupName {
@@ -68,13 +69,13 @@ type GroupIndex = u32;
 type ShapeIndex = u32;
 type SmoothingGroupIndex = u32;
 
-type VertexSet = ObjectTable<Vertex>;
-type TextureVertexSet = ObjectTable<TextureVertex>;
-type NormalVertexSet = ObjectTable<NormalVertex>;
-type ElementSet = ObjectTable<Element>;
-type ShapeSet = ObjectTable<ShapeEntry>;
-type GroupSet = ObjectTable<GroupName>;
-type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
+pub type VertexSet = ObjectTable<Vertex>;
+pub type TextureVertexSet = ObjectTable<TextureVertex>;
+pub type NormalVertexSet = ObjectTable<NormalVertex>;
+pub type ElementSet = ObjectTable<Element>;
+pub type ShapeSet = ObjectTable<ShapeEntry>;
+pub type GroupSet = ObjectTable<GroupName>;
+pub type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VTNIndex { 
@@ -104,6 +105,7 @@ pub enum VTNTriple<'a> {
     VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct Object {
     name: String,
     vertex_set: VertexSet,
@@ -224,15 +226,85 @@ impl ObjectQuery<ShapeIndex, ShapeEntry> for Object {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct ObjectSet {
     objects: Vec<Object>,
 }
 
 impl ObjectSet {
-    fn new() -> ObjectSet {
+    pub fn new(vec: Vec<Object>) -> ObjectSet {
         ObjectSet {
-            objects: Vec::new(),
+            objects: vec,
         }    
+    }
+}
+
+pub struct ObjectBuilder {
+    name: Option<String>,
+    vertex_set: VertexSet,
+    texture_vertex_set: Option<TextureVertexSet>,
+    normal_vertex_set: Option<NormalVertexSet>,
+    group_set: Option<GroupSet>,
+    smoothing_group_set: Option<SmoothingGroupSet>,
+    element_set: ElementSet,
+    shape_set: Option<ShapeSet>,
+}
+
+impl ObjectBuilder {
+    pub fn new(vertex_set: Vec<Vertex>, element_set: Vec<Element>) -> ObjectBuilder {
+        ObjectBuilder {
+            name: None,
+            vertex_set: ObjectTable::from(vertex_set),
+            texture_vertex_set: None,
+            normal_vertex_set: None,
+            group_set: None,
+            smoothing_group_set: None,
+            element_set: ObjectTable::from(element_set),
+            shape_set: None,
+        }
+    }
+
+    pub fn with_name(&mut self, name: String) -> &mut Self {
+        self.name = Some(name);
+        self
+    }
+
+    pub fn with_texture_vertex_set(&mut self, texture_vertex_set: Vec<TextureVertex>) -> &mut Self {
+        self.texture_vertex_set = Some(ObjectTable::from(texture_vertex_set));
+        self
+    }
+
+    pub fn with_normal_vertex_set(&mut self, normal_vertex_set: Vec<NormalVertex>) -> &mut Self {
+        self.normal_vertex_set = Some(ObjectTable::from(normal_vertex_set));
+        self
+    }
+
+    pub fn with_group_set(&mut self, group_set: Vec<GroupName>) -> &mut Self {
+        self.group_set = Some(ObjectTable::from(group_set));
+        self
+    }
+
+    pub fn with_smoothing_group_set(&mut self, smoothing_group_set: Vec<SmoothingGroupName>) -> &mut Self {
+        self.smoothing_group_set = Some(ObjectTable::from(smoothing_group_set));
+        self
+    }
+
+    pub fn with_shape_set(&mut self, shape_set: Vec<ShapeEntry>) -> &mut Self {
+        self.shape_set = Some(ObjectTable::from(shape_set));
+        self
+    }
+
+    pub fn build(self) -> Object {
+        Object {
+            name: self.name.unwrap_or(String::from("")),
+            vertex_set: self.vertex_set,
+            texture_vertex_set: self.texture_vertex_set.unwrap_or(Default::default()),
+            normal_vertex_set: self.normal_vertex_set.unwrap_or(Default::default()),
+            group_set: self.group_set.unwrap_or(Default::default()),
+            smoothing_group_set: self.smoothing_group_set.unwrap_or(Default::default()),
+            element_set: self.element_set,
+            shape_set: self.shape_set.unwrap_or(Default::default()),
+        }
     }
 }
 

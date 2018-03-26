@@ -1,8 +1,10 @@
 use std::slice;
 use std::ops;
 use std::convert;
+use std::default;
 
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct ObjectTable<V>(Vec<V>);
 
 impl<V> ObjectTable<V> {
@@ -58,3 +60,22 @@ impl<V> convert::AsRef<[V]> for ObjectTable<V> {
     }
 }
 
+impl<'a, V> convert::From<&'a [V]> for ObjectTable<V> where V: Clone {
+    #[inline]
+    fn from(slice: &'a [V]) -> Self {
+        ObjectTable(Vec::from(slice))
+    }
+}
+
+impl<V> convert::From<Vec<V>> for ObjectTable<V> {
+    #[inline]
+    fn from(vec: Vec<V>) -> Self {
+        ObjectTable(vec)
+    }
+}
+
+impl<V> default::Default for ObjectTable<V> {
+    fn default() -> Self {
+        ObjectTable::new()
+    }
+}
