@@ -439,7 +439,7 @@ impl<'a> Parser<'a> {
                         Err(_) => String::from(""),
                     };
                 }
-                Some("g")  => {
+                Some("g")  => {            
                     // Fill in the shape entries for the current group.
                     self.parse_shape_entries(
                         &mut shape_entries,
@@ -458,6 +458,13 @@ impl<'a> Parser<'a> {
                     max_group_index += amount_parsed;
                     // Update the element indices.
                     min_element_index = max_element_index;
+                }
+                Some("p") | Some("l") | Some("f") => {
+                    let amount_parsed = match self.parse_elements(&mut elements) {
+                        Ok(got) => got,
+                        Err(err) => return Err(err)
+                    };
+                    max_element_index += amount_parsed;
                 }
                 Some("v")  => {
                     let vertex = match self.parse_vertex() {
@@ -480,13 +487,6 @@ impl<'a> Parser<'a> {
                     };
                     normal_vertices.push(normal_vertex);
                 }
-                Some("p") | Some("l") | Some("f") => {
-                    let amount_parsed = match self.parse_elements(&mut elements) {
-                        Ok(got) => got,
-                        Err(err) => return Err(err)
-                    };
-                    max_element_index += amount_parsed;
-                }
                 Some("\n") => { 
                     try!(self.skip_one_or_more_newlines());
                 }
@@ -496,6 +496,15 @@ impl<'a> Parser<'a> {
                     ));
                 }
                 None => {
+                    // At the end of file, collect any remaining shapes.
+                    // Fill in the shape entries for the current group.
+                    self.parse_shape_entries(
+                        &mut shape_entries,
+                        min_element_index, max_element_index,
+                        min_group_index, max_group_index, 
+                        min_smoothing_group_index, max_smoothing_group_index
+                    );
+                    min_element_index = max_element_index;
                     break;
                 }
             }
