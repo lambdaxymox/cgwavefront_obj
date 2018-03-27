@@ -1,5 +1,5 @@
 use obj::object::{
-    ObjectSet, Object, 
+    ObjectSet, Object, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex,
     GroupName, SmoothingGroupName, Element, VTNIndex, ShapeEntry,
 };
@@ -451,6 +451,8 @@ impl<'a> Parser<'a> {
                     // Update range of group indices.
                     min_group_index = max_group_index;
                     max_group_index += amount_parsed;
+                    // Update the element indices.
+                    min_element_index = max_element_index;
                 }
                 Some("v")  => {
                     let vertex = match self.parse_vertex() {
@@ -494,7 +496,13 @@ impl<'a> Parser<'a> {
             }
         }
 
-        Ok(Object::new())
+        let mut builder = ObjectBuilder::new(vertices, elements);
+        builder.with_texture_vertex_set(texture_vertices)
+               .with_normal_vertex_set(normal_vertices)
+               .with_group_set(groups)
+               .with_shape_set(shape_entries);
+
+        Ok(builder.build())
     }
 
     fn parse(&mut self) -> Result<ObjectSet, ParseError> {
