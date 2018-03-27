@@ -1,7 +1,7 @@
 use obj::object::{
     ObjectSet, Object, 
     Vertex, TextureVertex, NormalVertex,
-    GroupName, SmoothingGroupName, Element, VTNIndex,
+    GroupName, SmoothingGroupName, Element, VTNIndex, ShapeEntry,
 };
 use lexer::Lexer;
 use std::iter;
@@ -252,27 +252,29 @@ impl<'a> Parser<'a> {
         self.error(format!("Expected `vertex/texture/normal` index but got `{}`", st))
     }
 
-    fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
+    fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("p"));
 
         let v_index = try!(self.parse_u32());
         elements.push(Element::Point(VTNIndex::V(v_index)));
+        let mut elements_parsed = 1;
         loop {
             match self.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(st) => match st.parse::<u32>() {
-                    Ok(v_index) => elements.push(
-                        Element::Point(VTNIndex::V(v_index))
-                    ),
+                    Ok(v_index) => { 
+                        elements.push(Element::Point(VTNIndex::V(v_index)));
+                        elements_parsed += 1;
+                    }
                     Err(_) => return self.error(format!("Expected integer but got `{}`.", st))
                 }
             }
         }
 
-        Ok(())
+        Ok(elements_parsed)
     }
 
-    fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
+    fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("l"));
 
         let current_vtn_index = try!(self.parse_vtn_index());
@@ -305,10 +307,10 @@ impl<'a> Parser<'a> {
             elements.push(Element::Line(vtn_indices[i], vtn_indices[i + 1]));
         }
 
-        Ok(())
+        Ok((vtn_indices.len() - 1) as u32)
     }
 
-    fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {
+    fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("f"));
 
         let mut vtn_indices = Vec::new();
@@ -345,10 +347,10 @@ impl<'a> Parser<'a> {
             elements.push(Element::Face(vertex0, vtn_indices[i+1], vtn_indices[i+2]));
         }
 
-        Ok(())
+        Ok((vtn_indices.len() - 2) as u32)
     }
 
-    fn parse_elements(&mut self, elements: &mut Vec<Element>) -> Result<(), ParseError> {  
+    fn parse_elements(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {  
         match self.peek().as_ref().map(|st| &st[..]) {
             Some("p") => self.parse_point(elements),
             Some("l") => self.parse_line(elements),
@@ -357,17 +359,18 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_groups(&mut self) -> Result<Vec<GroupName>, ParseError> {
+    fn parse_groups(&mut self, groups: &mut Vec<GroupName>) -> Result<u32, ParseError> {
         try!(self.expect("g"));
-        let mut groups = Vec::new();
+        let mut parsed = 0;
         loop {
             match self.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(name) => groups.push(GroupName::new(name)),
             }
+            parsed += 1;
         }
 
-        Ok(groups)
+        Ok(parsed)
     }
 
     fn parse_smoothing_group(&mut self) -> Result<SmoothingGroupName, ParseError> {
@@ -389,26 +392,65 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_shape_entries(&self,
+        shape_entries: &mut Vec<ShapeEntry>,
+        min_element_index: u32, max_element_index: u32,
+        min_group_index: u32, max_group_index: u32, 
+        min_smoothing_group_index: u32, max_smoothing_group_index: u32) {
+
+        let mut groups = vec![];
+        for i in min_group_index..max_group_index {
+            groups.push(i);
+        }
+        let mut smoothing_groups = vec![];
+        for i in min_smoothing_group_index..max_smoothing_group_index {
+            smoothing_groups.push(i);
+        }
+
+        for i in min_element_index..max_element_index {
+            shape_entries.push(ShapeEntry::new(i, &groups, &smoothing_groups));
+        }
+    }
+
     fn parse_object(&mut self) -> Result<Object, ParseError> {
-        let mut vertices = Vec::new();
-        let mut texture_vertices = Vec::new();
-        let mut normal_vertices = Vec::new();
-        let mut elements = Vec::new();
+        let mut vertices = vec![];
+        let mut texture_vertices = vec![];
+        let mut normal_vertices = vec![];
+        
+        let mut elements = vec![];
+        let mut min_element_index = 1;
+        let mut max_element_index = 1;
+        
+        let mut groups = vec![GroupName::new("default")];
         let mut min_group_index = 1;
         let mut max_group_index = 1;
+        
+        let mut shape_entries = vec![];
+        //let mut smoothing_groups = vec![];
+        let mut min_smoothing_group_index = 1;
+        let mut max_smoothing_group_index = 1;
         loop {
             match self.peek().as_ref().map(|st| &st[..]) {
                 Some("o")  => { 
                     self.parse_object_name();
                 }
                 Some("g")  => {
-                    let groups = match self.parse_groups() {
+                    // Fill in the shape entries for the current group.
+                    self.parse_shape_entries(
+                        &mut shape_entries,
+                        min_element_index, max_element_index,
+                        min_group_index, max_group_index, 
+                        min_smoothing_group_index, max_smoothing_group_index
+                    );
+
+                    // Fetch the new groups.
+                    let amount_parsed = match self.parse_groups(&mut groups) {
                         Ok(got) => got,
                         Err(err) => return Err(err)
                     };
                     // Update range of group indices.
                     min_group_index = max_group_index;
-                    max_group_index += groups.len();
+                    max_group_index += amount_parsed;
                 }
                 Some("v")  => {
                     let vertex = match self.parse_vertex() {
@@ -432,20 +474,19 @@ impl<'a> Parser<'a> {
                     normal_vertices.push(normal_vertex);
                 }
                 Some("p") | Some("l") | Some("f") => {
-                    match self.parse_elements(&mut elements) {
-                        Ok(_) => {},
+                    let amount_parsed = match self.parse_elements(&mut elements) {
+                        Ok(got) => got,
                         Err(err) => return Err(err)
-                    }
-                    // Update shape table with new elements.
-
-                } 
+                    };
+                    max_element_index += amount_parsed;
+                }
                 Some("\n") => { 
                     self.skip_one_or_more_newlines();
                 }
                 Some(other_st) => {
                     return self.error(format!(
-                        "Parse error: Invalid element declaration in obj file. Got `{}`", other_st)
-                    );
+                        "Parse error: Invalid element declaration in obj file. Got `{}`", other_st
+                    ));
                 }
                 None => {
                     break;
@@ -781,23 +822,25 @@ mod group_tests {
     #[test]
     fn parse_group_name1() {
         let mut parser = super::Parser::new("g group");
+        let mut result = Vec::new();
         let expected = vec![GroupName::new("group")];
-        let result = parser.parse_groups();
+        let parsed = parser.parse_groups(&mut result);
 
-        assert!(result.is_ok());
-        assert_eq!(result, Ok(expected));
+        assert!(parsed.is_ok());
+        assert_eq!(result, expected);
     }
 
     #[test]
     fn parse_group_name2() {
         let mut parser = super::Parser::new("g group1 group2 group3");
-        let result = parser.parse_groups();
+        let mut result = Vec::new();
+        let parsed = parser.parse_groups(&mut result);
         let expected = vec![
             GroupName::new("group1"), GroupName::new("group2"), GroupName::new("group3")
         ];
 
-        assert!(result.is_ok());
-        assert_eq!(result, Ok(expected));
+        assert!(parsed.is_ok());
+        assert_eq!(result, expected);
     }
 }
 

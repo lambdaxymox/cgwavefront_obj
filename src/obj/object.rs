@@ -38,6 +38,19 @@ pub struct ShapeEntry {
     pub smoothing_groups: Vec<SmoothingGroupIndex>,
 }
 
+impl ShapeEntry {
+    pub fn new(
+        element: ElementIndex, 
+        groups: &[GroupIndex], smoothing_groups: &[SmoothingGroupIndex]
+    ) -> ShapeEntry {
+        ShapeEntry {
+            element: element,
+            groups: Vec::from(groups),
+            smoothing_groups: Vec::from(smoothing_groups),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Shape {
     element: Element,
