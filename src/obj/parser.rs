@@ -436,7 +436,7 @@ impl<'a> Parser<'a> {
                 Some("o")  => { 
                     current_object_name = match self.parse_object_name() {
                         Ok(name) => name,
-                        Err(e) => String::from(""),
+                        Err(_) => String::from(""),
                     };
                 }
                 Some("g")  => {
@@ -488,7 +488,7 @@ impl<'a> Parser<'a> {
                     max_element_index += amount_parsed;
                 }
                 Some("\n") => { 
-                    self.skip_one_or_more_newlines();
+                    try!(self.skip_one_or_more_newlines());
                 }
                 Some(other_st) => {
                     return self.error(format!(
