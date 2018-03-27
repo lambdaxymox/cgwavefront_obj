@@ -413,6 +413,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_object(&mut self) -> Result<Object, ParseError> {
+        let mut current_object_name = String::from("");
+
         let mut vertices = vec![];
         let mut texture_vertices = vec![];
         let mut normal_vertices = vec![];
@@ -421,7 +423,7 @@ impl<'a> Parser<'a> {
         let mut min_element_index = 1;
         let mut max_element_index = 1;
         
-        let mut groups = vec![GroupName::new("default")];
+        let mut groups = vec![];
         let mut min_group_index = 1;
         let mut max_group_index = 1;
         
@@ -432,7 +434,10 @@ impl<'a> Parser<'a> {
         loop {
             match self.peek().as_ref().map(|st| &st[..]) {
                 Some("o")  => { 
-                    self.parse_object_name();
+                    current_object_name = match self.parse_object_name() {
+                        Ok(name) => name,
+                        Err(e) => String::from(""),
+                    };
                 }
                 Some("g")  => {
                     // Fill in the shape entries for the current group.
@@ -496,8 +501,13 @@ impl<'a> Parser<'a> {
             }
         }
 
+        if groups.is_empty() {
+            groups.push(GroupName::new("default"));
+        }
+
         let mut builder = ObjectBuilder::new(vertices, elements);
-        builder.with_texture_vertex_set(texture_vertices)
+        builder.with_name(current_object_name)
+               .with_texture_vertex_set(texture_vertices)
                .with_normal_vertex_set(normal_vertices)
                .with_group_set(groups)
                .with_shape_set(shape_entries);
@@ -978,13 +988,13 @@ mod objectset_tests {
 
         (result, Ok(expected))
     }
-
+    /*
     #[test]
     fn test_parse_object_set1() {
         let (result, expected) = test_case();
         assert_eq!(result, expected);
     }
-
+    */
     #[test]
     fn test_parse_object_set1_tokenwise() {
         let (result_set, expected_set) = test_case();
