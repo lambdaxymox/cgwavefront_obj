@@ -26,6 +26,10 @@ impl<V> ObjectTable<V> {
         }
     }
 
+    pub fn push(&mut self, item: V) {
+        self.0.push(item);
+    }
+
     pub fn as_slice(&self) -> &[V] {
         self.0.as_slice()
     }
