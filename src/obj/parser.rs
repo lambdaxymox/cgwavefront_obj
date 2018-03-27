@@ -888,8 +888,7 @@ mod objectset_tests {
         GroupName, Vertex, NormalVertex, Element, VTNIndex, ShapeEntry,
     };
 
-    #[test]
-    fn test_parse_object_set1() {
+    fn test_case() -> (Result<ObjectSet, super::ParseError>, Result<ObjectSet, super::ParseError>){
         let obj_file = r"
             o object1
             g cube
@@ -977,7 +976,31 @@ mod objectset_tests {
         let mut parser = super::Parser::new(obj_file);
         let result = parser.parse();
 
-        assert_eq!(result, Ok(expected));
+        (result, Ok(expected))
+    }
+
+    #[test]
+    fn test_parse_object_set1() {
+        let (result, expected) = test_case();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_object_set1_tokenwise() {
+        let (result_set, expected_set) = test_case();
+        let result_set = result_set.unwrap();
+        let expected_set = expected_set.unwrap();
+
+        for (result, expected) in result_set.iter().zip(expected_set.iter()) {
+            assert_eq!(result.name, expected.name);
+            assert_eq!(result.vertex_set, expected.vertex_set);
+            assert_eq!(result.texture_vertex_set, expected.texture_vertex_set);
+            assert_eq!(result.normal_vertex_set, expected.normal_vertex_set);
+            assert_eq!(result.group_set, expected.group_set);
+            assert_eq!(result.smoothing_group_set, expected.smoothing_group_set);
+            assert_eq!(result.element_set, expected.element_set);
+            assert_eq!(result.shape_set, expected.shape_set);
+        }
     }
 }
 

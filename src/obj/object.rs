@@ -1,5 +1,6 @@
 use obj::table::ObjectTable;
 use std::default::Default;
+use std::slice;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -120,14 +121,14 @@ pub enum VTNTriple<'a> {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Object {
-    name: String,
-    vertex_set: VertexSet,
-    texture_vertex_set: TextureVertexSet,
-    normal_vertex_set: NormalVertexSet,
-    group_set: GroupSet,
-    smoothing_group_set: SmoothingGroupSet,
-    element_set: ElementSet,
-    shape_set: ShapeSet,
+    pub name: String,
+    pub vertex_set: VertexSet,
+    pub texture_vertex_set: TextureVertexSet,
+    pub normal_vertex_set: NormalVertexSet,
+    pub group_set: GroupSet,
+    pub smoothing_group_set: SmoothingGroupSet,
+    pub element_set: ElementSet,
+    pub shape_set: ShapeSet,
 }
 
 impl Object {
@@ -262,6 +263,24 @@ impl ObjectSet {
         ObjectSet {
             objects: vec,
         }    
+    }
+
+    pub fn iter(&self) -> ObjectSetIter {
+        ObjectSetIter {
+            inner: self.objects.iter(),
+        }
+    }
+}
+
+pub struct ObjectSetIter<'a> {
+    inner: slice::Iter<'a, Object>,   
+}
+
+impl<'a> Iterator for ObjectSetIter<'a> {
+    type Item = &'a Object;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next()
     }
 }
 
