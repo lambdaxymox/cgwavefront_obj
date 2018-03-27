@@ -988,13 +988,13 @@ mod objectset_tests {
 
         (result, Ok(expected))
     }
-    /*
+
     #[test]
     fn test_parse_object_set1() {
         let (result, expected) = test_case();
         assert_eq!(result, expected);
     }
-    */
+
     #[test]
     fn test_parse_object_set1_tokenwise() {
         let (result_set, expected_set) = test_case();
