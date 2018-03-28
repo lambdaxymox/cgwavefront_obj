@@ -2078,7 +2078,9 @@ fn test_cases(file_path: &str) -> TestSet {
             NormalVertex { i:  0.350498,    j:  0.925312,   k: -0.14474     },
             NormalVertex { i:  0.48559,     j:  0.850653,   k: -0.201474    },
         ])
-        .with_group_set(vec![GroupName::new("Object001")])
+        .with_group_set(vec![
+            GroupName::new("Object001"), GroupName::new("Object002"), GroupName::new("Object003")
+        ])
         .with_shape_set(vec![
             ShapeEntry { element: 1,    groups: vec![1, 2, 3], smoothing_groups: vec![] },
             ShapeEntry { element: 2,    groups: vec![1, 2, 3], smoothing_groups: vec![] },
@@ -3129,6 +3131,7 @@ fn test_parse_object_set() {
     }
 }
 */
+#[test]
 fn test_parse_object_set_should_parse_objects() {
     let tests = test_cases(SAMPLE_DATA);
 
@@ -3155,6 +3158,7 @@ fn test_parse_object_set_should_parse_object_names() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
+        
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.name, expected.name);
         }
@@ -3169,6 +3173,8 @@ fn test_parse_object_set_should_parse_vertices() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            
+            assert_eq!(result.vertex_set.len(), expected.vertex_set.len(), "Length mismatch.");
             for (result_v, expected_v) in 
                 result.vertex_set.iter().zip(expected.vertex_set.iter()) {
                 
@@ -3186,6 +3192,8 @@ fn test_parse_object_set_should_parse_texture_vertices() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            
+            assert_eq!(result.texture_vertex_set.len(), expected.texture_vertex_set.len(), "Length mismatch.");
             for (result_tv, expected_tv) in 
                 result.texture_vertex_set.iter().zip(expected.texture_vertex_set.iter()) {
                 
@@ -3203,9 +3211,12 @@ fn test_parse_object_set_should_parse_normal_vertices() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+
+            assert_eq!(result.normal_vertex_set.len(), expected.normal_vertex_set.len(), "Length mismatch.");
             for (result_nv, expected_nv) in 
                 result.normal_vertex_set.iter().zip(expected.normal_vertex_set.iter()) {
                 
+                assert_eq!(result.vertex_set.len(), expected.vertex_set.len(), "Length mismatch.");
                 assert_eq!(result_nv, expected_nv);
             }
         }
@@ -3220,6 +3231,8 @@ fn test_parse_object_set_should_parse_groups() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+
+            assert_eq!(result.group_set.len(), expected.group_set.len(), "Length mismatch.");
             for (result_g, expected_g) in 
                 result.group_set.iter().zip(expected.group_set.iter()) {
                 
@@ -3237,6 +3250,8 @@ fn test_parse_object_set_should_parse_smoothing_groups() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+
+            assert_eq!(result.smoothing_group_set.len(), expected.smoothing_group_set.len(), "Length mismatch.");
             for (result_sg, expected_sg) in 
                 result.smoothing_group_set.iter().zip(expected.smoothing_group_set.iter()) {
                 
@@ -3254,6 +3269,8 @@ fn test_parse_object_set_should_parse_elements() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+
+            assert_eq!(result.element_set.len(), expected.element_set.len(), "Length mismatch.");
             for (result_elem, expected_elem) in 
                 result.element_set.iter().zip(expected.element_set.iter()) {
                 
@@ -3271,6 +3288,8 @@ fn test_parse_object_set_should_parse_shape_entries() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            
+            assert_eq!(result.shape_set.len(), expected.shape_set.len(), "Length mismatch.");
             for (result_sh, expected_sh) in 
                 result.shape_set.iter().zip(expected.shape_set.iter()) {
                 

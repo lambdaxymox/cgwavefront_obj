@@ -30,6 +30,10 @@ impl<V> ObjectTable<V> {
         self.0.push(item);
     }
 
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
     pub fn as_slice(&self) -> &[V] {
         self.0.as_slice()
     }
