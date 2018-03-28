@@ -5,4 +5,4 @@ The wavefront-obj library is a library for working with Wavefront OBJ files. Wav
 For release, the `wavefront-obj` library has no external dependencies. It requires `rustc` version 1.24 stable or greater to compile, along with a recent version of `cargo`.
 
 # Notes
-* The Wavefront OBJ format does not contain information about how the mesh should be tesselated. All quadrilateral and higher vertex count faces must be either coplanar and convex or coplanar and concave. to get good results with rendering. Otherwise, there might be undredictable results with rendering.
+* The Wavefront OBJ format does not contain information about how the mesh should be tesselated. All quadrilateral and higher vertex count faces must be either coplanar and convex or coplanar and concave to get good results with rendering. Otherwise, there might be undredictable results with rendering.
