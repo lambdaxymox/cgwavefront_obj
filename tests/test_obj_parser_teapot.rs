@@ -252,7 +252,8 @@ fn test_cases(file_path: &str) -> TestSet {
             Vertex { x:  17.5665,  y: -35.6115,  z: -40.4417, w: 1.0 },
             Vertex { x:  39.6184,  y: -22.7202,  z: -39.8954, w: 1.0 },
             Vertex { x:  36.1496,  y: -28.9493,  z: -36.4266, w: 1.0 },
-            Vertex { x:  32.6808,  y: -35.6115,  z: -31.3811, w: 1.0 },
+            Vertex { x:  32.6808,  y: -33.1798,  z: -32.9578, w: 1.0 },
+            Vertex { x:  31.1041,  y: -35.6115,  z: -31.3811, w: 1.0 },
             Vertex { x:  51.2273,  y: -22.7202,  z: -22.5504, w: 1.0 },
             Vertex { x:  46.7203,  y: -28.9493,  z: -20.6327, w: 1.0 },
             Vertex { x:  42.2133,  y: -33.1798,  z: -18.7151, w: 1.0 },
@@ -2103,7 +2104,7 @@ fn test_cases(file_path: &str) -> TestSet {
         ],
     }
 }
-
+/*
 #[test]
 fn test_parse_object_set() {
     let tests = test_cases(SAMPLE_DATA);
@@ -2115,16 +2116,123 @@ fn test_parse_object_set() {
         assert_eq!(result, test.expected);
     }
 }
-
+*/
 #[test]
-fn test_parse_object_set_tokenwise() {
+fn test_parse_object_set_should_parse_vertices() {
     let tests = test_cases(SAMPLE_DATA);
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-            assert_eq!(result, expected);
+            for (result_v, expected_v) in 
+                result.vertex_set.iter().zip(expected.vertex_set.iter()) {
+                
+                assert_eq!(result_v, expected_v);
+            }
+        }
+    }
+}
+
+
+#[test]
+fn test_parse_object_set_should_parse_normal_vertices() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse().unwrap();
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            for (result_nv, expected_nv) in 
+                result.normal_vertex_set.iter().zip(expected.normal_vertex_set.iter()) {
+                
+                assert_eq!(result_nv, expected_nv);
+            }
+        }
+    }
+}
+
+#[test]
+fn test_parse_object_set_should_parse_texture_vertices() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse().unwrap();
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            for (result_tv, expected_tv) in 
+                result.texture_vertex_set.iter().zip(expected.texture_vertex_set.iter()) {
+                
+                assert_eq!(result_tv, expected_tv);
+            }
+        }
+    }
+}
+
+#[test]
+fn test_parse_object_set_should_parse_groups() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse().unwrap();
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            for (result_g, expected_g) in 
+                result.group_set.iter().zip(expected.group_set.iter()) {
+                
+                assert_eq!(result_g, expected_g);
+            }
+        }
+    }
+}
+
+#[test]
+fn test_parse_object_set_should_parse_smoothing_groups() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse().unwrap();
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            for (result_sg, expected_sg) in 
+                result.smoothing_group_set.iter().zip(expected.smoothing_group_set.iter()) {
+                
+                assert_eq!(result_sg, expected_sg);
+            }
+        }
+    }
+}
+
+#[test]
+fn test_parse_object_set_should_parse_elements() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse().unwrap();
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            for (result_elem, expected_elem) in 
+                result.element_set.iter().zip(expected.element_set.iter()) {
+                
+                assert_eq!(result_elem, expected_elem);
+            }
+        }
+    }
+}
+
+#[test]
+fn test_parse_object_set_should_parse_shape_entries() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse().unwrap();
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            for (result_sh, expected_sh) in 
+                result.shape_set.iter().zip(expected.shape_set.iter()) {
+                
+                assert_eq!(result_sh, expected_sh);
+            }
         }
     }
 }
