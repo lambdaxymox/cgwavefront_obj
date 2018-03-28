@@ -1,42 +1,55 @@
 use std::iter;
 use std::str;
 
-
-/// The return type from the lexer.
-pub type Token = String;
  
 #[inline]
-fn is_whitespace(ch: u8) -> bool {
-    ch == b' ' || ch == b'\\' || ch == b'\t'
+fn is_whitespace(ch: char) -> bool {
+    ch == ' ' || ch == '\\' || ch == '\t'
 }
 
 #[inline]
-fn is_newline(ch: u8) -> bool {
-    ch == b'\n' || ch == b'\r'
+fn is_newline(ch: char) -> bool {
+    ch == '\n' || ch == '\r'
 }
 
 #[inline]
-fn is_whitespace_or_newline(ch: u8) -> bool {
+fn is_whitespace_or_newline(ch: char) -> bool {
     is_whitespace(ch) || is_newline(ch)
 }
 
+/// The return type from the lexer.
+#[derive(Clone, Debug)]
+pub struct Token {
+    pub line_number: usize,
+    pub content: String,
+}
+
+impl Token {
+    fn new(line_number: usize, content: String) -> Token {
+        Token {
+            line_number: line_number,
+            content: content,
+        }
+    }
+}
+
 ///
-/// A OBJ file lexer tokenizes an input byte stream.
+/// A OBJ file lexer tokenizes an input character stream.
 ///
 #[derive(Clone)]
-pub struct Lexer<'a> {
+pub struct Lexer<Stream> where Stream: Iterator<Item=char> {
     /// The current line position in the token stream.
     current_line_number: usize,
     /// The input stream.
-    stream: iter::Peekable<str::Bytes<'a>>,
+    stream: iter::Peekable<Stream>,
 }
 
-impl<'a> Lexer<'a> {
+impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
     /// Create a new lexer.
-    pub fn new(stream: &str) -> Lexer {
+    pub fn new(stream: Stream) -> Lexer<Stream> {
         Lexer {
             current_line_number: 1,
-            stream: stream.bytes().peekable(),
+            stream: stream.peekable(),
         }
     }
 
@@ -44,7 +57,7 @@ impl<'a> Lexer<'a> {
     /// The function `peek_u8` looks at the character at the current position
     /// in the byte stream without advancing the stream.
     #[inline]
-    fn peek_byte(&mut self) -> Option<u8> {
+    fn peek_char(&mut self) -> Option<char> {
         self.stream.peek().map(|&x| x)
     }
 
@@ -66,9 +79,9 @@ impl<'a> Lexer<'a> {
     /// without returning it.
     ///
     fn skip_comment(&mut self) -> usize {
-        let mut skipped: usize = 0;
+        let mut skipped = 0;
         loop {
-            match self.peek_byte() {
+            match self.peek_char() {
                 Some(ch) => {
                     if is_newline(ch) {
                         break;
@@ -91,9 +104,9 @@ impl<'a> Lexer<'a> {
     /// characters without returning them.
     ///
     fn skip_whitespace(&mut self) -> usize {
-        let mut skipped: usize = 0;
+        let mut skipped = 0;
         loop {
-            match self.peek_byte() {
+            match self.peek_char() {
                 Some(ch) if is_whitespace(ch) => {
                     self.advance();
                     skipped += 1;
@@ -116,10 +129,10 @@ impl<'a> Lexer<'a> {
 
         // Count the number of bytes consumed for a token.
         let mut consumed: usize = 0;
-        let mut token: Vec<u8> = Vec::new();
+        let mut token: String = String::new();
         loop {
-            match self.peek_byte() {
-                Some(ch) if ch == b'#' => {
+            match self.peek_char() {
+                Some(ch) if ch == '#' => {
                     self.skip_comment();
                 }
                 Some(ch) if is_whitespace_or_newline(ch) => {
@@ -155,13 +168,7 @@ impl<'a> Lexer<'a> {
         if consumed != 0 {
             // We consumed a token.
             debug_assert!(token.len() != 0);
-            match String::from_utf8(token) {
-                Ok(st) => Some(st),
-                Err(_) => panic!(
-                    "Lexical Error: Found invalid UTF-8 token on line {}.",
-                    self.current_line_number
-                )
-            }
+            Some(Token::new(self.current_line_number, token))
         } else {
             debug_assert!(token.len() == 0);
             None
@@ -169,13 +176,14 @@ impl<'a> Lexer<'a> {
     }
 }
 
-impl<'a> Iterator for Lexer<'a> {
+impl<Stream> Iterator for Lexer<Stream> where Stream: Iterator<Item=char> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.next_token()
     }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -409,8 +417,8 @@ mod tests {
     #[test]
     fn test_lexer() {
         for test_case in test_cases().iter() {
-            let lexer = Lexer::new(&test_case.data);
-            let result = lexer.collect::<Vec<String>>();
+            let lexer = Lexer::new(test_case.data.chars());
+            let result = lexer.map(|token| token.content).collect::<Vec<String>>();
             assert_eq!(result, test_case.expected);
         }
     }
@@ -418,11 +426,11 @@ mod tests {
     #[test]
     fn test_lexer_tokenwise() {
         for test_case in test_cases().iter() {
-            let lexer = Lexer::new(&test_case.data);
+            let lexer = Lexer::new(test_case.data.chars());
         
             for (result, expected) in lexer.zip(test_case.expected.iter()) {
                 assert_eq!(
-                    &result, expected,
+                    &result.content, expected,
                     "result = {:?}; expected = {:?}", result, expected
                 );
             }
