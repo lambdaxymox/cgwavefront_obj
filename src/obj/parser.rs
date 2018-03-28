@@ -5,6 +5,8 @@ use obj::object::{
 };
 use lexer::Lexer;
 use std::iter;
+use std::error;
+use std::fmt;
 
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -19,6 +21,18 @@ impl ParseError {
             line_number: line_number,
             message: message,
         }
+    }
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "Parse error at line {}: {}", self.line_number, self.message)
+    }
+}
+
+impl error::Error for ParseError {
+    fn description(&self) -> &str {
+        &self.message
     }
 }
 
