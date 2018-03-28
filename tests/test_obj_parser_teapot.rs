@@ -3181,7 +3181,7 @@ fn test_cases(file_path: &str) -> TestSet {
         ],
     }
 }
-/*
+
 #[test]
 fn test_parse_object_set() {
     let tests = test_cases(SAMPLE_DATA);
@@ -3193,7 +3193,7 @@ fn test_parse_object_set() {
         assert_eq!(result, test.expected);
     }
 }
-*/
+
 #[test]
 fn test_parse_object_set_should_parse_objects() {
     let tests = test_cases(SAMPLE_DATA);
