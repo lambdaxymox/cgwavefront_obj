@@ -3129,6 +3129,25 @@ fn test_parse_object_set() {
     }
 }
 */
+fn test_parse_object_set_should_parse_objects() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse().unwrap();
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+            assert_eq!(result.name, expected.name);
+            assert_eq!(result.vertex_set, expected.vertex_set);
+            assert_eq!(result.texture_vertex_set, expected.texture_vertex_set);
+            assert_eq!(result.normal_vertex_set, expected.normal_vertex_set);
+            assert_eq!(result.group_set, expected.group_set);
+            assert_eq!(result.smoothing_group_set, expected.smoothing_group_set);
+            assert_eq!(result.element_set, expected.element_set);
+            assert_eq!(result.shape_set, expected.shape_set);
+        }
+    }
+}
+
 #[test]
 fn test_parse_object_set_should_parse_object_names() {
     let tests = test_cases(SAMPLE_DATA);
