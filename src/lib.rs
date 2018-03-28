@@ -1,5 +1,5 @@
 #![crate_type = "lib"]
 
 mod lexer;
-mod obj;
+pub mod obj;
 

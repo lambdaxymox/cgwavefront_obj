@@ -1,3 +1,7 @@
-mod object;
 mod table;
-mod parser;
+
+pub mod object;
+pub mod parser;
+
+pub use obj::object::ObjectSet;
+pub use obj::parser::Parser;

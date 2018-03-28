@@ -8,7 +8,7 @@ use std::iter;
 
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct ParseError {
+pub struct ParseError {
     line_number: usize,
     message: String,
 }
@@ -22,13 +22,13 @@ impl ParseError {
     }
 }
 
-struct Parser<'a> {
+pub struct Parser<'a> {
     line_number: usize,
     lexer: iter::Peekable<Lexer<'a>>,
 }
 
 impl<'a> Parser<'a> {
-    fn new(input: &'a str) -> Parser<'a> {
+    pub fn new(input: &'a str) -> Parser<'a> {
         Parser {
             line_number: 1,
             lexer: Lexer::new(input).peekable(),
@@ -524,7 +524,7 @@ impl<'a> Parser<'a> {
         Ok(builder.build())
     }
 
-    fn parse(&mut self) -> Result<ObjectSet, ParseError> {
+    pub fn parse(&mut self) -> Result<ObjectSet, ParseError> {
         self.parse_object().map(|obj| ObjectSet::new(vec![obj]))
     }
 }
