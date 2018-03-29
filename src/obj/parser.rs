@@ -266,6 +266,25 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         self.error(format!("Expected `vertex/texture/normal` index but got `{}`", st))
     }
 
+    fn parse_multiple_vtn_indices(
+        &mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
+
+        let mut indices_parsed = 0;
+        loop {
+            match self.parse_vtn_index() {
+                Ok(vtn_index) => {
+                    vtn_indices.push(vtn_index);
+                    indices_parsed += 1;
+                }
+                Err(_) => {
+                    break;
+                }
+            }
+        }
+
+        Ok(indices_parsed)
+    }
+
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("p"));
 
@@ -296,16 +315,8 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut vtn_indices = Vec::new();
         vtn_indices.push(current_vtn_index);
         vtn_indices.push(next_vtn_index);
-        loop {
-            match self.parse_vtn_index() {
-                Ok(vtn_index) => {
-                    vtn_indices.push(vtn_index);
-                },
-                Err(_) => {
-                    break;
-                }
-            }
-        }
+        
+        self.parse_multiple_vtn_indices(&mut vtn_indices)?;
 
         // Verify that each VTN index has the same type and if of a valid form.
         for i in 1..vtn_indices.len() {
@@ -327,17 +338,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("f"));
 
+        
         let mut vtn_indices = Vec::new();
-        loop {
-            match self.parse_vtn_index() {
-                Ok(vtn_index) => {
-                    vtn_indices.push(vtn_index);
-                },
-                Err(_) => {
-                    break;
-                }
-            }
-        }
+        self.parse_multiple_vtn_indices(&mut vtn_indices)?;
 
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
@@ -355,7 +358,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
             }
         }
 
-        // Triangulate the polygon with a triangle fan.
+        // Triangulate the polygon with a triangle fan. Note that the OBJ specification
+        // assumes that polygons are coplanar, and consequently the parser does not check
+        // this. It is up to the model creator to ensure this.
         let vertex0 = vtn_indices[0];
         for i in 0..vtn_indices.len()-2 {
             elements.push(Element::Face(vertex0, vtn_indices[i+1], vtn_indices[i+2]));
