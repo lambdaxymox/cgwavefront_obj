@@ -497,7 +497,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 }
                 None => {
                     // At the end of file, collect any remaining shapes.
-                    println!("{:?}", (min_element_index, max_element_index, min_group_index, max_group_index));
                     shape_table.push(
                         (min_element_index, max_element_index, min_group_index, max_group_index)
                     );
