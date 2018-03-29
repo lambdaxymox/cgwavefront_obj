@@ -66,6 +66,10 @@ impl GroupName {
     pub fn new(name: &str) -> GroupName { GroupName(String::from(name)) }
 }
 
+impl Default for GroupName {
+    fn default() -> GroupName { GroupName::new("default") }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroupName(u32);
 

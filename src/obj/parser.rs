@@ -403,7 +403,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     )
                 }
             }
-            Err(_) => self.error(format!("Parser error: Invalid smoothing group name.")),
+            Err(_) => { 
+                self.error(format!("Parser error: Invalid smoothing group name."))
+            }
         }
     }
 
@@ -446,6 +448,8 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         //let mut smoothing_groups = vec![];
         let mut min_smoothing_group_index = 1;
         let mut max_smoothing_group_index = 1;
+
+        let mut shape_table = vec![];
         loop {
             match self.peek().as_ref().map(|st| &st[..]) {
                 Some("o")  => { 
@@ -453,12 +457,10 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                         self.parse_object_name().unwrap_or(String::from(""));
                 }
                 Some("g")  => {            
-                    // Fill in the shape entries for the current group.
-                    self.parse_shape_entries(
-                        &mut shape_entries,
-                        min_element_index, max_element_index,
-                        min_group_index, max_group_index, 
-                        min_smoothing_group_index, max_smoothing_group_index
+                    // Save the shape entry ranges for the current group.
+                    println!("{:?}", (min_element_index, max_element_index, min_group_index, max_group_index));
+                    shape_table.push(
+                        (min_element_index, max_element_index, min_group_index, max_group_index)
                     );
 
                     // Fetch the new groups.
@@ -495,12 +497,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 }
                 None => {
                     // At the end of file, collect any remaining shapes.
-                    // Fill in the shape entries for the current group.
-                    self.parse_shape_entries(
-                        &mut shape_entries,
-                        min_element_index, max_element_index,
-                        min_group_index, max_group_index, 
-                        min_smoothing_group_index, max_smoothing_group_index
+                    println!("{:?}", (min_element_index, max_element_index, min_group_index, max_group_index));
+                    shape_table.push(
+                        (min_element_index, max_element_index, min_group_index, max_group_index)
                     );
                     min_element_index = max_element_index;
                     break;
@@ -510,6 +509,15 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         if groups.is_empty() {
             groups.push(GroupName::new("default"));
+        }
+
+        // At the end of file, collect any remaining shapes.
+        // Fill in the shape entries for the current group.
+        for &(min_elem, max_elem, min_group, max_group) in shape_table.iter() {
+            self.parse_shape_entries(
+                &mut shape_entries, min_elem, max_elem, min_group, max_group, 
+                min_smoothing_group_index, max_smoothing_group_index
+            );
         }
 
         let mut builder = ObjectBuilder::new(vertices, elements);
