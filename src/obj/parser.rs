@@ -266,8 +266,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         self.error(format!("Expected `vertex/texture/normal` index but got `{}`", st))
     }
 
-    fn parse_multiple_vtn_indices(
-        &mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
+    fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
 
         let mut indices_parsed = 0;
         loop {
@@ -316,7 +315,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         vtn_indices.push(current_vtn_index);
         vtn_indices.push(next_vtn_index);
         
-        self.parse_multiple_vtn_indices(&mut vtn_indices)?;
+        self.parse_vtn_indices(&mut vtn_indices)?;
 
         // Verify that each VTN index has the same type and if of a valid form.
         for i in 1..vtn_indices.len() {
@@ -340,7 +339,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         
         let mut vtn_indices = Vec::new();
-        self.parse_multiple_vtn_indices(&mut vtn_indices)?;
+        self.parse_vtn_indices(&mut vtn_indices)?;
 
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
