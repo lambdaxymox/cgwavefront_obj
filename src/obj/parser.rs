@@ -245,7 +245,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         let st = try!(self.next_string());
-        
+
         match self.parse_vn(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
@@ -310,7 +310,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("l"));
 
-        let mut vtn_indices = Vec::new();
+        let mut vtn_indices = vec![];
         vtn_indices.push(try!(self.parse_vtn_index()));
         vtn_indices.push(try!(self.parse_vtn_index()));
         self.parse_vtn_indices(&mut vtn_indices)?;
@@ -335,7 +335,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("f"));
         
-        let mut vtn_indices = Vec::new();
+        let mut vtn_indices = vec![];
         self.parse_vtn_indices(&mut vtn_indices)?;
 
         // Check that there are enough vtn indices.
@@ -714,7 +714,7 @@ mod element_tests {
     #[test]
     fn test_parse_point1() {
         let mut parser = super::Parser::new("p 1 2 3 4 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Point(VTNIndex::V(1)), Element::Point(VTNIndex::V(2)),
             Element::Point(VTNIndex::V(3)), Element::Point(VTNIndex::V(4)),
@@ -726,14 +726,14 @@ mod element_tests {
     #[test]
     fn test_parse_point2() {
         let mut parser = super::Parser::new("p 1 1/2 3 4/5".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         assert!(parser.parse_elements(&mut result).is_err());
     }
 
     #[test]
     fn test_parse_line1() {
         let mut parser = super::Parser::new("l 297 38 118 108 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Line(VTNIndex::V(297), VTNIndex::V(38)), 
             Element::Line(VTNIndex::V(38),  VTNIndex::V(118)),
@@ -746,7 +746,7 @@ mod element_tests {
     #[test]
     fn test_parse_line2() {
         let mut parser = super::Parser::new("l 297/38 118/108 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
         ];
@@ -757,7 +757,7 @@ mod element_tests {
     #[test]
     fn test_parse_line3() {
         let mut parser = super::Parser::new("l 297/38 118/108 324/398 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
             Element::Line(VTNIndex::VT(118, 108), VTNIndex::VT(324, 398)),
@@ -769,21 +769,21 @@ mod element_tests {
     #[test]
     fn test_parse_line4() {
         let mut parser = super::Parser::new("l 297/38 118 324 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         assert!(parser.parse_elements(&mut result).is_err());
     }
 
     #[test]
     fn test_parse_line5() {
         let mut parser = super::Parser::new("l 297 118/108 324/398 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         assert!(parser.parse_elements(&mut result).is_err());
     }
 
     #[test]
     fn test_parse_face1() {
         let mut parser = super::Parser::new("f 297 118 108\n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
         ];
@@ -794,7 +794,7 @@ mod element_tests {
     #[test]
     fn test_parse_face2() {
         let mut parser = super::Parser::new("f 297 118 108 324\n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
             Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
@@ -806,7 +806,7 @@ mod element_tests {
     #[test]
     fn test_parse_face3() {
         let mut parser = super::Parser::new("f 297 118 108 324 398 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
             Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
@@ -819,7 +819,7 @@ mod element_tests {
     #[test]
     fn test_parse_face4() {
         let mut parser = super::Parser::new("f 297 118 \n".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         assert!(parser.parse_face(&mut result).is_err());
     }
 
@@ -828,7 +828,7 @@ mod element_tests {
         let mut parser = super::Parser::new(
             "f 34184//34184 34088//34088 34079//34079 34084//34084 34091//34091 34076//34076\n".chars()
         );
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![
             Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34088,34088), VTNIndex::VN(34079,34079)),
             Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34079,34079), VTNIndex::VN(34084,34084)),
@@ -847,7 +847,7 @@ mod group_tests {
     #[test]
     fn parse_group_name1() {
         let mut parser = super::Parser::new("g group".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let expected = vec![GroupName::new("group")];
         let parsed = parser.parse_groups(&mut result);
 
@@ -858,7 +858,7 @@ mod group_tests {
     #[test]
     fn parse_group_name2() {
         let mut parser = super::Parser::new("g group1 group2 group3".chars());
-        let mut result = Vec::new();
+        let mut result = vec![];
         let parsed = parser.parse_groups(&mut result);
         let expected = vec![
             GroupName::new("group1"), GroupName::new("group2"), GroupName::new("group3")
