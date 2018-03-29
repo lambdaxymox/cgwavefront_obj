@@ -458,7 +458,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 }
                 Some("g")  => {            
                     // Save the shape entry ranges for the current group.
-                    println!("{:?}", (min_element_index, max_element_index, min_group_index, max_group_index));
                     shape_table.push(
                         (min_element_index, max_element_index, min_group_index, max_group_index)
                     );
