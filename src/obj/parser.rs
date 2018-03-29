@@ -171,6 +171,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 try!(self.expect("o"));
                 let object_name = self.next_string();
                 try!(self.skip_one_or_more_newlines());
+                
                 object_name
             }
             _ => Ok(String::from(""))
@@ -429,8 +430,13 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    fn parse_object(&mut self) -> Result<Object, ParseError> {
-        let mut current_object_name = String::from("");
+    fn parse_object(&mut self,
+        min_vertex_index:  &mut usize,  max_vertex_index:  &mut usize,
+        min_texture_index: &mut usize,  max_texture_index: &mut usize,
+        min_normal_index:  &mut usize,  max_normal_index:  &mut usize
+    ) -> Result<Object, ParseError> {
+        
+        let object_name = try!(self.parse_object_name());
 
         let mut vertices = vec![];
         let mut texture_vertices = vec![];
@@ -444,18 +450,14 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut min_group_index = 1;
         let mut max_group_index = 1;
         
-        let mut shape_entries = vec![];
-        //let mut smoothing_groups = vec![];
+        let mut smoothing_groups = vec![];
         let mut min_smoothing_group_index = 1;
         let mut max_smoothing_group_index = 1;
 
+        let mut shape_entries = vec![];
         let mut shape_table = vec![];
         loop {
             match self.peek().as_ref().map(|st| &st[..]) {
-                Some("o")  => { 
-                    current_object_name = 
-                        self.parse_object_name().unwrap_or(String::from(""));
-                }
                 Some("g")  => {            
                     // Save the shape entry ranges for the current group.
                     shape_table.push(
@@ -489,12 +491,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 Some("\n") => { 
                     try!(self.skip_one_or_more_newlines());
                 }
-                Some(other_st) => {
-                    return self.error(format!(
-                        "Parse error: Invalid element declaration in obj file. Got `{}`", other_st
-                    ));
-                }
-                None => {
+                Some("o") | None => {
                     // At the end of file, collect any remaining shapes.
                     shape_table.push(
                         (min_element_index, max_element_index, min_group_index, max_group_index)
@@ -502,11 +499,20 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     min_element_index = max_element_index;
                     break;
                 }
+                Some(other_st) => {
+                    return self.error(format!(
+                        "Parse error: Invalid element declaration in obj file. Got `{}`", other_st
+                    ));
+                }
             }
         }
 
         if groups.is_empty() {
             groups.push(GroupName::new("default"));
+        }
+
+        if smoothing_groups.is_empty() {
+            smoothing_groups.push(0);
         }
 
         // At the end of file, collect any remaining shapes.
@@ -519,7 +525,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
 
         let mut builder = ObjectBuilder::new(vertices, elements);
-        builder.with_name(current_object_name)
+        builder.with_name(object_name)
                .with_texture_vertex_set(texture_vertices)
                .with_normal_vertex_set(normal_vertices)
                .with_group_set(groups)
@@ -528,8 +534,40 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         Ok(builder.build())
     }
 
+    fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
+        let mut result = Vec::new();
+
+        let mut min_vertex_index = 1;
+        let mut max_vertex_index = 1;
+        let mut min_tex_index    = 1;
+        let mut max_tex_index    = 1;
+        let mut min_normal_index = 1;
+        let mut max_normal_index = 1;
+
+        loop {
+            self.skip_zero_or_more_newlines();
+            match self.peek().as_ref().map(|st| &st[..]) {
+                Some(_) => {
+                    result.push(try!(self.parse_object(
+                        &mut min_vertex_index,
+                        &mut max_vertex_index,
+                        &mut min_tex_index,
+                        &mut max_tex_index,
+                        &mut min_normal_index,
+                        &mut max_normal_index
+                    )));
+                }
+                None => break
+            }
+        }
+
+        self.skip_zero_or_more_newlines();
+
+        Ok(result)
+    }
+
     pub fn parse(&mut self) -> Result<ObjectSet, ParseError> {
-        self.parse_object().map(|obj| ObjectSet::new(vec![obj]))
+        self.parse_objects().map(|objs| ObjectSet::new(objs))
     }
 }
 
