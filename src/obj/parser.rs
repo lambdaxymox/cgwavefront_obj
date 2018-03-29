@@ -267,7 +267,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
-
         let mut indices_parsed = 0;
         loop {
             match self.parse_vtn_index() {
@@ -298,7 +297,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                         elements.push(Element::Point(VTNIndex::V(v_index)));
                         elements_parsed += 1;
                     }
-                    Err(_) => return self.error(format!("Expected integer but got `{}`.", st))
+                    Err(_) => {
+                        return self.error(format!("Expected integer but got `{}`.", st))
+                    }
                 }
             }
         }
@@ -309,12 +310,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("l"));
 
-        let current_vtn_index = try!(self.parse_vtn_index());
-        let next_vtn_index = try!(self.parse_vtn_index());
         let mut vtn_indices = Vec::new();
-        vtn_indices.push(current_vtn_index);
-        vtn_indices.push(next_vtn_index);
-        
+        vtn_indices.push(try!(self.parse_vtn_index()));
+        vtn_indices.push(try!(self.parse_vtn_index()));
         self.parse_vtn_indices(&mut vtn_indices)?;
 
         // Verify that each VTN index has the same type and if of a valid form.
@@ -336,7 +334,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
         try!(self.expect("f"));
-
         
         let mut vtn_indices = Vec::new();
         self.parse_vtn_indices(&mut vtn_indices)?;
@@ -379,16 +376,16 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
     fn parse_groups(&mut self, groups: &mut Vec<GroupName>) -> Result<u32, ParseError> {
         try!(self.expect("g"));
-        let mut parsed = 0;
+        let mut groups_parsed = 0;
         loop {
             match self.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(name) => groups.push(GroupName::new(name)),
             }
-            parsed += 1;
+            groups_parsed += 1;
         }
 
-        Ok(parsed)
+        Ok(groups_parsed)
     }
 
     fn parse_smoothing_group(&mut self) -> Result<SmoothingGroupName, ParseError> {
@@ -452,10 +449,8 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         loop {
             match self.peek().as_ref().map(|st| &st[..]) {
                 Some("o")  => { 
-                    current_object_name = match self.parse_object_name() {
-                        Ok(name) => name,
-                        Err(_) => String::from(""),
-                    };
+                    current_object_name = 
+                        self.parse_object_name().unwrap_or(String::from(""));
                 }
                 Some("g")  => {            
                     // Fill in the shape entries for the current group.
@@ -467,10 +462,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     );
 
                     // Fetch the new groups.
-                    let amount_parsed = match self.parse_groups(&mut groups) {
-                        Ok(got) => got,
-                        Err(err) => return Err(err)
-                    };
+                    let amount_parsed = try!(self.parse_groups(&mut groups));
                     // Update range of group indices.
                     min_group_index = max_group_index;
                     max_group_index += amount_parsed;
@@ -478,31 +470,19 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     min_element_index = max_element_index;
                 }
                 Some("p") | Some("l") | Some("f") => {
-                    let amount_parsed = match self.parse_elements(&mut elements) {
-                        Ok(got) => got,
-                        Err(err) => return Err(err)
-                    };
+                    let amount_parsed = try!(self.parse_elements(&mut elements));
                     max_element_index += amount_parsed;
                 }
                 Some("v")  => {
-                    let vertex = match self.parse_vertex() {
-                        Ok(got) => got,
-                        Err(err) => return Err(err),
-                    };
+                    let vertex = try!(self.parse_vertex());
                     vertices.push(vertex);
                 }
                 Some("vt") => {
-                    let texture_vertex = match self.parse_texture_vertex() {
-                        Ok(got) => got,
-                        Err(err) => return Err(err),
-                    };
+                    let texture_vertex = try!(self.parse_texture_vertex());
                     texture_vertices.push(texture_vertex);
                 }
                 Some("vn") => {
-                    let normal_vertex = match self.parse_normal_vertex() {
-                        Ok(got) => got,
-                        Err(err) => return Err(err),
-                    };
+                    let normal_vertex = try!(self.parse_normal_vertex());
                     normal_vertices.push(normal_vertex);
                 }
                 Some("\n") => { 
