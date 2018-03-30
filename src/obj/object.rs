@@ -1,4 +1,3 @@
-use obj::table::ObjectTable;
 use std::default::Default;
 use std::slice;
 
@@ -91,13 +90,13 @@ type GroupIndex = u32;
 type ShapeIndex = u32;
 type SmoothingGroupIndex = u32;
 
-pub type VertexSet = ObjectTable<Vertex>;
-pub type TextureVertexSet = ObjectTable<TextureVertex>;
-pub type NormalVertexSet = ObjectTable<NormalVertex>;
-pub type ElementSet = ObjectTable<Element>;
-pub type ShapeSet = ObjectTable<ShapeEntry>;
-pub type GroupSet = ObjectTable<GroupName>;
-pub type SmoothingGroupSet = ObjectTable<SmoothingGroup>;
+pub type VertexSet = Vec<Vertex>;
+pub type TextureVertexSet = Vec<TextureVertex>;
+pub type NormalVertexSet = Vec<NormalVertex>;
+pub type ElementSet = Vec<Element>;
+pub type ShapeSet = Vec<ShapeEntry>;
+pub type GroupSet = Vec<GroupName>;
+pub type SmoothingGroupSet = Vec<SmoothingGroup>;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VTNIndex { 
@@ -307,12 +306,12 @@ impl ObjectBuilder {
     pub fn new(vertex_set: Vec<Vertex>, element_set: Vec<Element>) -> ObjectBuilder {
         ObjectBuilder {
             name: None,
-            vertex_set: ObjectTable::from(vertex_set),
+            vertex_set: Vec::from(vertex_set),
             texture_vertex_set: None,
             normal_vertex_set: None,
             group_set: None,
             smoothing_group_set: None,
-            element_set: ObjectTable::from(element_set),
+            element_set: Vec::from(element_set),
             shape_set: None,
         }
     }
@@ -323,27 +322,27 @@ impl ObjectBuilder {
     }
 
     pub fn with_texture_vertex_set(&mut self, texture_vertex_set: Vec<TextureVertex>) -> &mut Self {
-        self.texture_vertex_set = Some(ObjectTable::from(texture_vertex_set));
+        self.texture_vertex_set = Some(Vec::from(texture_vertex_set));
         self
     }
 
     pub fn with_normal_vertex_set(&mut self, normal_vertex_set: Vec<NormalVertex>) -> &mut Self {
-        self.normal_vertex_set = Some(ObjectTable::from(normal_vertex_set));
+        self.normal_vertex_set = Some(Vec::from(normal_vertex_set));
         self
     }
 
     pub fn with_group_set(&mut self, group_set: Vec<GroupName>) -> &mut Self {
-        self.group_set = Some(ObjectTable::from(group_set));
+        self.group_set = Some(Vec::from(group_set));
         self
     }
 
     pub fn with_smoothing_group_set(&mut self, smoothing_group_set: Vec<SmoothingGroup>) -> &mut Self {
-        self.smoothing_group_set = Some(ObjectTable::from(smoothing_group_set));
+        self.smoothing_group_set = Some(Vec::from(smoothing_group_set));
         self
     }
 
     pub fn with_shape_set(&mut self, shape_set: Vec<ShapeEntry>) -> &mut Self {
-        self.shape_set = Some(ObjectTable::from(shape_set));
+        self.shape_set = Some(Vec::from(shape_set));
         self
     }
 
@@ -354,7 +353,7 @@ impl ObjectBuilder {
             texture_vertex_set: self.texture_vertex_set.unwrap_or(Default::default()),
             normal_vertex_set: self.normal_vertex_set.unwrap_or(Default::default()),
             group_set: self.group_set.unwrap_or(Default::default()),
-            smoothing_group_set: self.smoothing_group_set.unwrap_or(ObjectTable::from(vec![Default::default()])),
+            smoothing_group_set: self.smoothing_group_set.unwrap_or(Vec::from(vec![Default::default()])),
             element_set: self.element_set,
             shape_set: self.shape_set.unwrap_or(Default::default()),
         }

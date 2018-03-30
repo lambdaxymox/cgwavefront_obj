@@ -1,5 +1,3 @@
-mod table;
-
 pub mod object;
 pub mod parser;
 
