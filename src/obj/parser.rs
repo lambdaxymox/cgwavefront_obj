@@ -380,10 +380,12 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut groups_parsed = 0;
         loop {
             match slice_res(&self.next_string()) {
-                Ok("\n") | Err(_) => break,
-                Ok(name) => groups.push(GroupName::new(name)),
+                Ok(name) if name != "\n" => {
+                    groups.push(GroupName::new(name));
+                    groups_parsed += 1;
+                }
+                _ => break,
             }
-            groups_parsed += 1;
         }
 
         Ok(groups_parsed)
