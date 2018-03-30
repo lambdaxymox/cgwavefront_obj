@@ -80,15 +80,12 @@ impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
     fn skip_comment(&mut self) -> usize {
         let mut skipped = 0;
         loop {
-            if let Some(ch) = self.peek_char() {
-                if !is_newline(ch) {
+            match self.peek_char() { 
+                Some(ch) if !is_newline(ch) => {
                     self.advance();
-                    skipped += 1; 
-                } else {
-                    break; 
+                    skipped += 1;
                 }
-            } else {
-                break;
+                _ => break,
             }
         }
 
