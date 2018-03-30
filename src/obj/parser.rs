@@ -1,7 +1,7 @@
 use obj::object::{
     ObjectSet, Object, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex,
-    GroupName, SmoothingGroupName, Element, VTNIndex, ShapeEntry,
+    GroupName, SmoothingGroup, Element, VTNIndex, ShapeEntry,
 };
 use lexer::Lexer;
 use std::iter;
@@ -392,15 +392,15 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_smoothing_group(&mut self, 
-        smoothing_groups: &mut Vec<SmoothingGroupName>
+        smoothing_groups: &mut Vec<SmoothingGroup>
     ) -> Result<u32, ParseError> {
         
         try!(self.expect("s"));
         if let Ok(name) = self.next_string() {
             if name == "off" {
-                smoothing_groups.push(SmoothingGroupName::new(0));
+                smoothing_groups.push(SmoothingGroup::new(0));
             } else if let Ok(number) = name.parse::<u32>() {
-                smoothing_groups.push(SmoothingGroupName::new(number));
+                smoothing_groups.push(SmoothingGroup::new(number));
             } else {
                 return self.error(format!(
                     "Expected integer or `off` for smoothing group name but got `{}`", name)
@@ -549,7 +549,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
 
         if smoothing_groups.is_empty() {
-            smoothing_groups.push(SmoothingGroupName::new(0));
+            smoothing_groups.push(SmoothingGroup::new(0));
         }
 
         // At the end of file, collect any remaining shapes.
@@ -954,14 +954,14 @@ mod group_tests {
 
 #[cfg(test)]
 mod smoothing_group_tests {
-    use obj::object::SmoothingGroupName;
+    use obj::object::SmoothingGroup;
 
     #[test]
     fn test_smoothing_group_name1() {
         let mut parser = super::Parser::new("s off".chars());
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
-        let expected = vec![SmoothingGroupName::new(0)];
+        let expected = vec![SmoothingGroup::new(0)];
 
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
@@ -972,7 +972,7 @@ mod smoothing_group_tests {
         let mut parser = super::Parser::new("s 0".chars());
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
-        let expected = vec![SmoothingGroupName::new(0)];
+        let expected = vec![SmoothingGroup::new(0)];
         
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
@@ -983,7 +983,7 @@ mod smoothing_group_tests {
         let mut parser = super::Parser::new("s 3434".chars());
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
-        let expected = vec![SmoothingGroupName::new(3434)];
+        let expected = vec![SmoothingGroup::new(3434)];
         
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
@@ -995,7 +995,7 @@ mod objectset_tests {
     use obj::object::{
         ObjectSet, ObjectBuilder,
         Vertex, NormalVertex, Element, VTNIndex, 
-        GroupName, SmoothingGroupName, ShapeEntry,
+        GroupName, SmoothingGroup, ShapeEntry,
     };
 
     fn test_case() -> (Result<ObjectSet, super::ParseError>, Result<ObjectSet, super::ParseError>){
@@ -1068,7 +1068,7 @@ mod objectset_tests {
             NormalVertex { i: -1.0, j:  0.0, k:  0.0 },
         ])
         .with_group_set(vec![GroupName::new("cube")])
-        .with_smoothing_group_set(vec![SmoothingGroupName::new(0)])
+        .with_smoothing_group_set(vec![SmoothingGroup::new(0)])
         .with_shape_set(vec![
             ShapeEntry { element: 1,  groups: vec![1], smoothing_groups: vec![1] },
             ShapeEntry { element: 2,  groups: vec![1], smoothing_groups: vec![1] },

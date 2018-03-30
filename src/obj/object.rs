@@ -56,7 +56,7 @@ impl ShapeEntry {
 pub struct Shape {
     element: Element,
     groups: Vec<GroupName>,
-    smoothing_groups: Vec<SmoothingGroupName>,
+    smoothing_groups: Vec<SmoothingGroup>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -71,16 +71,16 @@ impl Default for GroupName {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SmoothingGroupName(u32);
+pub struct SmoothingGroup(u32);
 
-impl SmoothingGroupName {
-    pub fn new(name: u32) -> SmoothingGroupName { 
-        SmoothingGroupName(name)
+impl SmoothingGroup {
+    pub fn new(name: u32) -> SmoothingGroup { 
+        SmoothingGroup(name)
     }
 }
 
-impl Default for SmoothingGroupName {
-    fn default() -> SmoothingGroupName { SmoothingGroupName::new(0) }
+impl Default for SmoothingGroup {
+    fn default() -> SmoothingGroup { SmoothingGroup::new(0) }
 }
 
 type ElementIndex = u32;
@@ -97,7 +97,7 @@ pub type NormalVertexSet = ObjectTable<NormalVertex>;
 pub type ElementSet = ObjectTable<Element>;
 pub type ShapeSet = ObjectTable<ShapeEntry>;
 pub type GroupSet = ObjectTable<GroupName>;
-pub type SmoothingGroupSet = ObjectTable<SmoothingGroupName>;
+pub type SmoothingGroupSet = ObjectTable<SmoothingGroup>;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VTNIndex { 
@@ -249,8 +249,8 @@ impl ObjectQuery<GroupIndex, GroupName> for Object {
     }
 }
 
-impl ObjectQuery<SmoothingGroupIndex, SmoothingGroupName> for Object {
-    fn query(&self, key: SmoothingGroupIndex) -> Option<SmoothingGroupName> {
+impl ObjectQuery<SmoothingGroupIndex, SmoothingGroup> for Object {
+    fn query(&self, key: SmoothingGroupIndex) -> Option<SmoothingGroup> {
         self.smoothing_group_set.get(key as usize).map(|x| x.clone())
     }
 }
@@ -337,7 +337,7 @@ impl ObjectBuilder {
         self
     }
 
-    pub fn with_smoothing_group_set(&mut self, smoothing_group_set: Vec<SmoothingGroupName>) -> &mut Self {
+    pub fn with_smoothing_group_set(&mut self, smoothing_group_set: Vec<SmoothingGroup>) -> &mut Self {
         self.smoothing_group_set = Some(ObjectTable::from(smoothing_group_set));
         self
     }
