@@ -394,7 +394,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     ) -> Result<u32, ParseError> {
         
         try!(self.expect("s"));
-        
         if let Ok(name) = self.next_string() {
             if name == "off" {
                 smoothing_groups.push(SmoothingGroupName::new(0));
@@ -413,29 +412,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         } else {
             return self.error(format!("Parser error: Invalid smoothing group name."));
         }
-        /*
-        match self.next_string() {
-            Ok(name) => {
-                if name == "off" {
-                    smoothing_groups.push(SmoothingGroupName::new(0));
-                } else {
-                    match name.parse::<u32>() {
-                        Ok(number) => {
-                            smoothing_groups.push(SmoothingGroupName::new(number));
-                        }
-                        Err(_) => {
-                            return self.error(format!(
-                                "Expected integer or `off` for smoothing group name but got `{}`", name)
-                            );
-                        }
-                    }
-                }
-            }
-            Err(_) => { 
-                return self.error(format!("Parser error: Invalid smoothing group name."));
-            }
-        }
-        */
+
         Ok(1)
     }
 
