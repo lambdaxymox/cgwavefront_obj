@@ -292,8 +292,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut elements_parsed = 1;
         loop {
             match slice_res(&self.next_string()) {
-                Ok("\n") | Err(_) => break,
-                Ok(st) => match st.parse::<u32>() {
+                Ok(st) if st != "\n" => match st.parse::<u32>() {
                     Ok(v_index) => { 
                         elements.push(Element::Point(VTNIndex::V(v_index)));
                         elements_parsed += 1;
@@ -302,6 +301,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                         return self.error(format!("Expected integer but got `{}`.", st))
                     }
                 }
+                _ => break,
             }
         }
 
