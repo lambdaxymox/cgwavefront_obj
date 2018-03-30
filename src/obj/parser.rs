@@ -397,17 +397,12 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         if let Ok(name) = self.next_string() {
             if name == "off" {
                 smoothing_groups.push(SmoothingGroupName::new(0));
+            } else if let Ok(number) = name.parse::<u32>() {
+                smoothing_groups.push(SmoothingGroupName::new(number));
             } else {
-                match name.parse::<u32>() {
-                    Ok(number) => {
-                        smoothing_groups.push(SmoothingGroupName::new(number));
-                    }
-                    Err(_) => {
-                        return self.error(format!(
-                            "Expected integer or `off` for smoothing group name but got `{}`", name)
-                        );
-                    }
-                }
+                return self.error(format!(
+                    "Expected integer or `off` for smoothing group name but got `{}`", name)
+                );
             }
         } else {
             return self.error(format!("Parser error: Invalid smoothing group name."));
