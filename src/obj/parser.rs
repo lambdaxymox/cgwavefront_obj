@@ -9,6 +9,12 @@ use std::error;
 use std::fmt;
 
 
+#[inline]
+fn slice<'a>(st: &'a Option<String>) -> Option<&'a str> {
+    st.as_ref().map(|st| &st[..])
+}
+
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
     line_number: usize,
@@ -146,11 +152,10 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
     fn skip_zero_or_more_newlines(&mut self) {
         loop {
-            match self.peek().as_ref().map(|st| &st[..]) {
-                Some("\n") => {},
-                Some(_) | None => break,
+            match slice(&self.peek()) {
+                Some("\n") => self.advance(),
+                Some(_) | None => break
             }
-            self.advance();
         }
     }
 
@@ -161,7 +166,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_object_name(&mut self) -> Result<String, ParseError> {
-        match self.peek().as_ref().map(|st| &st[..]) {
+        match slice(&self.peek()) {
             Some("o") => {
                 try!(self.expect("o"));
                 let object_name = self.next_string();
@@ -241,7 +246,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         let st = try!(self.next_string());
-
         match self.parse_vn(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
@@ -359,7 +363,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_elements(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {  
-        match self.peek().as_ref().map(|st| &st[..]) {
+        match slice(&self.peek()) {
             Some("p") => self.parse_point(elements),
             Some("l") => self.parse_line(elements),
             Some("f") => self.parse_face(elements),
@@ -461,7 +465,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut max_smoothing_group_index = 1;
 
         loop {
-            match self.peek().as_ref().map(|st| &st[..]) {
+            match slice(&self.peek()) {
                 Some("g")  => {            
                     // Save the shape entry ranges for the current group.
                     group_entry_table.push((
@@ -572,7 +576,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         loop {
             self.skip_zero_or_more_newlines();
-            match self.peek().as_ref().map(|st| &st[..]) {
+            match slice(&self.peek()) {
                 Some(_) => {
                     result.push(try!(self.parse_object(
                         &mut min_vertex_index,
