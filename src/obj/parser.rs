@@ -55,13 +55,10 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
     fn next(&mut self) -> Option<String> {
         let token = self.lexer.next().map(|t| t.content);
-        match token {
-            Some(ref val) => {
-                if val == "\n" {
-                    self.line_number += 1;
-                }
-            },
-            None => {},
+        if let Some(ref val) = token {
+            if val == "\n" {
+                self.line_number += 1;
+            }
         }
 
         token
@@ -120,7 +117,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let y = try!(self.parse_f32());
         let z = try!(self.parse_f32());
         let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = mw.unwrap_or(1.);
+        let w = mw.unwrap_or(1.0);
 
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }
@@ -130,9 +127,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         let u = try!(self.parse_f32());
         let mv = self.try_once(|st| st.parse::<f32>().ok());
-        let v = mv.unwrap_or(0.);
+        let v = mv.unwrap_or(0.0);
         let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = mw.unwrap_or(0.);
+        let w = mw.unwrap_or(0.0);
 
         Ok(TextureVertex { u: u, v: v, w: w })
     }
@@ -268,14 +265,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
         let mut indices_parsed = 0;
         loop {
-            match self.parse_vtn_index() {
-                Ok(vtn_index) => {
-                    vtn_indices.push(vtn_index);
-                    indices_parsed += 1;
-                }
-                Err(_) => {
-                    break;
-                }
+            if let Ok(vtn_index) = self.parse_vtn_index() {
+                vtn_indices.push(vtn_index);
+                indices_parsed += 1;
+            } else {
+                break;
             }
         }
 
