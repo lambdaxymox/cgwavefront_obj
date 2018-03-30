@@ -14,6 +14,10 @@ fn slice<'a>(st: &'a Option<String>) -> Option<&'a str> {
     st.as_ref().map(|st| &st[..])
 }
 
+#[inline]
+fn slice_res<'a>(st: &'a Result<String, ParseError>) -> Result<&'a str, &'a ParseError> {
+    st.as_ref().map(|s| &s[..])
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
@@ -287,7 +291,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         elements.push(Element::Point(VTNIndex::V(v_index)));
         let mut elements_parsed = 1;
         loop {
-            match self.next_string().as_ref().map(|st| &st[..]) {
+            match slice_res(&self.next_string()) {
                 Ok("\n") | Err(_) => break,
                 Ok(st) => match st.parse::<u32>() {
                     Ok(v_index) => { 
@@ -375,7 +379,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         try!(self.expect("g"));
         let mut groups_parsed = 0;
         loop {
-            match self.next_string().as_ref().map(|st| &st[..]) {
+            match slice_res(&self.next_string()) {
                 Ok("\n") | Err(_) => break,
                 Ok(name) => groups.push(GroupName::new(name)),
             }
