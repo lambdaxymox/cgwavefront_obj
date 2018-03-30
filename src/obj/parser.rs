@@ -439,11 +439,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         for &((min_element_index, max_element_index), 
               (min_smoothing_group_index, max_smoothing_group_index)) 
             in smoothing_group_entry_table { 
-        
+
             let smoothing_groups: Vec<u32> = 
-                (min_smoothing_group_index..max_smoothing_group_index).collect();
+                (min_smoothing_group_index..max_smoothing_group_index + 1).collect();
             for i in min_element_index..max_element_index {
-                shape_entry_table[i as usize].smoothing_groups = smoothing_groups.clone();
+                shape_entry_table[(i - 1) as usize].smoothing_groups = smoothing_groups.clone();
             }
         }
 
@@ -506,10 +506,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     //Update the element indices.
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
                 }
-                Some("p") | Some("l") | Some("f") => {
-                    let amount_parsed = try!(self.parse_elements(&mut elements));
-                    max_element_group_index += amount_parsed;
-                }
                 Some("v")  => {
                     let vertex = try!(self.parse_vertex());
                     vertices.push(vertex);
@@ -521,6 +517,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 Some("vn") => {
                     let normal_vertex = try!(self.parse_normal_vertex());
                     normal_vertices.push(normal_vertex);
+                }
+                Some("p") | Some("l") | Some("f") => {
+                    let amount_parsed = try!(self.parse_elements(&mut elements));
+                    max_element_group_index += amount_parsed;
+                    max_element_smoothing_group_index += amount_parsed;
                 }
                 Some("\n") => { 
                     try!(self.skip_one_or_more_newlines());
@@ -550,7 +551,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
 
         if groups.is_empty() {
-            groups.push(GroupName::new("default"));
+            groups.push(Default::default());
         }
 
         if smoothing_groups.is_empty() {
