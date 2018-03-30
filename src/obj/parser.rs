@@ -449,26 +449,23 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         let mut vertices = vec![];
         let mut texture_vertices = vec![];
-        let mut normal_vertices = vec![];
-        
+        let mut normal_vertices = vec![];        
         let mut elements = vec![];
-        //let mut min_element_index = 1;
-       // let mut max_element_index = 1;
         
+        let mut group_entry_table = vec![];
         let mut groups = vec![];
         let mut min_element_group_index = 1;
         let mut max_element_group_index = 1;
         let mut min_group_index = 1;
         let mut max_group_index = 1;
-        
+
+        let mut smoothing_group_entry_table = vec![];        
         let mut smoothing_groups = vec![];
         let mut min_element_smoothing_group_index = 1;
         let mut max_element_smoothing_group_index = 1;
         let mut min_smoothing_group_index = 1;
         let mut max_smoothing_group_index = 1;
 
-        let mut group_entry_table = vec![];
-        let mut smoothing_group_entry_table = vec![];
         loop {
             match self.peek().as_ref().map(|st| &st[..]) {
                 Some("g")  => {            
