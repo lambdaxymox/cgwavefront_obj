@@ -389,24 +389,34 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         Ok(groups_parsed)
     }
 
-    fn parse_smoothing_group(&mut self) -> Result<SmoothingGroupName, ParseError> {
+    fn parse_smoothing_group(&mut self, 
+        smoothing_groups: &mut Vec<SmoothingGroupName>
+    ) -> Result<u32, ParseError> {
+        
         try!(self.expect("s"));
         match self.next_string() {
             Ok(name) => {
                 if name == "off" {
-                    return Ok(SmoothingGroupName::new(0));
-                }
-                match name.parse::<u32>() {
-                    Ok(number) => Ok(SmoothingGroupName::new(number)),
-                    Err(_) => self.error(format!(
-                        "Expected integer or `off` for smoothing group name but got `{}`", name)
-                    )
+                    smoothing_groups.push(SmoothingGroupName::new(0));
+                } else {
+                    match name.parse::<u32>() {
+                        Ok(number) => {
+                            smoothing_groups.push(SmoothingGroupName::new(number));
+                        }
+                        Err(_) => {
+                            return self.error(format!(
+                                "Expected integer or `off` for smoothing group name but got `{}`", name)
+                            );
+                        }
+                    }
                 }
             }
             Err(_) => { 
-                self.error(format!("Parser error: Invalid smoothing group name."))
+                return self.error(format!("Parser error: Invalid smoothing group name."));
             }
         }
+
+        Ok(1)
     }
 
     fn parse_shape_entries(&self,
@@ -470,13 +480,10 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
             match self.peek().as_ref().map(|st| &st[..]) {
                 Some("g")  => {            
                     // Save the shape entry ranges for the current group.
-                    group_entry_table.push(
-                        (
-                            (min_element_group_index, max_element_group_index), 
-                            (min_group_index, max_group_index)
-                        )
-                    );
-
+                    group_entry_table.push((
+                        (min_element_group_index, max_element_group_index), 
+                        (min_group_index, max_group_index)
+                    ));
                     // Fetch the new groups.
                     let amount_parsed = try!(self.parse_groups(&mut groups));
                     // Update range of group indices.
@@ -484,6 +491,20 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     max_group_index += amount_parsed;
                     // Update the element indices.
                     min_element_group_index = max_element_group_index;
+                }
+                Some("s") => {
+                    // Save the shape entry ranges for the current smoothing group.
+                    smoothing_group_entry_table.push((
+                        (min_element_smoothing_group_index, max_element_smoothing_group_index),
+                        (min_smoothing_group_index, max_smoothing_group_index)
+                    ));
+                    // Fetch the next smoothing group.
+                    let amount_parsed = try!(self.parse_smoothing_group(&mut smoothing_groups));
+                    // Update the range of the smoothing group indices.
+                    min_smoothing_group_index = max_smoothing_group_index;
+                    max_smoothing_group_index += amount_parsed;
+                    //Update the element indices.
+                    min_element_smoothing_group_index = max_element_smoothing_group_index;
                 }
                 Some("p") | Some("l") | Some("f") => {
                     let amount_parsed = try!(self.parse_elements(&mut elements));
@@ -505,14 +526,19 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     try!(self.skip_one_or_more_newlines());
                 }
                 Some("o") | None => {
-                    // At the end of file, collect any remaining shapes.
-                    group_entry_table.push(
-                        (
-                            (min_element_group_index, max_element_group_index), 
-                            (min_group_index, max_group_index)
-                        )
-                    );
+                    // At the end of file or object, collect any remaining shapes.
+                    group_entry_table.push((
+                        (min_element_group_index, max_element_group_index), 
+                        (min_group_index, max_group_index)
+                    ));
                     min_element_group_index = max_element_group_index;
+
+                    smoothing_group_entry_table.push((
+                        (min_element_smoothing_group_index, max_element_smoothing_group_index),
+                        (min_smoothing_group_index, max_smoothing_group_index)
+                    ));
+                    min_element_smoothing_group_index = max_element_smoothing_group_index;
+
                     break;
                 }
                 Some(other_st) => {
@@ -525,12 +551,10 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         if groups.is_empty() {
             groups.push(GroupName::new("default"));
-            max_element_group_index += 1;
         }
 
         if smoothing_groups.is_empty() {
             smoothing_groups.push(SmoothingGroupName::new(0));
-            max_element_smoothing_group_index += 1;
         }
 
         // At the end of file, collect any remaining shapes.
@@ -937,25 +961,34 @@ mod smoothing_group_tests {
     #[test]
     fn test_smoothing_group_name1() {
         let mut parser = super::Parser::new("s off".chars());
-        let result = parser.parse_smoothing_group();
-        let expected = SmoothingGroupName::new(0);
-        assert_eq!(result, Ok(expected));
+        let mut result = vec![];
+        let parsed = parser.parse_smoothing_group(&mut result);
+        let expected = vec![SmoothingGroupName::new(0)];
+
+        assert!(parsed.is_ok());
+        assert_eq!(result, expected);
     }
 
     #[test]
     fn test_smoothing_group_name2() {
         let mut parser = super::Parser::new("s 0".chars());
-        let result = parser.parse_smoothing_group();
-        let expected = SmoothingGroupName::new(0);
-        assert_eq!(result, Ok(expected));
+        let mut result = vec![];
+        let parsed = parser.parse_smoothing_group(&mut result);
+        let expected = vec![SmoothingGroupName::new(0)];
+        
+        assert!(parsed.is_ok());
+        assert_eq!(result, expected);
     }
 
     #[test]
     fn test_smoothing_group_name3() {
         let mut parser = super::Parser::new("s 3434".chars());
-        let result = parser.parse_smoothing_group();
-        let expected = SmoothingGroupName::new(3434);
-        assert_eq!(result, Ok(expected));
+        let mut result = vec![];
+        let parsed = parser.parse_smoothing_group(&mut result);
+        let expected = vec![SmoothingGroupName::new(3434)];
+        
+        assert!(parsed.is_ok());
+        assert_eq!(result, expected);
     }
 }
 
