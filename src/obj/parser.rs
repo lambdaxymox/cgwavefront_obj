@@ -94,9 +94,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let st = try!(self.next_string());
         match st.parse::<f32>() {
             Ok(val) => Ok(val),
-            Err(_) => self.error(
-                format!("Expected `f32` but got `{}`.", st)
-            ),
+            Err(_) => self.error(format!("Expected `f32` but got `{}`.", st)),
         }
     }
 
