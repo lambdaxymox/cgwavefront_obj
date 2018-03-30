@@ -79,6 +79,10 @@ impl SmoothingGroupName {
     }
 }
 
+impl Default for SmoothingGroupName {
+    fn default() -> SmoothingGroupName { SmoothingGroupName::new(0) }
+}
+
 type ElementIndex = u32;
 type VertexIndex = u32;
 type TextureVertexIndex = u32;
@@ -350,7 +354,7 @@ impl ObjectBuilder {
             texture_vertex_set: self.texture_vertex_set.unwrap_or(Default::default()),
             normal_vertex_set: self.normal_vertex_set.unwrap_or(Default::default()),
             group_set: self.group_set.unwrap_or(Default::default()),
-            smoothing_group_set: self.smoothing_group_set.unwrap_or(Default::default()),
+            smoothing_group_set: self.smoothing_group_set.unwrap_or(ObjectTable::from(vec![Default::default()])),
             element_set: self.element_set,
             shape_set: self.shape_set.unwrap_or(Default::default()),
         }
