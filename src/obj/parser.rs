@@ -396,7 +396,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 if name == "off" {
                     return Ok(SmoothingGroupName::new(0));
                 }
-
                 match name.parse::<u32>() {
                     Ok(number) => Ok(SmoothingGroupName::new(number)),
                     Err(_) => self.error(format!(
@@ -411,23 +410,33 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_shape_entries(&self,
-        shape_entries: &mut Vec<ShapeEntry>,
-        element_range: (u32, u32),
-        group_range: (u32, u32), 
-        smoothing_group_range: (u32, u32)) {
+        shape_entry_table: &mut Vec<ShapeEntry>,
+        elements: &[Element],
+        group_entry_table: &[((u32, u32), (u32, u32))],
+        smoothing_group_entry_table: &[((u32, u32), (u32, u32))]) {
 
-        let mut groups = vec![];
-        for i in (group_range.0)..(group_range.1) {
-            groups.push(i);
-        }
-        let mut smoothing_groups = vec![];
-        for i in (smoothing_group_range.0)..(smoothing_group_range.1) {
-            smoothing_groups.push(i);
+        for &((min_element_index, max_element_index), 
+              (min_group_index, max_group_index)) in group_entry_table { 
+            
+            let mut groups: Vec<u32> = (min_group_index..max_group_index).collect();
+            for i in min_element_index..max_element_index {
+                shape_entry_table.push(ShapeEntry::new(i, &groups, &vec![]));
+            }
         }
 
-        for i in (element_range.0)..(element_range.1) {
-            shape_entries.push(ShapeEntry::new(i, &groups, &smoothing_groups));
+        debug_assert!(shape_entry_table.len() == elements.len());
+
+        for &((min_element_index, max_element_index), 
+              (min_smoothing_group_index, max_smoothing_group_index)) 
+            in smoothing_group_entry_table { 
+        
+            let smoothing_groups: Vec<u32> = 
+                (min_smoothing_group_index..max_smoothing_group_index).collect();
+            for i in min_element_index..max_element_index {
+                shape_entry_table[i as usize].smoothing_groups = smoothing_groups.clone();
+            }
         }
+
     }
 
     fn parse_object(&mut self,
@@ -443,25 +452,32 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut normal_vertices = vec![];
         
         let mut elements = vec![];
-        let mut min_element_index = 1;
-        let mut max_element_index = 1;
+        //let mut min_element_index = 1;
+       // let mut max_element_index = 1;
         
         let mut groups = vec![];
+        let mut min_element_group_index = 1;
+        let mut max_element_group_index = 1;
         let mut min_group_index = 1;
         let mut max_group_index = 1;
         
         let mut smoothing_groups = vec![];
+        let mut min_element_smoothing_group_index = 1;
+        let mut max_element_smoothing_group_index = 1;
         let mut min_smoothing_group_index = 1;
         let mut max_smoothing_group_index = 1;
 
-        let mut shape_entries = vec![];
-        let mut shape_table = vec![];
+        let mut group_entry_table = vec![];
+        let mut smoothing_group_entry_table = vec![];
         loop {
             match self.peek().as_ref().map(|st| &st[..]) {
                 Some("g")  => {            
                     // Save the shape entry ranges for the current group.
-                    shape_table.push(
-                        (min_element_index, max_element_index, min_group_index, max_group_index)
+                    group_entry_table.push(
+                        (
+                            (min_element_group_index, max_element_group_index), 
+                            (min_group_index, max_group_index)
+                        )
                     );
 
                     // Fetch the new groups.
@@ -470,11 +486,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     min_group_index = max_group_index;
                     max_group_index += amount_parsed;
                     // Update the element indices.
-                    min_element_index = max_element_index;
+                    min_element_group_index = max_element_group_index;
                 }
                 Some("p") | Some("l") | Some("f") => {
                     let amount_parsed = try!(self.parse_elements(&mut elements));
-                    max_element_index += amount_parsed;
+                    max_element_group_index += amount_parsed;
                 }
                 Some("v")  => {
                     let vertex = try!(self.parse_vertex());
@@ -493,10 +509,13 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 }
                 Some("o") | None => {
                     // At the end of file, collect any remaining shapes.
-                    shape_table.push(
-                        (min_element_index, max_element_index, min_group_index, max_group_index)
+                    group_entry_table.push(
+                        (
+                            (min_element_group_index, max_element_group_index), 
+                            (min_group_index, max_group_index)
+                        )
                     );
-                    min_element_index = max_element_index;
+                    min_element_group_index = max_element_group_index;
                     break;
                 }
                 Some(other_st) => {
@@ -509,26 +528,27 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         if groups.is_empty() {
             groups.push(GroupName::new("default"));
+            max_element_group_index += 1;
         }
 
         if smoothing_groups.is_empty() {
-            smoothing_groups.push(0);
+            smoothing_groups.push(SmoothingGroupName::new(0));
+            max_element_smoothing_group_index += 1;
         }
 
         // At the end of file, collect any remaining shapes.
         // Fill in the shape entries for the current group.
-        for &(min_elem, max_elem, min_group, max_group) in shape_table.iter() {
-            self.parse_shape_entries(
-                &mut shape_entries, (min_elem, max_elem), (min_group, max_group), 
-                (min_smoothing_group_index, max_smoothing_group_index)
-            );
-        }
+        let mut shape_entries = vec![];
+        self.parse_shape_entries(
+            &mut shape_entries, &elements, &group_entry_table, &smoothing_group_entry_table
+        );
 
         let mut builder = ObjectBuilder::new(vertices, elements);
         builder.with_name(object_name)
                .with_texture_vertex_set(texture_vertices)
                .with_normal_vertex_set(normal_vertices)
                .with_group_set(groups)
+               .with_smoothing_group_set(smoothing_groups)
                .with_shape_set(shape_entries);
 
         Ok(builder.build())
@@ -945,8 +965,9 @@ mod smoothing_group_tests {
 #[cfg(test)]
 mod objectset_tests {
     use obj::object::{
-        ObjectSet, Object, ObjectBuilder,
-        GroupName, Vertex, NormalVertex, Element, VTNIndex, ShapeEntry,
+        ObjectSet, ObjectBuilder,
+        Vertex, NormalVertex, Element, VTNIndex, 
+        GroupName, SmoothingGroupName, ShapeEntry,
     };
 
     fn test_case() -> (Result<ObjectSet, super::ParseError>, Result<ObjectSet, super::ParseError>){
@@ -1019,19 +1040,20 @@ mod objectset_tests {
             NormalVertex { i: -1.0, j:  0.0, k:  0.0 },
         ])
         .with_group_set(vec![GroupName::new("cube")])
+        .with_smoothing_group_set(vec![SmoothingGroupName::new(0)])
         .with_shape_set(vec![
-            ShapeEntry { element: 1,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 2,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 3,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 4,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 5,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 6,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 7,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 8,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 9,  groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 10, groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 11, groups: vec![1], smoothing_groups: vec![] },
-            ShapeEntry { element: 12, groups: vec![1], smoothing_groups: vec![] },
+            ShapeEntry { element: 1,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 2,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 3,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 4,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 5,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 6,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 7,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 8,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 9,  groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 10, groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 11, groups: vec![1], smoothing_groups: vec![1] },
+            ShapeEntry { element: 12, groups: vec![1], smoothing_groups: vec![1] },
         ]);
         let expected = ObjectSet::new(vec![builder.build()]);
         let mut parser = super::Parser::new(obj_file.chars());
