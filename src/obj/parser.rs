@@ -158,7 +158,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         loop {
             match slice(&self.peek()) {
                 Some("\n") => self.advance(),
-                Some(_) | None => break
+                _ => break
             }
         }
     }
@@ -559,6 +559,13 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
             &mut shape_entries, &elements, &group_entry_table, &smoothing_group_entry_table
         );
 
+        *min_vertex_index  += vertices.len();
+        *max_vertex_index  += vertices.len();
+        *min_texture_index += texture_vertices.len();
+        *max_texture_index += texture_vertices.len();
+        *min_normal_index  += normal_vertices.len();
+        *max_normal_index  += normal_vertices.len();
+
         let mut builder = ObjectBuilder::new(vertices, elements);
         builder.with_name(object_name)
                .with_texture_vertex_set(texture_vertices)
@@ -582,18 +589,14 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         loop {
             self.skip_zero_or_more_newlines();
-            match slice(&self.peek()) {
-                Some(_) => {
-                    result.push(try!(self.parse_object(
-                        &mut min_vertex_index,
-                        &mut max_vertex_index,
-                        &mut min_tex_index,
-                        &mut max_tex_index,
-                        &mut min_normal_index,
-                        &mut max_normal_index
-                    )));
-                }
-                None => break
+            if let Some(_) = slice(&self.peek()) {
+                result.push(try!(self.parse_object(
+                    &mut min_vertex_index, &mut max_vertex_index,
+                    &mut min_tex_index,    &mut max_tex_index,
+                    &mut min_normal_index, &mut max_normal_index
+                )));
+            } else {
+                break;
             }
         }
 

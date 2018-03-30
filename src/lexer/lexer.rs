@@ -139,7 +139,7 @@ impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
                     } else if is_newline(ch) {
                         // We are at the end of a line.
                         self.advance();
-                        token.push(ch);
+                        token.push('\n');
                         consumed += 1;
                         break;
                     } else {
