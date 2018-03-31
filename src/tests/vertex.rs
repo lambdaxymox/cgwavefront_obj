@@ -1,87 +1,87 @@
 use obj::object::Vertex;
-use quickcheck::Arbitrary;
 use quickcheck;
 use std::fmt;
 use std::cmp;
 
 
 #[derive(Clone, Debug)]
-struct QcVertex {
-    inner: Vertex,
-    display_w: bool,
+struct QcVertex3(Vertex);
+
+impl QcVertex3 {
+    fn to_vertex(&self) -> Vertex { self.0 }
 }
 
-impl QcVertex {
-    fn to_vertex(&self) -> Vertex {
-        self.inner
-    }
-
-    fn to_qc_vertex3(&self) -> QcVertex {
-        let mut qc_vertex = self.clone();
-        qc_vertex.display_w = false;
-        qc_vertex.inner.w = 1.0;
-
-        qc_vertex
-    }
-}
-
-impl fmt::Display for QcVertex {
+impl fmt::Display for QcVertex3 {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        if self.display_w {
-            write!(f, "v  {}  {}  {}  {}", 
-                self.inner.x, self.inner.y, self.inner.z, self.inner.w
-            )
-        } else {
-            write!(f, "v  {}  {}  {}", self.inner.x, self.inner.y, self.inner.z)
-        }
+        write!(f, "v  {}  {}  {}", self.0.x, self.0.y, self.0.z)
     }
 }
 
-impl cmp::PartialEq<Vertex> for QcVertex {
-    fn eq(&self, other: &Vertex) -> bool {
-        &self.inner == other
-    }
+impl cmp::PartialEq<Vertex> for QcVertex3 {
+    fn eq(&self, other: &Vertex) -> bool { &self.0 == other }
 }
 
-impl<'a> cmp::PartialEq<&'a Vertex> for QcVertex {
-    fn eq(&self, other: & &Vertex) -> bool {
-        &&self.inner == other
-    }
+impl<'a> cmp::PartialEq<&'a Vertex> for QcVertex3 {
+    fn eq(&self, other: & &Vertex) -> bool { &&self.0 == other }
 }
 
-impl Arbitrary for QcVertex {
+impl quickcheck::Arbitrary for QcVertex3 {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
-        let display_w = Arbitrary::arbitrary(g);
-        let w = if display_w { Arbitrary::arbitrary(g) } else { 1.0 };
-        let x = Arbitrary::arbitrary(g);
-        let y = Arbitrary::arbitrary(g);
-        let z = Arbitrary::arbitrary(g);
+        let x = quickcheck::Arbitrary::arbitrary(g);
+        let y = quickcheck::Arbitrary::arbitrary(g);
+        let z = quickcheck::Arbitrary::arbitrary(g);
 
-        QcVertex { inner: Vertex { x: x, y: y, z: z, w: w }, display_w: display_w }
+        QcVertex3(Vertex { x: x, y: y, z: z, w: 1.0 })
     }
 }
+
+#[derive(Clone, Debug)]
+struct QcVertex4(Vertex);
+
+impl QcVertex4 {
+    fn to_vertex(&self) -> Vertex { self.0 }
+}
+
+impl fmt::Display for QcVertex4 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "v  {}  {}  {} {}", self.0.x, self.0.y, self.0.z, self.0.w)
+    }
+}
+
+impl cmp::PartialEq<Vertex> for QcVertex4 {
+    fn eq(&self, other: &Vertex) -> bool { &self.0 == other }
+}
+
+impl<'a> cmp::PartialEq<&'a Vertex> for QcVertex4 {
+    fn eq(&self, other: & &Vertex) -> bool { &&self.0 == other }
+}
+
+impl quickcheck::Arbitrary for QcVertex4 {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        let x = quickcheck::Arbitrary::arbitrary(g);
+        let y = quickcheck::Arbitrary::arbitrary(g);
+        let z = quickcheck::Arbitrary::arbitrary(g);
+        let w = quickcheck::Arbitrary::arbitrary(g);
+
+        QcVertex4(Vertex { x: x, y: y, z: z, w: w })
+    }
+}
+
+impl From<QcVertex3> for QcVertex4 {
+    fn from(qc_vertex: QcVertex3) -> QcVertex4 {
+        QcVertex4(qc_vertex.0)
+    }
+}
+
 
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::QcVertex;
-
-    #[test]
-    fn prop_parsing_a_vertex_with_three_coordinates_should_have_default_w() {
-        fn property(qc_vertex: QcVertex) -> bool {
-            let input = qc_vertex.to_qc_vertex3().to_string();
-            let mut parser = Parser::new(input.chars());
-            let result = parser.parse_vertex();
-            let expected = Ok(qc_vertex.to_vertex());
-
-            result == expected
-        }
-        quickcheck::quickcheck(property as fn(QcVertex) -> bool);
-    }
+    use super::{QcVertex3, QcVertex4};
 
     #[test]
     fn prop_parsing_a_vertex_string_should_yield_the_same_vertex() {
-        fn property(qc_vertex: QcVertex) -> bool {
+        fn property(qc_vertex: QcVertex4) -> bool {
             let input = qc_vertex.to_string();
             let mut parser = Parser::new(input.chars());
             let result = parser.parse_vertex();
@@ -89,21 +89,33 @@ mod property_tests {
 
             result == expected
         }
-        quickcheck::quickcheck(property as fn(QcVertex) -> bool);
+        quickcheck::quickcheck(property as fn(QcVertex4) -> bool);
+    }
+
+    #[test]
+    fn prop_parsing_a_vertex_with_three_coordinates_should_have_default_w_1() {
+        fn property(qc_vertex: QcVertex3) -> bool {
+            let input = qc_vertex.to_string();
+            let mut parser = Parser::new(input.chars());
+            let result = parser.parse_vertex();
+            let expected = Ok(qc_vertex.to_vertex());
+
+            result == expected
+        }
+        quickcheck::quickcheck(property as fn(QcVertex3) -> bool);
     }
 
     #[test]
     fn prop_a_three_vertex_and_a_four_vertex_with_w_1_identical() {
-        fn property(qc_vertex: QcVertex) -> bool {
+        fn property(qc_vertex: QcVertex3) -> bool {
             let input = qc_vertex.to_string();
             let mut parser = Parser::new(input.chars());
             let result = parser.parse_vertex();
-            let expected = Ok(qc_vertex.to_vertex());
+            let expected = Ok(QcVertex4::from(qc_vertex).0);
 
             result == expected
         }
-        quickcheck::quickcheck(property as fn(QcVertex) -> bool);
+        quickcheck::quickcheck(property as fn(QcVertex3) -> bool);
     }
-
 }
 
