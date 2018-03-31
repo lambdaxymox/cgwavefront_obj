@@ -120,7 +120,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
+    pub fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
         try!(self.expect("v"));
  
         let x = try!(self.parse_f32());
@@ -628,6 +628,7 @@ mod primitive_tests {
 #[cfg(test)]
 mod vertex_tests {
     use obj::object::Vertex;
+
 
     #[test]
     fn test_parse_vertex1() {
