@@ -15,6 +15,14 @@ impl QcVertex {
     fn to_vertex(&self) -> Vertex {
         self.inner
     }
+
+    fn to_qc_vertex3(&self) -> QcVertex {
+        let mut qc_vertex = self.clone();
+        qc_vertex.display_w = false;
+        qc_vertex.inner.w = 1.0;
+
+        qc_vertex
+    }
 }
 
 impl fmt::Display for QcVertex {
@@ -58,9 +66,34 @@ mod property_tests {
     use quickcheck;
     use super::QcVertex;
 
-
     #[test]
     fn prop_parsing_a_vertex_with_three_coordinates_should_have_default_w() {
+        fn property(qc_vertex: QcVertex) -> bool {
+            let input = qc_vertex.to_qc_vertex3().to_string();
+            let mut parser = Parser::new(input.chars());
+            let result = parser.parse_vertex();
+            let expected = Ok(qc_vertex.to_vertex());
+
+            result == expected
+        }
+        quickcheck::quickcheck(property as fn(QcVertex) -> bool);
+    }
+
+    #[test]
+    fn prop_parsing_a_vertex_string_should_yield_the_same_vertex() {
+        fn property(qc_vertex: QcVertex) -> bool {
+            let input = qc_vertex.to_string();
+            let mut parser = Parser::new(input.chars());
+            let result = parser.parse_vertex();
+            let expected = Ok(qc_vertex.to_vertex());
+
+            result == expected
+        }
+        quickcheck::quickcheck(property as fn(QcVertex) -> bool);
+    }
+
+    #[test]
+    fn prop_a_three_vertex_and_a_four_vertex_with_w_1_identical() {
         fn property(qc_vertex: QcVertex) -> bool {
             let input = qc_vertex.to_string();
             let mut parser = Parser::new(input.chars());
