@@ -8,7 +8,7 @@ use std::cmp;
 struct QcTextureVertex(TextureVertex);
 
 impl QcTextureVertex {
-    fn to_texture_vertex(&self) -> TextureVertex { self.0 }
+    fn to_vertex(&self) -> TextureVertex { self.0 }
 }
 
 impl fmt::Display for QcTextureVertex {
@@ -84,7 +84,7 @@ mod property_tests {
             let input = qc_texture_vertex.to_string();
             let mut parser = Parser::new(input.chars());
             let result = parser.parse_texture_vertex();
-            let expected = Ok(qc_texture_vertex.to_texture_vertex());
+            let expected = Ok(qc_texture_vertex.to_vertex());
 
             result == expected
         }
@@ -96,7 +96,7 @@ mod property_tests {
         fn property(qctvo: QcTextureVertexOracle) -> bool {
             let result1 = Parser::new(qctvo.1.chars()).parse_texture_vertex();
             let result2 = Parser::new(qctvo.2.chars()).parse_texture_vertex();
-            let expected = Ok(qctvo.0.to_texture_vertex());
+            let expected = Ok(qctvo.0.to_vertex());
 
             (result1 == expected) && (result2 == expected)
         }
