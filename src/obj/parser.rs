@@ -144,7 +144,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         Ok(TextureVertex { u: u, v: v, w: w })
     }
 
-    fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
+    pub fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
         try!(self.expect("vn"));
 
         let i = try!(self.parse_f32());
