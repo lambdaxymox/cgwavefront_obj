@@ -35,11 +35,48 @@ impl quickcheck::Arbitrary for QcTextureVertex {
     }
 }
 
+#[derive(Clone, Debug)]
+struct QcTextureVertexOracle(QcTextureVertex, String, String);
+
+impl QcTextureVertexOracle {
+    fn new(qc_texture_vertex: QcTextureVertex, 
+        string: String, other_string: String) -> QcTextureVertexOracle {
+        
+        QcTextureVertexOracle(qc_texture_vertex, string, other_string)
+    }
+}
+
+impl quickcheck::Arbitrary for QcTextureVertexOracle {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        use quickcheck::Arbitrary;
+
+        fn spaces(n: u8) -> String {
+            let mut spaces = String::new();
+            for _ in 0..n {
+                spaces.push(' ');
+            }
+            spaces
+        }
+
+        let qc_vertex: QcTextureVertex = Arbitrary::arbitrary(g);
+        let string = qc_vertex.to_string();
+        let spaces: [String; 4] = [
+            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g))
+        ];
+        let other_string = format!("vt {} {} {} {} {} {} {} ", 
+            spaces[0], qc_vertex.0.u, spaces[1], qc_vertex.0.v, 
+            spaces[2], qc_vertex.0.w, spaces[3]
+        );
+
+        QcTextureVertexOracle::new(qc_vertex, string, other_string)
+    }
+}
 
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::QcTextureVertex;
+    use super::{QcTextureVertex, QcTextureVertexOracle};
 
     #[test]
     fn prop_parsing_a_texture_vertex_string_is_reversible() {
@@ -52,6 +89,18 @@ mod property_tests {
             result == expected
         }
         quickcheck::quickcheck(property as fn(QcTextureVertex) -> bool);
+    }
+
+    #[test]
+    fn prop_parser_texture_vertex_should_be_invariant_to_whitespace() {
+        fn property(qctvo: QcTextureVertexOracle) -> bool {
+            let result1 = Parser::new(qctvo.1.chars()).parse_texture_vertex();
+            let result2 = Parser::new(qctvo.2.chars()).parse_texture_vertex();
+            let expected = Ok(qctvo.0.to_texture_vertex());
+
+            (result1 == expected) && (result2 == expected)
+        }
+        quickcheck::quickcheck(property as fn(QcTextureVertexOracle) -> bool);
     }
 }
 
