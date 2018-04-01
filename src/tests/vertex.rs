@@ -44,7 +44,7 @@ impl QcVertex4 {
 
 impl fmt::Display for QcVertex4 {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "v  {}  {}  {} {}", self.0.x, self.0.y, self.0.z, self.0.w)
+        write!(f, "v  {}  {}  {}  {}", self.0.x, self.0.y, self.0.z, self.0.w)
     }
 }
 
@@ -73,11 +73,48 @@ impl From<QcVertex3> for QcVertex4 {
     }
 }
 
+#[derive(Clone, Debug)]
+struct QcVertexOracle(QcVertex4, String, String);
+
+impl QcVertexOracle {
+    fn new(qc_vertex: QcVertex4, string: String, other_string: String) -> QcVertexOracle {
+        QcVertexOracle(qc_vertex, string, other_string)
+    }
+}
+
+impl quickcheck::Arbitrary for QcVertexOracle {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        use quickcheck::Arbitrary;
+
+        fn spaces(n: u8) -> String {
+            let mut spaces = String::new();
+            for _ in 0..n {
+                spaces.push(' ');
+            }
+            spaces
+        }
+
+        let qc_vertex: QcVertex4 = Arbitrary::arbitrary(g);
+        let string = qc_vertex.to_string();
+        let spaces: [String; 5] = [
+            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)), 
+            spaces(Arbitrary::arbitrary(g))
+        ];
+        let other_string = format!("v {} {} {} {} {} {} {} {} {} ", 
+            spaces[0], qc_vertex.0.x, spaces[1], qc_vertex.0.y, 
+            spaces[2], qc_vertex.0.z, spaces[3], qc_vertex.0.w,
+            spaces[4], 
+        );
+
+        QcVertexOracle::new(qc_vertex, string, other_string)
+    }
+}
 
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::{QcVertex3, QcVertex4};
+    use super::{QcVertex3, QcVertex4, QcVertexOracle};
 
     #[test]
     fn prop_parsing_a_vertex_string_should_yield_the_same_vertex() {
@@ -116,6 +153,18 @@ mod property_tests {
             result == expected
         }
         quickcheck::quickcheck(property as fn(QcVertex3) -> bool);
+    }
+
+    #[test]
+    fn prop_parser_vertex_should_be_invariant_to_whitespace() {
+        fn property(qcvo: QcVertexOracle) -> bool {
+            let result1 = Parser::new(qcvo.1.chars()).parse_vertex();
+            let result2 = Parser::new(qcvo.2.chars()).parse_vertex();
+            let expected = Ok(qcvo.0.to_vertex());
+
+            (result1 == expected) && (result2 == expected)
+        }
+        quickcheck::quickcheck(property as fn(QcVertexOracle) -> bool);
     }
 }
 
