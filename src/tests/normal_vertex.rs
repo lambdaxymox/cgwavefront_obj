@@ -1,4 +1,5 @@
 use obj::object::NormalVertex;
+use obj::parser::ParseError;
 use quickcheck;
 use std::fmt;
 use std::cmp;
@@ -36,17 +37,19 @@ impl quickcheck::Arbitrary for QcNormalVertex {
 }
 
 #[derive(Clone, Debug)]
-struct QcNormalVertexOracle(QcNormalVertex, String, String);
+struct QcNormalVertexModel(QcNormalVertex, String);
 
-impl QcNormalVertexOracle {
-    fn new(qc_texture_vertex: QcNormalVertex, 
-        string: String, other_string: String) -> QcNormalVertexOracle {
-        
-        QcNormalVertexOracle(qc_texture_vertex, string, other_string)
+impl QcNormalVertexModel {
+    fn new(qc_normal_vertex: QcNormalVertex, string: String) -> QcNormalVertexModel {
+        QcNormalVertexModel(qc_normal_vertex, string)
+    }
+
+    fn parse(&self) -> Result<NormalVertex, ParseError> {
+        Ok(self.0.to_vertex())
     }
 }
 
-impl quickcheck::Arbitrary for QcNormalVertexOracle {
+impl quickcheck::Arbitrary for QcNormalVertexModel {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
         use quickcheck::Arbitrary;
 
@@ -59,24 +62,24 @@ impl quickcheck::Arbitrary for QcNormalVertexOracle {
         }
 
         let qc_vertex: QcNormalVertex = Arbitrary::arbitrary(g);
-        let string = qc_vertex.to_string();
-        let spaces: [String; 4] = [
+        let spaces: [String; 5] = [
             spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
-            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g))
+            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+            spaces(Arbitrary::arbitrary(g))
         ];
-        let other_string = format!("vn {} {} {} {} {} {} {} ", 
-            spaces[0], qc_vertex.0.i, spaces[1], qc_vertex.0.j, 
-            spaces[2], qc_vertex.0.k, spaces[3]
+        let string = format!("{}vn {} {} {} {} {} {} {} ", 
+            spaces[0], spaces[1], qc_vertex.0.i, spaces[2], qc_vertex.0.j, 
+            spaces[3], qc_vertex.0.k, spaces[4]
         );
 
-        QcNormalVertexOracle::new(qc_vertex, string, other_string)
+        QcNormalVertexModel::new(qc_vertex, string)
     }
 }
 
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::{QcNormalVertex, QcNormalVertexOracle};
+    use super::{QcNormalVertex, QcNormalVertexModel};
 
     #[test]
     fn prop_parsing_a_texture_vertex_string_is_reversible() {
@@ -93,14 +96,13 @@ mod property_tests {
 
     #[test]
     fn prop_parser_texture_vertex_should_be_invariant_to_whitespace() {
-        fn property(qcnvo: QcNormalVertexOracle) -> bool {
-            let result1 = Parser::new(qcnvo.1.chars()).parse_normal_vertex();
-            let result2 = Parser::new(qcnvo.2.chars()).parse_normal_vertex();
-            let expected = Ok(qcnvo.0.to_vertex());
+        fn property(qcnvm: QcNormalVertexModel) -> bool {
+            let result = Parser::new(qcnvm.1.chars()).parse_normal_vertex();
+            let expected = qcnvm.parse();
 
-            (result1 == expected) && (result2 == expected)
+            result == expected
         }
-        quickcheck::quickcheck(property as fn(QcNormalVertexOracle) -> bool);
+        quickcheck::quickcheck(property as fn(QcNormalVertexModel) -> bool);
     }
 }
 
