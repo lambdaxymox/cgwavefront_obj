@@ -1,4 +1,5 @@
 use obj::object::Vertex;
+use obj::parser::ParseError;
 use quickcheck;
 use std::fmt;
 use std::cmp;
@@ -74,11 +75,15 @@ impl From<QcVertex3> for QcVertex4 {
 }
 
 #[derive(Clone, Debug)]
-struct QcVertexModel(QcVertex4, String, String);
+struct QcVertexModel(QcVertex4, String);
 
 impl QcVertexModel {
-    fn new(qc_vertex: QcVertex4, string: String, other_string: String) -> QcVertexModel {
-        QcVertexModel(qc_vertex, string, other_string)
+    fn new(qc_vertex: QcVertex4, string: String) -> QcVertexModel {
+        QcVertexModel(qc_vertex, string)
+    }
+
+    fn parse_vertex(&self) -> Result<Vertex, ParseError> {
+        Ok(self.0.to_vertex())
     }
 }
 
@@ -95,19 +100,18 @@ impl quickcheck::Arbitrary for QcVertexModel {
         }
 
         let qc_vertex: QcVertex4 = Arbitrary::arbitrary(g);
-        let string = qc_vertex.to_string();
         let spaces: [String; 5] = [
             spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
             spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)), 
             spaces(Arbitrary::arbitrary(g))
         ];
-        let other_string = format!("v {} {} {} {} {} {} {} {} {} ", 
+        let string = format!("v {} {} {} {} {} {} {} {} {} ", 
             spaces[0], qc_vertex.0.x, spaces[1], qc_vertex.0.y, 
             spaces[2], qc_vertex.0.z, spaces[3], qc_vertex.0.w,
             spaces[4], 
         );
 
-        QcVertexModel::new(qc_vertex, string, other_string)
+        QcVertexModel::new(qc_vertex, string)
     }
 }
 
@@ -121,8 +125,7 @@ mod property_tests {
     fn prop_parsing_a_vertex_string_should_yield_the_same_vertex() {
         fn property(qc_vertex: QcVertex4) -> bool {
             let input = qc_vertex.to_string();
-            let mut parser = Parser::new(input.chars());
-            let result = parser.parse_vertex();
+            let result = Parser::new(input.chars()).parse_vertex();
             let expected = Ok(qc_vertex.to_vertex());
 
             result == expected
@@ -134,8 +137,7 @@ mod property_tests {
     fn prop_parsing_a_vertex_with_three_coordinates_should_have_default_w_1() {
         fn property(qc_vertex: QcVertex3) -> bool {
             let input = qc_vertex.to_string();
-            let mut parser = Parser::new(input.chars());
-            let result = parser.parse_vertex();
+            let result = Parser::new(input.chars()).parse_vertex();
             let expected = Ok(qc_vertex.to_vertex());
 
             result == expected
@@ -147,8 +149,7 @@ mod property_tests {
     fn prop_a_three_vertex_and_a_four_vertex_with_w_1_identical() {
         fn property(qc_vertex: QcVertex3) -> bool {
             let input = qc_vertex.to_string();
-            let mut parser = Parser::new(input.chars());
-            let result = parser.parse_vertex();
+            let result = Parser::new(input.chars()).parse_vertex();
             let expected = Ok(QcVertex4::from(qc_vertex).0);
 
             result == expected
@@ -159,11 +160,10 @@ mod property_tests {
     #[test]
     fn prop_parser_vertex_should_be_invariant_to_whitespace() {
         fn property(qcvm: QcVertexModel) -> bool {
-            let result1 = Parser::new(qcvm.1.chars()).parse_vertex();
-            let result2 = Parser::new(qcvm.2.chars()).parse_vertex();
-            let expected = Ok(qcvm.0.to_vertex());
+            let result = Parser::new(qcvm.1.chars()).parse_vertex();
+            let expected = qcvm.parse_vertex();
 
-            (result1 == expected) && (result2 == expected)
+            result == expected
         }
         quickcheck::quickcheck(property as fn(QcVertexModel) -> bool);
     }
