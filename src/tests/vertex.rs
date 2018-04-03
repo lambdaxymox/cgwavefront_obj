@@ -74,15 +74,15 @@ impl From<QcVertex3> for QcVertex4 {
 }
 
 #[derive(Clone, Debug)]
-struct QcVertexOracle(QcVertex4, String, String);
+struct QcVertexModel(QcVertex4, String, String);
 
-impl QcVertexOracle {
-    fn new(qc_vertex: QcVertex4, string: String, other_string: String) -> QcVertexOracle {
-        QcVertexOracle(qc_vertex, string, other_string)
+impl QcVertexModel {
+    fn new(qc_vertex: QcVertex4, string: String, other_string: String) -> QcVertexModel {
+        QcVertexModel(qc_vertex, string, other_string)
     }
 }
 
-impl quickcheck::Arbitrary for QcVertexOracle {
+impl quickcheck::Arbitrary for QcVertexModel {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
         use quickcheck::Arbitrary;
 
@@ -107,14 +107,14 @@ impl quickcheck::Arbitrary for QcVertexOracle {
             spaces[4], 
         );
 
-        QcVertexOracle::new(qc_vertex, string, other_string)
+        QcVertexModel::new(qc_vertex, string, other_string)
     }
 }
 
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::{QcVertex3, QcVertex4, QcVertexOracle};
+    use super::{QcVertex3, QcVertex4, QcVertexModel};
 
 
     #[test]
@@ -158,14 +158,14 @@ mod property_tests {
 
     #[test]
     fn prop_parser_vertex_should_be_invariant_to_whitespace() {
-        fn property(qcvo: QcVertexOracle) -> bool {
-            let result1 = Parser::new(qcvo.1.chars()).parse_vertex();
-            let result2 = Parser::new(qcvo.2.chars()).parse_vertex();
-            let expected = Ok(qcvo.0.to_vertex());
+        fn property(qcvm: QcVertexModel) -> bool {
+            let result1 = Parser::new(qcvm.1.chars()).parse_vertex();
+            let result2 = Parser::new(qcvm.2.chars()).parse_vertex();
+            let expected = Ok(qcvm.0.to_vertex());
 
             (result1 == expected) && (result2 == expected)
         }
-        quickcheck::quickcheck(property as fn(QcVertexOracle) -> bool);
+        quickcheck::quickcheck(property as fn(QcVertexModel) -> bool);
     }
 }
 
