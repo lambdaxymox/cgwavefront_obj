@@ -67,7 +67,7 @@ impl quickcheck::Arbitrary for QcTextureVertexModel {
             spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
             spaces(Arbitrary::arbitrary(g))
         ];
-        let string = format!("{} vt {} {} {} {} {} {} {} ", 
+        let string = format!("{}vt {} {} {} {} {} {} {} ", 
             spaces[0], spaces[1], qc_vertex.0.u, spaces[2], qc_vertex.0.v, 
             spaces[3], qc_vertex.0.w, spaces[4]
         );
