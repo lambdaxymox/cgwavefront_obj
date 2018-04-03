@@ -1,8 +1,21 @@
 use lexer::Lexer;
-use std::iter;
-use std::collections::HashMap;
 use obj::vertex_parser::VertexParser;
 
+use std::iter;
+use std::collections::HashMap;
+use std::error;
+use std::fmt;
+
+
+#[inline]
+fn slice<'a>(st: &'a Option<String>) -> Option<&'a str> {
+    st.as_ref().map(|st| &st[..])
+}
+
+#[inline]
+fn slice_res<'a>(st: &'a Result<String, ParseError>) -> Result<&'a str, &'a ParseError> {
+    st.as_ref().map(|s| &s[..])
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
@@ -18,6 +31,19 @@ impl ParseError {
         }
     }
 }
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "Parse error at line {}: {}", self.line_number, self.message)
+    }
+}
+
+impl error::Error for ParseError {
+    fn description(&self) -> &str {
+        &self.message
+    }
+}
+
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 enum ParserIndex {
@@ -125,7 +151,7 @@ impl<'a> ParserState<'a> {
 
     pub fn skip_zero_or_more_newlines(&mut self) {
         loop {
-            match self.peek().as_ref().map(|st| &st[..]) {
+            match slice(&self.peek()) {
                 Some("\n") => {},
                 Some(_) | None => break,
             }
