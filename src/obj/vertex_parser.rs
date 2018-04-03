@@ -8,16 +8,13 @@ impl VertexParser {
     pub fn new() -> VertexParser { VertexParser {} }
 
     pub fn parse(&self, state: &mut ParserState) -> Result<Vertex, ParseError> {
-        try!(state.parse_statement("v"));
+        try!(state.expect("v"));
  
         let x = try!(state.parse_f32());
         let y = try!(state.parse_f32());
         let z = try!(state.parse_f32());
         let mw = state.try_once(|st| st.parse::<f32>().ok());
-        let w = match mw {
-            Some(val) => val,
-            None => return Ok(Vertex { x: x, y: y, z: z, w: 1. })
-        };
+        let w = mw.unwrap_or(1.0);
 
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }

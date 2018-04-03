@@ -8,7 +8,7 @@ impl NormalVertexParser {
     pub fn new() -> NormalVertexParser { NormalVertexParser {} }
 
     pub fn parse(&self, state: &mut ParserState) -> Result<NormalVertex, ParseError> {
-        try!(state.parse_statement("vn"));
+        try!(state.expect("vn"));
 
         let i = try!(state.parse_f32());
         let j = try!(state.parse_f32());

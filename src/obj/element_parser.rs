@@ -11,11 +11,11 @@ impl ElementParser {
         state: &mut ParserState, 
         elements: &mut Vec<Element>) -> Result<(), ParseError> {
         
-        try!(state.parse_statement("p"));
+        try!(state.expect("p"));
         let v_index = try!(state.parse_u32());
         elements.push(Element::Point(VTNIndex::new(v_index as usize, None, None)));
         loop {
-            match state.parse_string().as_ref().map(|st| &st[..]) {
+            match state.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(st) => match st.parse::<usize>() {
                     Ok(v_index) => elements.push(
@@ -33,7 +33,7 @@ impl ElementParser {
         state: &mut ParserState, 
         elements: &mut Vec<Element>) -> Result<(), ParseError> {
         
-        try!(state.parse_statement("l"));
+        try!(state.expect("l"));
         
         let vtn_index1 = try!(state.parse_u32());
         let vtn_index2 = try!(state.parse_u32());
@@ -43,7 +43,7 @@ impl ElementParser {
         ));
         let mut vtn_index1 = VTNIndex::new(vtn_index2 as usize, None, None);
         loop {
-            match state.parse_string().as_ref().map(|st| &st[..]) {
+            match state.next_string().as_ref().map(|st| &st[..]) {
                 Ok("\n") | Err(_) => break,
                 Ok(st) => match st.parse::<usize>() {
                     Ok(v_index) => { 

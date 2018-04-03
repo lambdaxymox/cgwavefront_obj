@@ -78,7 +78,7 @@ impl VTNIndexParser {
     }
 
     fn parse(&self, state: &mut ParserState) -> Result<VTNIndex, ParseError> {
-        let st = try!(state.parse_string());
+        let st = try!(state.next_string());
         match self.parse_vn(state, &st) {
             Ok(val) => return Ok(val),
             Err(_) => {},

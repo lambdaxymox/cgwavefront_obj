@@ -8,7 +8,7 @@ impl TextureVertexParser {
     fn new() -> TextureVertexParser { TextureVertexParser {} }
 
     fn parse(&self, state: &mut ParserState) -> Result<TextureVertex, ParseError> {
-        try!(state.parse_statement("vt"));
+        try!(state.expect("vt"));
 
         let u = try!(state.parse_f32());
         let mv = state.try_once(|st| st.parse::<f32>().ok());
