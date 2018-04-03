@@ -105,7 +105,7 @@ impl quickcheck::Arbitrary for QcVertexModel {
             spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)), 
             spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
         ];
-        let string = format!("{} v {} {} {} {} {} {} {} {} {} ", 
+        let string = format!("{}v {} {} {} {} {} {} {} {} {} ", 
             spaces[0], spaces[1], qc_vertex.0.x, spaces[2], qc_vertex.0.y, 
             spaces[3], qc_vertex.0.z, spaces[4], qc_vertex.0.w,
             spaces[5], 
