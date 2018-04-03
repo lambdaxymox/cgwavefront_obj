@@ -272,13 +272,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
         let mut indices_parsed = 0;
-        loop {
-            if let Ok(vtn_index) = self.parse_vtn_index() {
-                vtn_indices.push(vtn_index);
-                indices_parsed += 1;
-            } else {
-                break;
-            }
+        while let Ok(vtn_index) = self.parse_vtn_index() {
+            vtn_indices.push(vtn_index);
+            indices_parsed += 1;
         }
 
         Ok(indices_parsed)
