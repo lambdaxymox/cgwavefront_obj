@@ -387,7 +387,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         Ok(groups_parsed)
     }
 
-    fn parse_smoothing_group(&mut self, 
+    fn parse_smoothing_group(&mut self,
         smoothing_groups: &mut Vec<SmoothingGroup>
     ) -> Result<u32, ParseError> {
         
@@ -583,20 +583,15 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut min_normal_index = 1;
         let mut max_normal_index = 1;
 
-        loop {
-            self.skip_zero_or_more_newlines();
-            if let Some(_) = slice(&self.peek()) {
-                result.push(try!(self.parse_object(
-                    &mut min_vertex_index, &mut max_vertex_index,
-                    &mut min_tex_index,    &mut max_tex_index,
-                    &mut min_normal_index, &mut max_normal_index
-                )));
-            } else {
-                break;
-            }
-        }
-
         self.skip_zero_or_more_newlines();
+        while let Some(_) = slice(&self.peek()) {
+            result.push(try!(self.parse_object(
+                &mut min_vertex_index, &mut max_vertex_index,
+                &mut min_tex_index,    &mut max_tex_index,
+                &mut min_normal_index, &mut max_normal_index
+            )));
+            self.skip_zero_or_more_newlines();
+        }
 
         Ok(result)
     }
