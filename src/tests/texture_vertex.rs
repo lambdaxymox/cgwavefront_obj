@@ -1,4 +1,5 @@
 use obj::object::TextureVertex;
+use obj::parser::ParseError;
 use quickcheck;
 use std::fmt;
 use std::cmp;
@@ -36,17 +37,19 @@ impl quickcheck::Arbitrary for QcTextureVertex {
 }
 
 #[derive(Clone, Debug)]
-struct QcTextureVertexOracle(QcTextureVertex, String, String);
+struct QcTextureVertexModel(QcTextureVertex, String);
 
-impl QcTextureVertexOracle {
-    fn new(qc_texture_vertex: QcTextureVertex, 
-        string: String, other_string: String) -> QcTextureVertexOracle {
-        
-        QcTextureVertexOracle(qc_texture_vertex, string, other_string)
+impl QcTextureVertexModel {
+    fn new(qc_texture_vertex: QcTextureVertex, string: String) -> QcTextureVertexModel {
+        QcTextureVertexModel(qc_texture_vertex, string)
+    }
+
+    fn parse(&self) -> Result<TextureVertex, ParseError> {
+        Ok(self.0.to_vertex())
     }
 }
 
-impl quickcheck::Arbitrary for QcTextureVertexOracle {
+impl quickcheck::Arbitrary for QcTextureVertexModel {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
         use quickcheck::Arbitrary;
 
@@ -59,24 +62,25 @@ impl quickcheck::Arbitrary for QcTextureVertexOracle {
         }
 
         let qc_vertex: QcTextureVertex = Arbitrary::arbitrary(g);
-        let string = qc_vertex.to_string();
-        let spaces: [String; 4] = [
+        let spaces: [String; 5] = [
             spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
-            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g))
+            spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+            spaces(Arbitrary::arbitrary(g))
         ];
-        let other_string = format!("vt {} {} {} {} {} {} {} ", 
-            spaces[0], qc_vertex.0.u, spaces[1], qc_vertex.0.v, 
-            spaces[2], qc_vertex.0.w, spaces[3]
+        let string = format!("{} vt {} {} {} {} {} {} {} ", 
+            spaces[0], spaces[1], qc_vertex.0.u, spaces[2], qc_vertex.0.v, 
+            spaces[3], qc_vertex.0.w, spaces[4]
         );
 
-        QcTextureVertexOracle::new(qc_vertex, string, other_string)
+        QcTextureVertexModel::new(qc_vertex, string)
     }
 }
 
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::{QcTextureVertex, QcTextureVertexOracle};
+    use super::{QcTextureVertex, QcTextureVertexModel};
+
 
     #[test]
     fn prop_parsing_a_texture_vertex_string_is_reversible() {
@@ -93,14 +97,13 @@ mod property_tests {
 
     #[test]
     fn prop_parser_texture_vertex_should_be_invariant_to_whitespace() {
-        fn property(qctvo: QcTextureVertexOracle) -> bool {
-            let result1 = Parser::new(qctvo.1.chars()).parse_texture_vertex();
-            let result2 = Parser::new(qctvo.2.chars()).parse_texture_vertex();
-            let expected = Ok(qctvo.0.to_vertex());
+        fn property(qctvm: QcTextureVertexModel) -> bool {
+            let result = Parser::new(qctvm.1.chars()).parse_texture_vertex();
+            let expected = qctvm.parse();
 
-            (result1 == expected) && (result2 == expected)
+            result == expected
         }
-        quickcheck::quickcheck(property as fn(QcTextureVertexOracle) -> bool);
+        quickcheck::quickcheck(property as fn(QcTextureVertexModel) -> bool);
     }
 }
 
