@@ -160,63 +160,26 @@ impl Object {
         match index {
             VTNIndex::V(v_index) => {
                 let vertex = self.vertex_set.get(v_index as usize)?;
-                /*
-                let vertex = match self.vertex_set.get(v_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                */
+
                 Some(VTNTriple::V(vertex))
             },
             VTNIndex::VT(v_index, vt_index) => { 
                 let vertex = self.vertex_set.get(v_index as usize)?;
                 let texture_vertex = self.texture_vertex_set.get(vt_index as usize)?;
-                /*
-                let vertex = match self.vertex_set.get(v_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                let texture_vertex = match self.texture_vertex_set.get(vt_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                */
 
                 Some(VTNTriple::VT(vertex, texture_vertex))
             },
             VTNIndex::VN(v_index, vn_index) => {
                 let vertex = self.vertex_set.get(v_index as usize)?;
                 let normal_vertex = self.normal_vertex_set.get(vn_index as usize)?;
-                /*
-                let vertex = match self.vertex_set.get(v_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                let normal_vertex = match self.normal_vertex_set.get(vn_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                */
+
                 Some(VTNTriple::VN(vertex, normal_vertex))
             },
             VTNIndex::VTN(v_index, vt_index, vn_index) => {
                 let vertex = self.vertex_set.get(v_index as usize)?;
                 let texture_vertex = self.texture_vertex_set.get(vt_index as usize)?;
                 let normal_vertex = self.normal_vertex_set.get(vn_index as usize)?;
-                /*
-                let vertex = match self.vertex_set.get(v_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                let texture_vertex = match self.texture_vertex_set.get(vt_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                let normal_vertex = match self.normal_vertex_set.get(vn_index as usize) {
-                    Some(val) => val,
-                    None => return None,
-                };
-                */
+
                 Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
             },
         }
