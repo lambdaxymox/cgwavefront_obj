@@ -1,5 +1,3 @@
-#[cfg(test)]
-#[macro_use]
 extern crate quickcheck;
 extern crate wavefront;
 
@@ -11,17 +9,17 @@ use wavefront::obj::{
 use wavefront::obj::{Parser, ParseError};
 
 use std::fmt;
-use std::cmp;
+use std::str;
 
 
 #[derive(Clone, Debug)]
-struct ObjectSetModel {
+struct ParserModel {
 
 }
 
-impl ObjectSetModel {
-    fn new() -> ObjectSetModel {
-        ObjectSetModel { }
+impl ParserModel {
+    fn new() -> ParserModel {
+        ParserModel { }
     }
 
     fn parse(&self) -> Result<ObjectSet, ParseError> { 
@@ -29,72 +27,148 @@ impl ObjectSetModel {
     }
 }
 
-impl fmt::Display for ObjectSetModel {
+impl fmt::Display for ParserModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "")
     }
 }
 
-impl Arbitrary for ObjectSetModel {
-    fn arbitrary<G: Gen>(g: &mut G) -> ObjectSetModel {
-        ObjectSetModel::new()
+#[derive(Clone, Debug)]
+struct Machine { 
+    model: ParserModel, 
+    text: String,
+}
+
+impl Machine {
+    fn new(model: ParserModel) -> Machine {
+        let text = model.to_string();
+        Machine { model: model, text: text }
+    }
+
+    fn actual(&self) -> Parser<str::Chars> {
+        let input = self.text.chars();
+        Parser::new(input)
+    }
+
+    fn model(&self) -> ParserModel {
+        self.model.clone()
     }
 }
 
-#[test]
-fn prop_parser_correctly_parses_valid_obj_files() {
-    fn property(model: ObjectSetModel) -> bool {
-        let input = model.to_string();
-        let result = Parser::new(input.chars()).parse();
-        let expected = model.parse();
-
-        //result == expected
+impl Arbitrary for Machine {
+    fn arbitrary<G: Gen>(g: &mut G) -> Machine {
         unimplemented!();
     }
 }
 
 #[test]
+fn prop_parser_correctly_parses_valid_obj_files() {
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        //result == expected
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
+}
+
+#[test]
 fn prop_parse_object_set_should_parse_objects() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_vertices() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_texture_vertices() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_normal_vertices() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_smoothing_groups() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_elements() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_shape_entries() {
-    unimplemented!();
+    fn property(machine: Machine) -> bool {
+        let result = machine.actual().parse();
+        let expected = machine.model().parse();
+
+        unimplemented!();
+    }
+    quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
