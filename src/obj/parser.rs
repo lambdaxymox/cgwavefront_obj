@@ -796,15 +796,29 @@ mod texture_vertex_tests {
 
 
     #[derive(Clone, Debug)]
-    struct QcTextureVertex(TextureVertex);
+    enum QcTextureVertex {
+        VTU(TextureVertex),
+        VTUV(TextureVertex),
+        VTUVW(TextureVertex),
+    }
 
     impl QcTextureVertex {
-        fn to_vertex(&self) -> TextureVertex { self.0 }
+        fn to_vertex(&self) -> TextureVertex {
+            match *self {
+                QcTextureVertex::VTU(tv) => tv.clone(),
+                QcTextureVertex::VTUV(tv) => tv.clone(),
+                QcTextureVertex::VTUVW(tv) => tv.clone(),
+            }
+        }
     }
 
     impl fmt::Display for QcTextureVertex {
         fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-            write!(f, "vt  {}  {}  {}", self.0.u, self.0.v, self.0.w)
+            match *self {
+                QcTextureVertex::VTU(tv) => write!(f, "vt  {}", tv.u),
+                QcTextureVertex::VTUV(tv) => write!(f, "vt  {}  {}", tv.u, tv.v),
+                QcTextureVertex::VTUVW(tv) => write!(f, "vt  {}  {}  {}", tv.u, tv.v, tv.w),
+            }
         }
     }
 
