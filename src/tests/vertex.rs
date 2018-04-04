@@ -103,7 +103,7 @@ impl quickcheck::Arbitrary for VertexParserModel {
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::{QcVertex, VertexParserModel};
+    use super::VertexParserModel;
 
 
     #[test]
