@@ -3,14 +3,110 @@ extern crate wavefront;
 
 use quickcheck::{Arbitrary, Gen};
 use wavefront::obj::{
-    Vertex, NormalVertex, Element, VTNIndex, ObjectSet, ObjectBuilder,
+    Vertex, TextureVertex, NormalVertex, Element, VTNIndex, ObjectSet, ObjectBuilder,
     GroupName, ShapeEntry,
 };
 use wavefront::obj::{Parser, ParseError};
 
 use std::fmt;
+use std::cmp;
 use std::str;
 
+
+enum MVertex {
+    Vertex3(Vertex),
+    Vertex4(Vertex),
+}
+
+impl MVertex {
+    fn to_vertex(&self) -> Vertex { 
+        match *self {
+            MVertex::Vertex3(v) => v.clone(),
+            MVertex::Vertex4(v) => v.clone(),
+        }
+    }
+}
+
+impl fmt::Display for MVertex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            MVertex::Vertex3(v) => {
+                write!(f, "v  {}  {}  {}", v.x, v.y, v.z)
+            }
+            MVertex::Vertex4(v) => {
+                write!(f, "v  {}  {}  {}  {}", v.x, v.y, v.z, v.w)
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+enum MTextureVertex {
+    VTU(TextureVertex),
+    VTUV(TextureVertex),
+    VTUVW(TextureVertex),
+}
+
+impl MTextureVertex {
+    fn to_vertex(&self) -> TextureVertex {
+        match *self {
+            MTextureVertex::VTU(tv) => tv.clone(),
+            MTextureVertex::VTUV(tv) => tv.clone(),
+            MTextureVertex::VTUVW(tv) => tv.clone(),
+        }
+    }
+}
+
+impl fmt::Display for MTextureVertex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            MTextureVertex::VTU(tv) => write!(f, "vt  {}", tv.u),
+            MTextureVertex::VTUV(tv) => write!(f, "vt  {}  {}", tv.u, tv.v),
+            MTextureVertex::VTUVW(tv) => write!(f, "vt  {}  {}  {}", tv.u, tv.v, tv.w),
+        }
+    }
+}
+
+impl cmp::PartialEq<TextureVertex> for MTextureVertex {
+    fn eq(&self, other: &TextureVertex) -> bool {
+        &self.to_vertex() == other
+    }
+}
+
+impl<'a> cmp::PartialEq<&'a TextureVertex> for MTextureVertex {
+    fn eq(&self, other: & &TextureVertex) -> bool { 
+        &&self.to_vertex() == other
+    }
+}
+
+impl quickcheck::Arbitrary for MTextureVertex {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        let tv_type = g.gen_range(0, 3);
+        let u = quickcheck::Arbitrary::arbitrary(g);
+        match tv_type {
+            0 => {
+                MTextureVertex::VTU(TextureVertex { u: u, v: 0.0, w: 0.0 })
+            }
+            1 => {
+                let v = quickcheck::Arbitrary::arbitrary(g);
+                MTextureVertex::VTUV(TextureVertex { u: u, v: v, w: 0.0 })
+            }
+            _ => {
+                let v = quickcheck::Arbitrary::arbitrary(g);
+                let w = quickcheck::Arbitrary::arbitrary(g);
+                MTextureVertex::VTUVW(TextureVertex { u: u, v: v, w: w })
+            }
+        }
+    }
+}
+
+enum TextLine {
+    V(MVertex),
+    Comment(String),
+    SmoothingGroup(String),
+    Group(Vec<String>),
+
+}
 
 #[derive(Clone, Debug)]
 struct ParserModel {
