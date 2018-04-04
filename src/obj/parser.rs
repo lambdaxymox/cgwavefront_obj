@@ -120,7 +120,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    pub fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
+    fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
         try!(self.expect("v"));
  
         let x = try!(self.parse_f32());
@@ -132,7 +132,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }
 
-    pub fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
+    fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
         try!(self.expect("vt"));
 
         let u = try!(self.parse_f32());
@@ -144,7 +144,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         Ok(TextureVertex { u: u, v: v, w: w })
     }
 
-    pub fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
+    fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
         try!(self.expect("vn"));
 
         let i = try!(self.parse_f32());
@@ -248,7 +248,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    pub fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
+    fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         let st = try!(self.next_string());
         match self.parse_vn(&st) {
             Ok(val) => return Ok(val),
