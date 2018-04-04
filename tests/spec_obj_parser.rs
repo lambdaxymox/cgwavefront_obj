@@ -100,10 +100,43 @@ impl quickcheck::Arbitrary for MTextureVertex {
     }
 }
 
+#[derive(Clone, Debug)]
+struct MNormalVertex(NormalVertex);
+
+impl MNormalVertex {
+    fn to_vertex(&self) -> NormalVertex { self.0 }
+}
+
+impl fmt::Display for MNormalVertex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "vn  {}  {}  {}", self.0.i, self.0.j, self.0.k)
+    }
+}
+
+impl cmp::PartialEq<NormalVertex> for MNormalVertex {
+    fn eq(&self, other: &NormalVertex) -> bool { &self.0 == other }
+}
+
+impl<'a> cmp::PartialEq<&'a NormalVertex> for MNormalVertex {
+    fn eq(&self, other: & &NormalVertex) -> bool { &&self.0 == other }
+}
+
+impl quickcheck::Arbitrary for MNormalVertex {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        let i = quickcheck::Arbitrary::arbitrary(g);
+        let j = quickcheck::Arbitrary::arbitrary(g);
+        let k = quickcheck::Arbitrary::arbitrary(g);
+
+        MNormalVertex(NormalVertex { i: i, j: j, k: k })
+    }
+}
+
 enum TextLine {
     V(MVertex),
+    VT(MTextureVertex),
+    VN(MNormalVertex),
     Comment(String),
-    SmoothingGroup(String),
+    S(String),
     Group(Vec<String>),
 
 }
