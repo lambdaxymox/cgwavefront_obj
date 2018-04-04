@@ -51,3 +51,49 @@ fn prop_parser_correctly_parses_valid_obj_files() {
         result == expected
     }
 }
+
+#[test]
+fn prop_parse_object_set_should_parse_objects() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_object_names() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_vertices() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_texture_vertices() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_normal_vertices() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_groups() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_smoothing_groups() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_elements() {
+    unimplemented!();
+}
+
+#[test]
+fn prop_parse_object_set_should_parse_shape_entries() {
+    unimplemented!();
+}
+
