@@ -11,4 +11,5 @@ pub use obj::object::GroupName;
 pub use obj::object::ShapeEntry;
 
 pub use obj::parser::Parser;
+pub use obj::parser::ParseError;
 

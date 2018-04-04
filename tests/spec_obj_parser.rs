@@ -3,51 +3,51 @@
 extern crate quickcheck;
 extern crate wavefront;
 
-use quickcheck::Arbitrary;
-use wavefront::obj::{Vertex};
+use quickcheck::{Arbitrary, Gen};
+use wavefront::obj::{
+    Vertex, NormalVertex, Element, VTNIndex, ObjectSet, ObjectBuilder,
+    GroupName, ShapeEntry,
+};
+use wavefront::obj::{Parser, ParseError};
+
 use std::fmt;
 use std::cmp;
 
 
 #[derive(Clone, Debug)]
-struct QcVertex {
-    inner: Vertex,
-    display_w: bool,
+struct ObjectSetModel {
+
 }
 
-impl fmt::Display for QcVertex {
+impl ObjectSetModel {
+    fn new() -> ObjectSetModel {
+        ObjectSetModel { }
+    }
+
+    fn parse(&self) -> Result<ObjectSet, ParseError> { 
+        unimplemented!();
+    }
+}
+
+impl fmt::Display for ObjectSetModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        if self.display_w {
-            write!(f, "v  {}  {}  {}  {}", 
-                self.inner.x, self.inner.y, self.inner.z, self.inner.w
-            )
-        } else {
-            write!(f, "v  {}  {}  {}", self.inner.x, self.inner.y, self.inner.z)
-        }
+        write!(f, "")
     }
 }
 
-impl cmp::PartialEq<Vertex> for QcVertex {
-    fn eq(&self, other: &Vertex) -> bool {
-        &self.inner == other
+impl Arbitrary for ObjectSetModel {
+    fn arbitrary<G: Gen>(g: &mut G) -> ObjectSetModel {
+        ObjectSetModel::new()
     }
 }
 
-impl<'a> cmp::PartialEq<&'a Vertex> for QcVertex {
-    fn eq(&self, other: & &Vertex) -> bool {
-        &&self.inner == other
+#[test]
+fn prop_parser_correctly_parses_valid_obj_files() {
+    fn property(model: ObjectSetModel) -> bool {
+        let input = model.to_string();
+        let result = Parser::new(input.chars()).parse();
+        let expected = model.parse();
+
+        result == expected
     }
 }
-
-impl Arbitrary for QcVertex {
-    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
-        let display_w = Arbitrary::arbitrary(g);
-        let w = if display_w { Arbitrary::arbitrary(g) } else { 1.0 };
-        let x = Arbitrary::arbitrary(g);
-        let y = Arbitrary::arbitrary(g);
-        let z = Arbitrary::arbitrary(g);
-
-        QcVertex { inner: Vertex { x: x, y: y, z: z, w: w }, display_w: display_w }
-    }
-}
-
