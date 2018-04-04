@@ -76,6 +76,7 @@ impl quickcheck::Arbitrary for QcTextureVertexModel {
     }
 }
 
+#[cfg(test)]
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;

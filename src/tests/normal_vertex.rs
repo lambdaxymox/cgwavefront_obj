@@ -76,6 +76,7 @@ impl quickcheck::Arbitrary for QcNormalVertexModel {
     }
 }
 
+#[cfg(test)]
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
