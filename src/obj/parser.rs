@@ -248,7 +248,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
+    pub fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         let st = try!(self.next_string());
         match self.parse_vn(&st) {
             Ok(val) => return Ok(val),

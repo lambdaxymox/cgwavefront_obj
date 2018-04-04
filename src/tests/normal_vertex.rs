@@ -82,6 +82,7 @@ mod property_tests {
     use quickcheck;
     use super::QcNormalVertexModel;
 
+
     #[test]
     fn prop_parsing_a_texture_vertex_string_is_reversible() {
         fn property(qcnvm: QcNormalVertexModel) -> bool {

@@ -105,6 +105,7 @@ mod property_tests {
     use quickcheck;
     use super::{QcVertex, VertexParserModel};
 
+
     #[test]
     fn prop_parsing_a_vertex_string_should_yield_the_same_vertex() {
         fn property(vpm: VertexParserModel) -> bool {

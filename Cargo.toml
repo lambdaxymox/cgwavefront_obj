@@ -11,6 +11,7 @@ name = "wavefront"
 
 [dependencies]
 quickcheck = "0.6.2"
+rand = "0.4.2"
 
 [dev-dependencies]
 criterion = "0.2.2"
