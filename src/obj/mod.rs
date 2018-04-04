@@ -9,6 +9,7 @@ pub use obj::object::NormalVertex;
 pub use obj::object::Element;
 pub use obj::object::VTNIndex;
 pub use obj::object::GroupName;
+pub use obj::object::SmoothingGroup;
 pub use obj::object::ShapeEntry;
 
 pub use obj::parser::Parser;

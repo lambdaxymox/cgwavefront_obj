@@ -4,7 +4,7 @@ extern crate wavefront;
 use quickcheck::{Arbitrary, Gen};
 use wavefront::obj::{
     Vertex, TextureVertex, NormalVertex, Element, VTNIndex, ObjectSet, ObjectBuilder,
-    GroupName, ShapeEntry,
+    GroupName, SmoothingGroup, ShapeEntry,
 };
 use wavefront::obj::{Parser, ParseError};
 
@@ -136,7 +136,7 @@ enum TextLine {
     VT(MTextureVertex),
     VN(MNormalVertex),
     Comment(String),
-    S(String),
+    S(SmoothingGroup),
     Group(Vec<String>),
 
 }
