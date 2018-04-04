@@ -48,7 +48,8 @@ fn prop_parser_correctly_parses_valid_obj_files() {
         let result = Parser::new(input.chars()).parse();
         let expected = model.parse();
 
-        result == expected
+        //result == expected
+        unimplemented!();
     }
 }
 
