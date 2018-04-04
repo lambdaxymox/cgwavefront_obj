@@ -37,11 +37,11 @@ impl quickcheck::Arbitrary for QcTextureVertex {
 }
 
 #[derive(Clone, Debug)]
-struct QcTextureVertexModel(QcTextureVertex, String);
+struct TextureVertexParserModel(QcTextureVertex, String);
 
-impl QcTextureVertexModel {
-    fn new(qc_texture_vertex: QcTextureVertex, string: String) -> QcTextureVertexModel {
-        QcTextureVertexModel(qc_texture_vertex, string)
+impl TextureVertexParserModel {
+    fn new(qc_texture_vertex: QcTextureVertex, string: String) -> TextureVertexParserModel {
+        TextureVertexParserModel(qc_texture_vertex, string)
     }
 
     fn parse(&self) -> Result<TextureVertex, ParseError> {
@@ -49,7 +49,7 @@ impl QcTextureVertexModel {
     }
 }
 
-impl quickcheck::Arbitrary for QcTextureVertexModel {
+impl quickcheck::Arbitrary for TextureVertexParserModel {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
         use quickcheck::Arbitrary;
 
@@ -72,7 +72,7 @@ impl quickcheck::Arbitrary for QcTextureVertexModel {
             spaces[3], qc_vertex.0.w, spaces[4]
         );
 
-        QcTextureVertexModel::new(qc_vertex, string)
+        TextureVertexParserModel::new(qc_vertex, string)
     }
 }
 
@@ -80,31 +80,30 @@ impl quickcheck::Arbitrary for QcTextureVertexModel {
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::{QcTextureVertex, QcTextureVertexModel};
+    use super::TextureVertexParserModel;
 
 
     #[test]
     fn prop_parsing_a_texture_vertex_string_is_reversible() {
-        fn property(qc_texture_vertex: QcTextureVertex) -> bool {
-            let input = qc_texture_vertex.to_string();
-            let mut parser = Parser::new(input.chars());
-            let result = parser.parse_texture_vertex();
-            let expected = Ok(qc_texture_vertex.to_vertex());
+        fn property(tvpm: TextureVertexParserModel) -> bool {
+            let input = tvpm.0.to_string();
+            let result = Parser::new(input.chars()).parse_texture_vertex();
+            let expected = tvpm.parse();
 
             result == expected
         }
-        quickcheck::quickcheck(property as fn(QcTextureVertex) -> bool);
+        quickcheck::quickcheck(property as fn(TextureVertexParserModel) -> bool);
     }
 
     #[test]
-    fn prop_parser_texture_vertex_should_be_invariant_to_whitespace() {
-        fn property(qctvm: QcTextureVertexModel) -> bool {
+    fn prop_parser_vertex_encode_decode_inverses() {
+        fn property(qctvm: TextureVertexParserModel) -> bool {
             let result = Parser::new(qctvm.1.chars()).parse_texture_vertex();
             let expected = qctvm.parse();
 
             result == expected
         }
-        quickcheck::quickcheck(property as fn(QcTextureVertexModel) -> bool);
+        quickcheck::quickcheck(property as fn(TextureVertexParserModel) -> bool);
     }
 }
 

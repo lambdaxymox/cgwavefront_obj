@@ -118,31 +118,7 @@ mod property_tests {
     }
 
     #[test]
-    fn prop_parsing_a_vertex_with_three_coordinates_should_have_default_w_1() {
-        fn property(vpm: VertexParserModel) -> bool {
-            let input = vpm.0.to_string();
-            let result = Parser::new(input.chars()).parse_vertex();
-            let expected = vpm.parse();
-
-            result == expected
-        }
-        quickcheck::quickcheck(property as fn(VertexParserModel) -> bool);
-    }
-
-    #[test]
-    fn prop_a_three_vertex_and_a_four_vertex_with_w_1_identical() {
-        fn property(vpm: VertexParserModel) -> bool {
-            let input = vpm.0.to_string();
-            let result = Parser::new(input.chars()).parse_vertex();
-            let expected = vpm.parse();
-
-            result == expected
-        }
-        quickcheck::quickcheck(property as fn(VertexParserModel) -> bool);
-    }
-
-    #[test]
-    fn prop_parser_vertex_should_be_invariant_to_whitespace() {
+    fn prop_parser_vertex_encode_decode_inverses() {
         fn property(vpm: VertexParserModel) -> bool {
             let result = Parser::new(vpm.1.chars()).parse_vertex();
             let expected = vpm.parse();
