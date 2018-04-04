@@ -823,20 +823,35 @@ mod texture_vertex_tests {
     }
 
     impl cmp::PartialEq<TextureVertex> for QcTextureVertex {
-        fn eq(&self, other: &TextureVertex) -> bool { &self.0 == other }
+        fn eq(&self, other: &TextureVertex) -> bool {
+            &self.to_vertex() == other
+        }
     }
 
     impl<'a> cmp::PartialEq<&'a TextureVertex> for QcTextureVertex {
-        fn eq(&self, other: & &TextureVertex) -> bool { &&self.0 == other }
+        fn eq(&self, other: & &TextureVertex) -> bool { 
+            &&self.to_vertex() == other
+        }
     }
 
     impl quickcheck::Arbitrary for QcTextureVertex {
         fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+            let tv_type = g.gen_range(0, 3);
             let u = quickcheck::Arbitrary::arbitrary(g);
-            let v = quickcheck::Arbitrary::arbitrary(g);
-            let w = quickcheck::Arbitrary::arbitrary(g);
-
-            QcTextureVertex(TextureVertex { u: u, v: v, w: w })
+            match tv_type {
+                0 => {
+                    QcTextureVertex::VTU(TextureVertex { u: u, v: 0.0, w: 0.0 })
+                }
+                1 => {
+                    let v = quickcheck::Arbitrary::arbitrary(g);
+                    QcTextureVertex::VTUV(TextureVertex { u: u, v: v, w: 0.0 })
+                }
+                _ => {
+                    let v = quickcheck::Arbitrary::arbitrary(g);
+                    let w = quickcheck::Arbitrary::arbitrary(g);
+                    QcTextureVertex::VTUVW(TextureVertex { u: u, v: v, w: w })
+                }
+            }
         }
     }
 
@@ -866,15 +881,34 @@ mod texture_vertex_tests {
             }
 
             let qc_vertex: QcTextureVertex = Arbitrary::arbitrary(g);
-            let spaces: [String; 5] = [
-                spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
-                spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
-                spaces(Arbitrary::arbitrary(g))
-            ];
-            let string = format!("{}vt {} {} {} {} {} {} {} ", 
-                spaces[0], spaces[1], qc_vertex.0.u, spaces[2], qc_vertex.0.v, 
-                spaces[3], qc_vertex.0.w, spaces[4]
-            );
+            let string = match qc_vertex {
+                QcTextureVertex::VTU(tv) => {
+                    let spaces = [
+                        spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+                        spaces(Arbitrary::arbitrary(g))
+                    ];
+                    format!("{}vt {} {} {}", spaces[0], spaces[1], tv.u, spaces[2])
+                }
+                QcTextureVertex::VTUV(tv) => {
+                    let spaces = [
+                        spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+                        spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g))
+                    ];
+                    format!("{}vt {} {} {} {} {}", 
+                        spaces[0], spaces[1], tv.u, spaces[2], tv.v, spaces[3]
+                    )
+                }
+                QcTextureVertex::VTUVW(tv) => {
+                    let spaces = [
+                        spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+                        spaces(Arbitrary::arbitrary(g)), spaces(Arbitrary::arbitrary(g)),
+                        spaces(Arbitrary::arbitrary(g))
+                    ];
+                    format!("{}vt {} {} {} {} {} {} {} ", 
+                        spaces[0], spaces[1], tv.u, spaces[2], tv.v, spaces[3], tv.w, spaces[4]
+                    )
+                }
+            };
 
             TextureVertexParserModel::new(qc_vertex, string)
         }
