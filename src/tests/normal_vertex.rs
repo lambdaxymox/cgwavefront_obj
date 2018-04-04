@@ -80,19 +80,18 @@ impl quickcheck::Arbitrary for QcNormalVertexModel {
 mod property_tests { 
     use obj::parser::Parser;
     use quickcheck;
-    use super::{QcNormalVertex, QcNormalVertexModel};
+    use super::QcNormalVertexModel;
 
     #[test]
     fn prop_parsing_a_texture_vertex_string_is_reversible() {
-        fn property(qc_normal_vertex: QcNormalVertex) -> bool {
-            let input = qc_normal_vertex.to_string();
-            let mut parser = Parser::new(input.chars());
-            let result = parser.parse_normal_vertex();
-            let expected = Ok(qc_normal_vertex.to_vertex());
+        fn property(qcnvm: QcNormalVertexModel) -> bool {
+            let input = qcnvm.0.to_string();
+            let result = Parser::new(input.chars()).parse_normal_vertex();
+            let expected = qcnvm.parse();
 
             result == expected
         }
-        quickcheck::quickcheck(property as fn(QcNormalVertex) -> bool);
+        quickcheck::quickcheck(property as fn(QcNormalVertexModel) -> bool);
     }
 
     #[test]
