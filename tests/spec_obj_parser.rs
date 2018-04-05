@@ -262,31 +262,27 @@ impl fmt::Display for TextLine {
                 s_name.fmt(f)
             }
             TextLine::G(ref vec) => {
-                let mut string = String::from("g ");
-                for name in vec {
-                    write!(string, " {} ", name)?;
-                }
+                let string = vec.iter().fold(String::from("g "), |acc, name| { 
+                    acc + " " + &name.to_string() + " "
+                });
                 string.fmt(f)
             }
             TextLine::P(ref vec) => {
-                let mut string = String::from("p ");
-                for v_index in vec {
-                    write!(string, " {} ", v_index)?;
-                }
+                let string = vec.iter().fold(String::from("p "), |acc, v_index| { 
+                    acc + " " + &v_index.to_string() + " "
+                });
                 string.fmt(f)
             }
             TextLine::L(ref vec) => {
-                let mut string = String::from("l ");
-                for vtn_index in vec {
-                    write!(string, " {} ", vtn_index)?;
-                }
+                let string = vec.iter().fold(String::from("l "), |acc, v_index| { 
+                    acc + " " + &v_index.to_string() + " "
+                });
                 string.fmt(f)
             }
             TextLine::F(ref vec) => {
-                let mut string = String::from("f ");
-                for vtn_index in vec {
-                    write!(string, " {} ", vtn_index)?;
-                }
+                let string = vec.iter().fold(String::from("f "), |acc, v_index| { 
+                    acc + " " + &v_index.to_string() + " "
+                });
                 string.fmt(f)
             }
             TextLine::O(ref o_name) => {
