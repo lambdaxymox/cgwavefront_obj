@@ -131,12 +131,42 @@ impl quickcheck::Arbitrary for MNormalVertex {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct MSmoothingGroup(SmoothingGroup);
+
+impl MSmoothingGroup {
+    fn new(smoothing_group: SmoothingGroup) -> MSmoothingGroup {
+        MSmoothingGroup(smoothing_group)
+    }
+}
+
+impl fmt::Display for MSmoothingGroup {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "s  {}", self.0.as_int())
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct MComment(String);
+
+impl MComment {
+    fn new(comment: String) -> MComment {
+        MComment(comment)
+    }
+}
+
+impl fmt::Display for MComment {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "# {}", self.0)
+    }
+}
+
 enum TextLine {
     V(MVertex),
     VT(MTextureVertex),
     VN(MNormalVertex),
-    Comment(String),
-    S(SmoothingGroup),
+    Comment(MComment),
+    S(MSmoothingGroup),
     Group(Vec<String>),
 
 }

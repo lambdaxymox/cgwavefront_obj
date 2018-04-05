@@ -76,6 +76,8 @@ impl SmoothingGroup {
     pub fn new(name: u32) -> SmoothingGroup { 
         SmoothingGroup(name)
     }
+
+    pub fn as_int(&self) -> u32 { self.0 }
 }
 
 impl Default for SmoothingGroup {
