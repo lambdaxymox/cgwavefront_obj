@@ -247,8 +247,12 @@ struct ObjectFile {
 }
 
 impl ObjectFile {
-    fn next(text: Vec<TextLine>) -> ObjectFile { 
+    fn new(text: Vec<TextLine>) -> ObjectFile { 
         ObjectFile { text: text }
+    }
+
+    fn parse(&self) -> ObjectSet {
+        ObjectSet::new(vec![])
     }
 }
 
