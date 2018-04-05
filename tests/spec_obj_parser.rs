@@ -299,17 +299,24 @@ impl fmt::Display for TextLine {
     }
 }
 
-struct ObjectFile {
+struct ObjectText {
     text: Vec<TextLine>,
 }
 
-impl ObjectFile {
-    fn new(text: Vec<TextLine>) -> ObjectFile { 
-        ObjectFile { text: text }
+impl ObjectText {
+    fn new(text: Vec<TextLine>) -> ObjectText { 
+        ObjectText { text: text }
     }
 
     fn parse(&self) -> ObjectSet {
         ObjectSet::new(vec![])
+    }
+}
+
+impl fmt::Display for ObjectText {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        self.text.iter().for_each(|line| { write!(f, "{}\n", line).unwrap(); });
+        Ok(())
     }
 }
 
