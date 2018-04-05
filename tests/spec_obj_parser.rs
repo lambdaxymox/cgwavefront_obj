@@ -11,6 +11,7 @@ use wavefront::obj::{Parser, ParseError};
 use std::fmt;
 use std::cmp;
 use std::str;
+use fmt::Write;
 
 
 enum MVertex {
@@ -240,6 +241,62 @@ enum TextLine {
     F(Vec<MVTNIndex>),
     O(MObjectName),
     EmptyLine(MWhitespace),
+}
+
+impl fmt::Display for TextLine {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            TextLine::V(ref v) => { 
+                v.fmt(f)
+            }
+            TextLine::VT(ref vt) => {
+                vt.fmt(f)
+            }
+            TextLine::VN(ref vn) => { 
+                vn.fmt(f)
+            }
+            TextLine::Comment(ref comment_line) => {
+                comment_line.fmt(f)
+            }
+            TextLine::S(ref s_name) => {
+                s_name.fmt(f)
+            }
+            TextLine::G(ref vec) => {
+                let mut string = String::from("g ");
+                for name in vec {
+                    write!(string, " {} ", name)?;
+                }
+                string.fmt(f)
+            }
+            TextLine::P(ref vec) => {
+                let mut string = String::from("p ");
+                for v_index in vec {
+                    write!(string, " {} ", v_index)?;
+                }
+                string.fmt(f)
+            }
+            TextLine::L(ref vec) => {
+                let mut string = String::from("l ");
+                for vtn_index in vec {
+                    write!(string, " {} ", vtn_index)?;
+                }
+                string.fmt(f)
+            }
+            TextLine::F(ref vec) => {
+                let mut string = String::from("f ");
+                for vtn_index in vec {
+                    write!(string, " {} ", vtn_index)?;
+                }
+                string.fmt(f)
+            }
+            TextLine::O(ref o_name) => {
+                o_name.fmt(f)
+            }
+            TextLine::EmptyLine(ref empty_line) => {
+                empty_line.fmt(f)
+            }
+        }
+    }
 }
 
 struct ObjectFile {

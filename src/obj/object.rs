@@ -1,5 +1,6 @@
 use std::default::Default;
 use std::slice;
+use std::fmt;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -60,6 +61,12 @@ pub struct Shape {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GroupName(String);
+
+impl fmt::Display for GroupName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
 
 impl GroupName {
     pub fn new(name: &str) -> GroupName { GroupName(String::from(name)) }
