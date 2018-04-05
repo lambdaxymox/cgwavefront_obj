@@ -216,12 +216,7 @@ struct MWhitespace(String);
 
 impl MWhitespace {
     fn new(spaces: usize) -> MWhitespace {
-        let mut line = String::new();
-        for _ in 0..(spaces % 79) {
-            line.push(' ');
-        }
-        line.push('\n');
-
+        let line = (0..spaces % 79).fold(String::new(), |acc, _| acc + " ");
         MWhitespace(line)
     }
 }
