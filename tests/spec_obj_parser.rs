@@ -350,8 +350,8 @@ impl Machine {
         Parser::new(input)
     }
 
-    fn model(&self) -> ParserModel {
-        self.model.clone()
+    fn model(&self) -> &ParserModel {
+        &self.model
     }
 }
 
