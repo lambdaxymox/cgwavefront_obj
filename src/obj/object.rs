@@ -201,7 +201,8 @@ impl Object {
 
 impl fmt::Debug for Object {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let mut string = String::from("Object {");
+        let mut string = String::from("Object {\n");
+    
         string.push_str(&format!("    name: {:?}\n", self.name));
         if self.vertex_set.is_empty() {
             string.push_str(&format!("    vertex set: []\n"));
@@ -212,7 +213,7 @@ impl fmt::Debug for Object {
             ));
         }
         string.push_str(&format!(
-            "    vertex set length: {:?} vertices\n", self.vertex_set.len()
+            "    vertex set length: {:?}\n", self.vertex_set.len()
         ));
         
         if self.texture_vertex_set.is_empty() {
