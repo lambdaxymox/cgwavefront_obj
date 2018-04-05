@@ -14,6 +14,7 @@ use std::str;
 use fmt::Write;
 
 
+#[derive(Clone, Debug)]
 enum MVertex {
     Vertex3(Vertex),
     Vertex4(Vertex),
@@ -201,6 +202,7 @@ impl fmt::Display for MVTNIndex {
     }
 }
 
+#[derive(Clone, Debug)]
 struct MObjectName(String);
 
 impl fmt::Display for MObjectName {
@@ -209,6 +211,7 @@ impl fmt::Display for MObjectName {
     }
 }
 
+#[derive(Clone, Debug)]
 struct MWhitespace(String);
 
 impl MWhitespace {
@@ -229,6 +232,7 @@ impl fmt::Display for MWhitespace {
     }
 }
 
+#[derive(Clone, Debug)]
 enum TextLine {
     V(MVertex),
     VT(MTextureVertex),
@@ -295,6 +299,7 @@ impl fmt::Display for TextLine {
     }
 }
 
+#[derive(Clone, Debug)]
 struct ObjectText {
     text: Vec<TextLine>,
 }
@@ -318,12 +323,12 @@ impl fmt::Display for ObjectText {
 
 #[derive(Clone, Debug)]
 struct ParserModel {
-
+    text: ObjectText,
 }
 
 impl ParserModel {
-    fn new() -> ParserModel {
-        ParserModel { }
+    fn new(text: ObjectText) -> ParserModel {
+        ParserModel { text: text }
     }
 
     fn parse(&self) -> Result<ObjectSet, ParseError> { 
@@ -333,7 +338,7 @@ impl ParserModel {
 
 impl fmt::Display for ParserModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "")
+        self.text.fmt(f)
     }
 }
 
