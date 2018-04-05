@@ -3,6 +3,7 @@ pub mod parser;
 
 pub use obj::object::ObjectSet;
 pub use obj::object::ObjectBuilder;
+pub use obj::object::Object;
 pub use obj::object::Vertex;
 pub use obj::object::TextureVertex;
 pub use obj::object::NormalVertex;

@@ -3,7 +3,8 @@ extern crate wavefront;
 
 use quickcheck::{Arbitrary, Gen};
 use wavefront::obj::{
-    Vertex, TextureVertex, NormalVertex, Element, VTNIndex, ObjectSet, ObjectBuilder,
+    Object, ObjectSet, ObjectBuilder,
+    Vertex, TextureVertex, NormalVertex, Element, VTNIndex,
     GroupName, SmoothingGroup, ShapeEntry,
 };
 use wavefront::obj::{Parser, ParseError};
@@ -11,6 +12,7 @@ use wavefront::obj::{Parser, ParseError};
 use std::fmt;
 use std::cmp;
 use std::str;
+use std::convert;
 use fmt::Write;
 
 
@@ -140,6 +142,10 @@ impl MSmoothingGroup {
     fn new(smoothing_group: SmoothingGroup) -> MSmoothingGroup {
         MSmoothingGroup(smoothing_group)
     }
+
+    fn to_smoothing_group(&self) -> SmoothingGroup {
+        self.0.clone()
+    }
 }
 
 impl fmt::Display for MSmoothingGroup {
@@ -228,13 +234,30 @@ impl fmt::Display for MWhitespace {
 }
 
 #[derive(Clone, Debug)]
+struct MGroupName(GroupName);
+
+impl MGroupName {
+    fn new(group: GroupName) -> MGroupName { MGroupName(group) }
+
+    fn to_group(&self) -> GroupName {
+        self.0.clone()
+    }
+}
+
+impl fmt::Display for MGroupName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.to_group())
+    }
+}
+
+#[derive(Clone, Debug)]
 enum TextLine {
     V(MVertex),
     VT(MTextureVertex),
     VN(MNormalVertex),
     Comment(MComment),
     S(MSmoothingGroup),
-    G(Vec<GroupName>),
+    G(Vec<MGroupName>),
     P(Vec<MVTNIndex>),
     L(Vec<MVTNIndex>),
     F(Vec<MVTNIndex>),
@@ -318,6 +341,17 @@ impl Arbitrary for ObjectText {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MParseError {
+    message: String,
+}
+
+impl MParseError {
+    fn new(message: String) -> MParseError { 
+        MParseError { message: message }
+    }
+}
+
 #[derive(Clone, Debug)]
 struct ParserModel {
     text: ObjectText,
@@ -328,7 +362,237 @@ impl ParserModel {
         ParserModel { text: text }
     }
 
-    fn parse(&self) -> Result<ObjectSet, ParseError> { 
+    fn error<T>(&mut self, err: String) -> Result<T, MParseError> {
+        Err(MParseError::new(err))
+    }
+
+    fn parse_object_name(&self, index: usize) -> String {
+        match self.text.text[index] {
+            TextLine::O(ref m_object_name) => m_object_name.0.clone(),
+            _ => String::from(""),
+        }
+    }
+
+    fn parse_v(&mut self, m_vtn_index: MVTNIndex) -> Result<VTNIndex, MParseError> {
+        match m_vtn_index {
+            MVTNIndex::V(_) => { 
+                Ok(m_vtn_index.to_vtn_index())
+            }
+            _ => { 
+                self.error(format!(
+                    "Expected `vertex` index but got `{:?}`", m_vtn_index.to_vtn_index())
+                )
+            }
+        }
+    } 
+
+    fn parse_vt(&mut self, m_vtn_index: MVTNIndex) -> Result<VTNIndex, MParseError> {
+        match m_vtn_index {
+            MVTNIndex::VT(_,_) => {
+                Ok(m_vtn_index.to_vtn_index())
+            }
+            _ => { 
+                self.error(format!(
+                    "Expected `vertex/texture` index but got `{:?}`", m_vtn_index.to_vtn_index())
+                )
+            }
+        }
+    }
+
+    fn parse_vn(&mut self, m_vtn_index: MVTNIndex) -> Result<VTNIndex, MParseError> {
+        match m_vtn_index {
+            MVTNIndex::VN(_,_) => {
+                Ok(m_vtn_index.to_vtn_index())
+            }
+            _ => { 
+                self.error(format!(
+                    "Expected `vertex//normal` index but got `{:?}`", m_vtn_index.to_vtn_index())
+                )
+            }
+        }
+    }
+
+    fn parse_vtn(&mut self, m_vtn_index: MVTNIndex) -> Result<VTNIndex, MParseError> {
+        match m_vtn_index {
+            MVTNIndex::VN(_,_) => {
+                Ok(m_vtn_index.to_vtn_index())
+            }
+            _ => { 
+                self.error(format!(
+                    "Expected `vertex/texture/normal` index but got `{:?}`", m_vtn_index.to_vtn_index())
+                )
+            }
+        }
+    }
+
+    fn parse_point(&mut self, vec: &[MVTNIndex]) -> Result<Vec<Element>, MParseError> {
+        let mut elements = vec![];
+
+        if vec.is_empty() {
+            return self.error(format!(
+                "Expected at least one `vertex` index but got an empty line.")
+            );
+        }
+         
+        for m_vtn_index in vec {
+            match m_vtn_index {
+                &MVTNIndex::V(_) => {
+                    elements.push(Element::Point(m_vtn_index.to_vtn_index()));
+                }
+                _ => {
+                    return self.error(format!(
+                        "Expected `vertex` index but got `{:?}`", m_vtn_index)
+                    );
+                }
+            }
+        }
+
+        Ok(elements)
+    }
+
+    fn parse_line(&self) -> Result<Vec<Element>, MParseError> {
+        unimplemented!()
+    }
+
+    fn parse_face(&self) -> Result<Vec<Element>, MParseError> {
+        unimplemented!()
+    }
+
+    fn parse_elements(&self, vec: &[MVTNIndex]) -> Result<VTNIndex, MParseError> {
+        unimplemented!()
+    }
+
+    fn parse_object(&mut self,
+        min_vertex_index:  &mut usize,  max_vertex_index:  &mut usize,
+        min_texture_index: &mut usize,  max_texture_index: &mut usize,
+        min_normal_index:  &mut usize,  max_normal_index:  &mut usize
+    ) -> Result<Object, ParseError> { 
+        let object_name = self.parse_object_name(0);
+
+        let mut vertices = vec![];
+        let mut texture_vertices = vec![];
+        let mut normal_vertices = vec![];        
+        let mut elements = vec![];
+        
+        let mut group_entry_table = vec![];
+        let mut groups = vec![];
+        let mut min_element_group_index = 1;
+        let mut max_element_group_index = 1;
+        let mut min_group_index = 1;
+        let mut max_group_index = 1;
+
+        let mut smoothing_group_entry_table = vec![];        
+        let mut smoothing_groups = vec![];
+        let mut min_element_smoothing_group_index = 1;
+        let mut max_element_smoothing_group_index = 1;
+        let mut min_smoothing_group_index = 1;
+        let mut max_smoothing_group_index = 1;
+
+        for text_line in &self.text.text {
+            match text_line.clone() {
+                TextLine::G(m_groups) => {            
+                    // Save the shape entry ranges for the current group.
+                    group_entry_table.push((
+                        (min_element_group_index, max_element_group_index), 
+                        (min_group_index, max_group_index)
+                    ));
+                    // Fetch the new groups.
+                    let amount_parsed = m_groups.len();
+                    groups.append(&mut m_groups.iter().map(|mg| mg.to_group()).collect());
+                    // Update range of group indices.
+                    min_group_index = max_group_index;
+                    max_group_index += amount_parsed;
+                    // Update the element indices.
+                    min_element_group_index = max_element_group_index;
+                }
+                TextLine::S(m_smoothing_group) => {
+                    // Save the shape entry ranges for the current smoothing group.
+                    smoothing_group_entry_table.push((
+                        (min_element_smoothing_group_index, max_element_smoothing_group_index),
+                        (min_smoothing_group_index, max_smoothing_group_index)
+                    ));
+                    // Fetch the next smoothing group.
+                    let amount_parsed = 1;
+                    smoothing_groups.push(m_smoothing_group.to_smoothing_group());
+                    // Update the range of the smoothing group indices.
+                    min_smoothing_group_index = max_smoothing_group_index;
+                    max_smoothing_group_index += amount_parsed;
+                    //Update the element indices.
+                    min_element_smoothing_group_index = max_element_smoothing_group_index;
+                }
+                TextLine::V(m_v)  => {
+                    let vertex = m_v.to_vertex();
+                    vertices.push(vertex);
+                }
+                TextLine::VT(m_vt) => {
+                    let texture_vertex = m_vt.to_vertex();
+                    texture_vertices.push(texture_vertex);
+                }
+                TextLine::VN(m_vn) => {
+                    let normal_vertex = m_vn.to_vertex();
+                    normal_vertices.push(normal_vertex);
+                }
+                TextLine::P(vec) | TextLine::L(vec) | TextLine::F(vec) => {
+                    //let amount_parsed = try!(self.parse_elements(&vec));
+                    //max_element_group_index += amount_parsed;
+                    //max_element_smoothing_group_index += amount_parsed;
+                }
+                TextLine::EmptyLine(_) | TextLine::Comment(_) => { 
+                    continue;
+                }
+                TextLine::O(m_object_name) => {
+                    // At the end of file or object, collect any remaining shapes.
+                    group_entry_table.push((
+                        (min_element_group_index, max_element_group_index), 
+                        (min_group_index, max_group_index)
+                    ));
+                    min_element_group_index = max_element_group_index;
+
+                    smoothing_group_entry_table.push((
+                        (min_element_smoothing_group_index, max_element_smoothing_group_index),
+                        (min_smoothing_group_index, max_smoothing_group_index)
+                    ));
+                    min_element_smoothing_group_index = max_element_smoothing_group_index;
+
+                    break;
+                }
+            }
+        }
+
+        if groups.is_empty() {
+            groups.push(Default::default());
+        }
+
+        if smoothing_groups.is_empty() {
+            smoothing_groups.push(SmoothingGroup::new(0));
+        }
+
+        // At the end of file, collect any remaining shapes.
+        // Fill in the shape entries for the current group.
+        let mut shape_entries = vec![];
+        //self.parse_shape_entries(
+        //    &mut shape_entries, &elements, &group_entry_table, &smoothing_group_entry_table
+        //);
+
+        *min_vertex_index  += vertices.len();
+        *max_vertex_index  += vertices.len();
+        *min_texture_index += texture_vertices.len();
+        *max_texture_index += texture_vertices.len();
+        *min_normal_index  += normal_vertices.len();
+        *max_normal_index  += normal_vertices.len();
+
+        let mut builder = ObjectBuilder::new(vertices, elements);
+        builder.with_name(object_name)
+               .with_texture_vertex_set(texture_vertices)
+               .with_normal_vertex_set(normal_vertices)
+               .with_group_set(groups)
+               .with_smoothing_group_set(smoothing_groups)
+               .with_shape_set(shape_entries);
+
+        Ok(builder.build())
+    }
+
+    fn parse(&self) -> Result<ObjectSet, MParseError> {
         unimplemented!()
     }
 }
