@@ -200,14 +200,46 @@ impl fmt::Display for MVTNIndex {
     }
 }
 
+struct MObjectName(String);
+
+impl fmt::Display for MObjectName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "o {}", self.0)
+    }
+}
+
+struct MWhitespace(String);
+
+impl MWhitespace {
+    fn new(spaces: usize) -> MWhitespace {
+        let mut line = String::new();
+        for _ in 0..(spaces % 79) {
+            line.push(' ');
+        }
+        line.push('\n');
+
+        MWhitespace(line)
+    }
+}
+
+impl fmt::Display for MWhitespace {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
 enum TextLine {
     V(MVertex),
     VT(MTextureVertex),
     VN(MNormalVertex),
     Comment(MComment),
     S(MSmoothingGroup),
-    Group(Vec<GroupName>),
-
+    G(Vec<GroupName>),
+    P(Vec<MVTNIndex>),
+    L(Vec<MVTNIndex>),
+    F(Vec<MVTNIndex>),
+    O(MObjectName),
+    EmptyLine(MWhitespace),
 }
 
 #[derive(Clone, Debug)]
