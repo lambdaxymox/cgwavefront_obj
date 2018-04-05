@@ -161,13 +161,52 @@ impl fmt::Display for MComment {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+enum MVTNIndex {
+    V(u32),
+    VT(u32, u32),
+    VN(u32, u32),
+    VTN(u32, u32, u32),
+}
+
+impl MVTNIndex {
+    fn new(vtn_index: VTNIndex) -> MVTNIndex { 
+        match vtn_index {
+            VTNIndex::V(v) => MVTNIndex::V(v),
+            VTNIndex::VT(v, vt) => MVTNIndex::VT(v, vt),
+            VTNIndex::VN(v, vn) => MVTNIndex::VN(v, vn),
+            VTNIndex::VTN(v, vt, vn) => MVTNIndex::VTN(v, vt, vn),
+        }
+    }
+
+    fn to_vtn_index(&self) -> VTNIndex {
+        match *self {
+            MVTNIndex::V(v) => VTNIndex::V(v),
+            MVTNIndex::VT(v, vt) => VTNIndex::VT(v, vt),
+            MVTNIndex::VN(v, vn) => VTNIndex::VN(v, vn),
+            MVTNIndex::VTN(v, vt, vn) => VTNIndex::VTN(v, vt, vn),
+        }
+    }
+}
+
+impl fmt::Display for MVTNIndex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            MVTNIndex::V(v)           => write!(f, "{}", v),
+            MVTNIndex::VT(v, vt)      => write!(f, "{}/{}", v, vt),
+            MVTNIndex::VN(v, vn)      => write!(f, "{}//{}", v, vn),
+            MVTNIndex::VTN(v, vt, vn) => write!(f, "{}/{}/{}", v, vt, vn),
+        }
+    }
+}
+
 enum TextLine {
     V(MVertex),
     VT(MTextureVertex),
     VN(MNormalVertex),
     Comment(MComment),
     S(MSmoothingGroup),
-    Group(Vec<String>),
+    Group(Vec<GroupName>),
 
 }
 
