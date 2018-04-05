@@ -242,6 +242,16 @@ enum TextLine {
     EmptyLine(MWhitespace),
 }
 
+struct ObjectFile {
+    text: Vec<TextLine>,
+}
+
+impl ObjectFile {
+    fn next(text: Vec<TextLine>) -> ObjectFile { 
+        ObjectFile { text: text }
+    }
+}
+
 #[derive(Clone, Debug)]
 struct ParserModel {
 
