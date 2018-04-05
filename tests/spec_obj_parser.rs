@@ -312,6 +312,12 @@ impl fmt::Display for ObjectText {
     }
 }
 
+impl Arbitrary for ObjectText {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        unimplemented!()
+    }
+}
+
 #[derive(Clone, Debug)]
 struct ParserModel {
     text: ObjectText,
@@ -330,6 +336,13 @@ impl ParserModel {
 impl fmt::Display for ParserModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         self.text.fmt(f)
+    }
+}
+
+impl Arbitrary for ParserModel {
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        let text = Arbitrary::arbitrary(g);
+        ParserModel::new(text)
     }
 }
 
@@ -356,10 +369,12 @@ impl Machine {
 }
 
 impl Arbitrary for Machine {
-    fn arbitrary<G: Gen>(g: &mut G) -> Machine {
-        unimplemented!();
+    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Machine {
+        let model = Arbitrary::arbitrary(g);
+        Machine::new(model)
     }
 }
+
 
 #[test]
 fn prop_parser_correctly_parses_valid_obj_files() {
