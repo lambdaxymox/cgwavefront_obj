@@ -171,26 +171,26 @@ impl Object {
                 let vertex = self.vertex_set.get(v_index as usize)?;
 
                 Some(VTNTriple::V(vertex))
-            },
+            }
             VTNIndex::VT(v_index, vt_index) => { 
                 let vertex = self.vertex_set.get(v_index as usize)?;
                 let texture_vertex = self.texture_vertex_set.get(vt_index as usize)?;
 
                 Some(VTNTriple::VT(vertex, texture_vertex))
-            },
+            }
             VTNIndex::VN(v_index, vn_index) => {
                 let vertex = self.vertex_set.get(v_index as usize)?;
                 let normal_vertex = self.normal_vertex_set.get(vn_index as usize)?;
 
                 Some(VTNTriple::VN(vertex, normal_vertex))
-            },
+            }
             VTNIndex::VTN(v_index, vt_index, vn_index) => {
                 let vertex = self.vertex_set.get(v_index as usize)?;
                 let texture_vertex = self.texture_vertex_set.get(vt_index as usize)?;
                 let normal_vertex = self.normal_vertex_set.get(vn_index as usize)?;
 
                 Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
-            },
+            }
         }
     }
 
