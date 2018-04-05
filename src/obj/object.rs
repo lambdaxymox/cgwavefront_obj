@@ -135,7 +135,7 @@ pub enum VTNTriple<'a> {
     VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Object {
     pub name: String,
     pub vertex_set: VertexSet,
@@ -196,6 +196,91 @@ impl Object {
 
     fn get_shape(&self, entry: &ShapeEntry) -> Option<&Shape> {
         unimplemented!();
+    }
+}
+
+impl fmt::Debug for Object {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        let mut string = String::from("Object {");
+        string.push_str(&format!("    name: {:?}\n", self.name));
+        if self.vertex_set.is_empty() {
+            string.push_str(&format!("    vertex set: []\n"));
+        } else {
+            let length = self.vertex_set.len();
+            string.push_str(&format!("    vertex set: [{:?} ... {:?}]\n", 
+                self.vertex_set[0], self.vertex_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    vertex set length: {:?} vertices\n", self.vertex_set.len()
+        ));
+        
+        if self.texture_vertex_set.is_empty() {
+            string.push_str(&format!("    texture vertex set: []\n"));
+        } else {
+            let length = self.texture_vertex_set.len();
+            string.push_str(&format!("    texture vertex set: [{:?} ... {:?}]\n", 
+                self.texture_vertex_set[0], self.texture_vertex_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    texture vertex set length: {:?}\n", 
+            self.texture_vertex_set.len()
+        ));
+
+        if self.normal_vertex_set.is_empty() {
+            string.push_str(&format!("    normal vertex set: []\n"));
+        } else {
+            let length = self.normal_vertex_set.len();
+            string.push_str(&format!("    normal vertex set: [{:?} ... {:?}]\n", 
+                self.normal_vertex_set[0], self.normal_vertex_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    normal vertex set length: {:?}\n", 
+            self.normal_vertex_set.len()
+        ));
+
+        if self.group_set.is_empty() {
+            string.push_str(&format!("    group set: []\n"));
+        } else {
+            let length = self.group_set.len();
+            string.push_str(&format!("    group set: [{:?} ... {:?}]\n", 
+                self.group_set[0], self.group_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    group set length: {:?}\n", 
+            self.group_set.len()
+        ));
+
+        if self.smoothing_group_set.is_empty() {
+            string.push_str(&format!("    smoothing group set: []\n"));
+        } else {
+            let length = self.smoothing_group_set.len();
+            string.push_str(&format!("    smoothing group set: [{:?} ... {:?}]\n", 
+                self.smoothing_group_set[0], self.smoothing_group_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    smoothing group set length: {:?}\n", 
+            self.smoothing_group_set.len()
+        ));
+
+        if self.element_set.is_empty() {
+            string.push_str(&format!("    smoothing group set: []\n"));
+        } else {
+            let length = self.element_set.len();
+            string.push_str(&format!("    element set: [{:?} ... {:?}]\n", 
+                self.element_set[0], self.element_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    element set length: {:?}\n", self.element_set.len()
+        ));
+
+        string.push_str(&format!("}}\n"));
+        write!(f, "{:?}", string)
     }
 }
 
