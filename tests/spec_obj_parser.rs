@@ -308,10 +308,6 @@ impl ObjectText {
     fn new(text: Vec<TextLine>) -> ObjectText { 
         ObjectText { text: text }
     }
-
-    fn parse(&self) -> ObjectSet {
-        ObjectSet::new(vec![])
-    }
 }
 
 impl fmt::Display for ObjectText {
@@ -332,7 +328,7 @@ impl ParserModel {
     }
 
     fn parse(&self) -> Result<ObjectSet, ParseError> { 
-        unimplemented!();
+        unimplemented!()
     }
 }
 
