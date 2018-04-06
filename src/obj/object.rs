@@ -1,6 +1,7 @@
 use std::default::Default;
 use std::slice;
 use std::fmt;
+use std::ops;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -348,6 +349,8 @@ impl ObjectSet {
             inner: self.objects.iter(),
         }
     }
+
+    pub fn len(&self) -> usize { self.objects.len() }
 }
 
 pub struct ObjectSetIter<'a> {
@@ -359,6 +362,14 @@ impl<'a> Iterator for ObjectSetIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.inner.next()
+    }
+}
+
+impl ops::Index<usize> for ObjectSet {
+    type Output = Object;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.objects[index]
     }
 }
 

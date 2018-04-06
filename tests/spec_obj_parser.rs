@@ -299,7 +299,42 @@ impl ParserModel {
 
 impl fmt::Display for ParserModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        unimplemented!()
+        let group_map = self.get_group_map();
+        let smoothing_group_map = self.get_smoothing_group_map();
+        for ((object, groups), smoothing_groups) 
+            in self.data.iter().zip(group_map.iter()).zip(smoothing_group_map.iter()) {
+            
+            if object.name != "" {
+                write!(f, "o {} \n", object.name)?;
+            }
+            
+            for v in object.vertex_set.iter() {
+                if v.w == 1.0 {
+                    write!(f, "v {} {} {} \n", v.x, v.y, v.z)?;
+                } else {
+                    write!(f, "v {} {} {} {} \n", v.x, v.y, v.z, v.w)?;
+                }
+            }
+
+            write!(f, "# {} vertices\n", object.vertex_set.len())?;
+            write!(f, "\n")?;
+
+            for vt in object.texture_vertex_set.iter() {
+                write!(f, "vt {} {} {} \n", vt.u, vt.v, vt.w)?;
+            }
+
+            write!(f, "# {} texture vertices\n", object.texture_vertex_set.len())?;
+            write!(f, "\n")?;
+
+            for vn in object.normal_vertex_set.iter() {
+                write!(f, "vn {} {} {} \n", vn.i, vn.j, vn.k)?;
+            }
+
+            write!(f, "# {} normal vertices\n", object.normal_vertex_set.len())?;
+            write!(f, "\n")?;
+        }
+
+        Ok(())
     }
 }
 
