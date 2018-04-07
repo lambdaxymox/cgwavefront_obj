@@ -14,10 +14,7 @@ use wavefront::obj::{Parser, ParseError};
 
 use std::marker;
 use std::fmt;
-use std::cmp;
 use std::str;
-use std::convert;
-use fmt::Write;
 use std::collections::HashMap;
 
 
@@ -47,7 +44,7 @@ struct ObjectSetGen<G> {
     _marker: marker::PhantomData<G>,
 }
 
-impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
+impl<G> ObjectSetGen<G> where G: Gen {
     fn new() -> Self { 
         ObjectSetGen { 
             _marker: marker::PhantomData 
@@ -269,7 +266,7 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 }
 
 impl Arbitrary for ParserModel {
-    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+    fn arbitrary<G: Gen>(g: &mut G) -> Self {
         ParserModel::new(ObjectSetGen::new().generate(g))
     }
 }
@@ -296,7 +293,7 @@ impl Machine {
 }
 
 impl Arbitrary for Machine {
-    fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Machine {
+    fn arbitrary<G: Gen>(g: &mut G) -> Machine {
         let model: ParserModel = Arbitrary::arbitrary(g);
         let text = TextObjectSetCompositor::new().compose(&model.data);
         Machine::new(model, text)
