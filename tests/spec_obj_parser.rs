@@ -269,27 +269,8 @@ impl ParserModel {
         ParserModel { data: data }
     }
 
-    fn get_group_map(&self) -> Vec<HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)>> {
-        let mut group_map = vec![];
-        for object in self.data.iter() {
-            let mut object_groups = HashMap::new();
-            for shape_entry in object.shape_set.iter() {
-                let mut entry_groups = vec![];
-                let mut entry_smoothing_groups = vec![];
-                for i in shape_entry.groups.iter() {
-                    entry_groups.push(object.group_set[*i as usize].clone());
-                }
-
-                for j in shape_entry.smoothing_groups.iter() {
-                    entry_smoothing_groups.push(object.smoothing_group_set[*j as usize].clone());
-                }
-
-                object_groups.insert(shape_entry.element, (entry_groups, entry_smoothing_groups));
-            }
-            group_map.push(object_groups);
-        }
-
-        group_map
+    fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)>> {
+        self.data.get_group_maps()
     }
 
     fn parse(&self) -> Result<ObjectSet, ParseError> {
@@ -299,7 +280,7 @@ impl ParserModel {
 
 impl fmt::Display for ParserModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let object_set_group_map = self.get_group_map();
+        let object_set_group_map = self.get_group_maps();
         for (object, object_group_map) in self.data.iter().zip(object_set_group_map) {    
             if object.name != "" {
                 write!(f, "o {} \n", object.name)?;

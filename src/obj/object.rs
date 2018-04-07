@@ -2,6 +2,7 @@ use std::default::Default;
 use std::slice;
 use std::fmt;
 use std::ops;
+use std::collections::HashMap;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -245,6 +246,26 @@ impl Object {
     fn get_shape(&self, entry: &ShapeEntry) -> Option<&Shape> {
         unimplemented!();
     }
+
+    pub fn get_group_map(&self) -> HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)> {
+        let mut group_map = HashMap::new();
+        for shape_entry in self.shape_set.iter() {
+            let mut entry_groups = vec![];
+            let mut entry_smoothing_groups = vec![];
+            
+            for i in shape_entry.groups.iter() {
+                entry_groups.push(self.group_set[*i as usize].clone());
+            }
+
+            for j in shape_entry.smoothing_groups.iter() {
+                entry_smoothing_groups.push(self.smoothing_group_set[*j as usize].clone());
+            }
+
+            group_map.insert(shape_entry.element, (entry_groups, entry_smoothing_groups));
+        }
+
+        group_map
+    }
 }
 
 impl fmt::Debug for Object {
@@ -398,6 +419,15 @@ impl ObjectSet {
     }
 
     pub fn len(&self) -> usize { self.objects.len() }
+
+    pub fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)>> {
+        let mut group_maps = vec![];
+        for object in self.iter() {
+            group_maps.push(object.get_group_map());
+        }
+
+        group_maps
+    }
 }
 
 pub struct ObjectSetIter<'a> {
