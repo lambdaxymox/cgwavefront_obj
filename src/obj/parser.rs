@@ -622,7 +622,6 @@ mod vertex_tests {
     use super::{Parser, ParseError};
     use quickcheck;
     use std::fmt;
-    use std::cmp;
 
 
     #[derive(Clone, Debug)]
@@ -1119,8 +1118,6 @@ mod vtn_index_tests {
     use obj::object::VTNIndex;
     use super::{Parser, ParseError};
     use quickcheck;
-    use std::fmt;
-    use std::cmp;
 
 
     #[derive(Clone, Debug)]
