@@ -371,6 +371,13 @@ impl ops::Index<usize> for ObjectSet {
     }
 }
 
+impl fmt::Display for ObjectSet {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        let string = DisplayObjectSetCompositor::new().compose(self);
+        write!(f, "{}", string)
+    }
+}
+
 pub struct ObjectBuilder {
     name: Option<String>,
     vertex_set: VertexSet,
