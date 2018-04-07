@@ -648,11 +648,11 @@ impl DisplayObjectSetCompositor {
 
 impl ObjectSetCompositor for DisplayObjectSetCompositor {
     fn compose(&self, object_set: &ObjectSet) -> String {
-        let object_compositor = DisplayObjectCompositor::new();
+        let compositor = DisplayObjectCompositor::new();
         let mut string = String::from("ObjectSet {\n");
         
         for object in object_set.iter() {
-            string += &object_compositor.compose(&object);
+            string += &compositor.compose(&object);
             string += &"\n";
         }
 
