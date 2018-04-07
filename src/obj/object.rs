@@ -184,7 +184,7 @@ pub enum VTNTriple<'a> {
     VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Object {
     pub name: String,
     pub vertex_set: VertexSet,
@@ -268,89 +268,10 @@ impl Object {
     }
 }
 
-impl fmt::Debug for Object {
+impl fmt::Display for Object {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let mut string = String::from("Object {\n");
-    
-        string.push_str(&format!("    name: {:?}\n", self.name));
-        if self.vertex_set.is_empty() {
-            string.push_str(&format!("    vertex set: []\n"));
-        } else {
-            let length = self.vertex_set.len();
-            string.push_str(&format!("    vertex set: [{:?} ... {:?}]\n", 
-                self.vertex_set[0], self.vertex_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    vertex set length: {:?}\n", self.vertex_set.len()
-        ));
-        
-        if self.texture_vertex_set.is_empty() {
-            string.push_str(&format!("    texture vertex set: []\n"));
-        } else {
-            let length = self.texture_vertex_set.len();
-            string.push_str(&format!("    texture vertex set: [{:?} ... {:?}]\n", 
-                self.texture_vertex_set[0], self.texture_vertex_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    texture vertex set length: {:?}\n", 
-            self.texture_vertex_set.len()
-        ));
-
-        if self.normal_vertex_set.is_empty() {
-            string.push_str(&format!("    normal vertex set: []\n"));
-        } else {
-            let length = self.normal_vertex_set.len();
-            string.push_str(&format!("    normal vertex set: [{:?} ... {:?}]\n", 
-                self.normal_vertex_set[0], self.normal_vertex_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    normal vertex set length: {:?}\n", 
-            self.normal_vertex_set.len()
-        ));
-
-        if self.group_set.is_empty() {
-            string.push_str(&format!("    group set: []\n"));
-        } else {
-            let length = self.group_set.len();
-            string.push_str(&format!("    group set: [{:?} ... {:?}]\n", 
-                self.group_set[0], self.group_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    group set length: {:?}\n", 
-            self.group_set.len()
-        ));
-
-        if self.smoothing_group_set.is_empty() {
-            string.push_str(&format!("    smoothing group set: []\n"));
-        } else {
-            let length = self.smoothing_group_set.len();
-            string.push_str(&format!("    smoothing group set: [{:?} ... {:?}]\n", 
-                self.smoothing_group_set[0], self.smoothing_group_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    smoothing group set length: {:?}\n", 
-            self.smoothing_group_set.len()
-        ));
-
-        if self.element_set.is_empty() {
-            string.push_str(&format!("    smoothing group set: []\n"));
-        } else {
-            let length = self.element_set.len();
-            string.push_str(&format!("    element set: [{:?} ... {:?}]\n", 
-                self.element_set[0], self.element_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    element set length: {:?}\n", self.element_set.len()
-        ));
-
-        string.push_str(&format!("}}\n"));
-        write!(f, "{:?}", string)
+        let string = DisplayObjectCompositor::new().compose(self);
+        write!(f, "{}", string)
     }
 }
 
@@ -519,3 +440,100 @@ impl ObjectBuilder {
     }
 }
 
+
+trait ObjectCompositor {
+    fn compose(&self, object: &Object) -> String;
+}
+
+struct DisplayObjectCompositor { }
+
+impl DisplayObjectCompositor {
+    fn new() -> DisplayObjectCompositor { DisplayObjectCompositor {} }
+}
+
+impl ObjectCompositor for DisplayObjectCompositor {
+    fn compose(&self, object: &Object) -> String {
+        let mut string = String::from("Object {\n");
+    
+        string.push_str(&format!("    name: {:?}\n", object.name));
+        if object.vertex_set.is_empty() {
+            string.push_str(&format!("    vertex set: []\n"));
+        } else {
+            let length = object.vertex_set.len();
+            string.push_str(&format!("    vertex set: [{:?} ... {:?}]\n", 
+                object.vertex_set[0], object.vertex_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    vertex set length: {:?}\n", object.vertex_set.len()
+        ));
+        
+        if object.texture_vertex_set.is_empty() {
+            string.push_str(&format!("    texture vertex set: []\n"));
+        } else {
+            let length = object.texture_vertex_set.len();
+            string.push_str(&format!("    texture vertex set: [{:?} ... {:?}]\n", 
+                object.texture_vertex_set[0], object.texture_vertex_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    texture vertex set length: {:?}\n", 
+            object.texture_vertex_set.len()
+        ));
+
+        if object.normal_vertex_set.is_empty() {
+            string.push_str(&format!("    normal vertex set: []\n"));
+        } else {
+            let length = object.normal_vertex_set.len();
+            string.push_str(&format!("    normal vertex set: [{:?} ... {:?}]\n", 
+                object.normal_vertex_set[0], object.normal_vertex_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    normal vertex set length: {:?}\n", 
+            object.normal_vertex_set.len()
+        ));
+
+        if object.group_set.is_empty() {
+            string.push_str(&format!("    group set: []\n"));
+        } else {
+            let length = object.group_set.len();
+            string.push_str(&format!("    group set: [{:?} ... {:?}]\n", 
+                object.group_set[0], object.group_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    group set length: {:?}\n", 
+            object.group_set.len()
+        ));
+
+        if object.smoothing_group_set.is_empty() {
+            string.push_str(&format!("    smoothing group set: []\n"));
+        } else {
+            let length = object.smoothing_group_set.len();
+            string.push_str(&format!("    smoothing group set: [{:?} ... {:?}]\n", 
+                object.smoothing_group_set[0], object.smoothing_group_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    smoothing group set length: {:?}\n", 
+            object.smoothing_group_set.len()
+        ));
+
+        if object.element_set.is_empty() {
+            string.push_str(&format!("    smoothing group set: []\n"));
+        } else {
+            let length = object.element_set.len();
+            string.push_str(&format!("    element set: [{:?} ... {:?}]\n", 
+                object.element_set[0], object.element_set[length - 1]
+            ));
+        }
+        string.push_str(&format!(
+            "    element set length: {:?}\n", object.element_set.len()
+        ));
+
+        string.push_str(&format!("}}\n"));
+
+        string
+    } 
+}
