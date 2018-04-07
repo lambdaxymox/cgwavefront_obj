@@ -6,7 +6,8 @@ use wavefront::obj::{
     Object, ObjectSet, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex, Element, VTNIndex,
     GroupName, SmoothingGroup, ShapeEntry,
-    TextObjectSetCompositor, Compositor
+    TextObjectSetCompositor, Compositor,
+    VertexSet, TextureVertexSet, NormalVertexSet,
 };
 use wavefront::obj::{Parser, ParseError};
 
@@ -319,6 +320,48 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
         NormalVertex::new(i, j, k)
     }
 
+    fn gen_vertex_set(&self, g: &mut G, len: usize) -> VertexSet {
+        let mut vertex_set = vec![];
+        for _ in 0..len {
+            vertex_set.push(self.gen_vertex(g, true));
+        }
+
+        vertex_set
+    }
+
+    fn gen_texture_vertex_set(&self, g: &mut G, len: usize) -> TextureVertexSet {
+        let mut texture_vertex_set = vec![];
+        for _ in 0..len {
+            texture_vertex_set.push(self.gen_texture_vertex(g));
+        }
+
+        texture_vertex_set
+    }
+
+    fn gen_normal_vertex_set(&self, g: &mut G, len: usize) -> NormalVertexSet {
+        let mut normal_vertex_set = vec![];
+        for _ in 0..len {
+            normal_vertex_set.push(self.gen_normal_vertex(g));
+        }
+        normal_vertex_set
+    }
+
+    fn gen_slices(&self, g: &mut G, 
+        range: (usize, usize), count: usize) -> Vec<(usize, usize)> {
+
+        let mut indices = vec![g.gen_range(range.0, range.1)];
+        for i in 1..count {
+            indices.push(g.gen_range(indices[i -1], range.1));
+        }
+
+        let mut slices = vec![];
+        for i in 0..count-1 {
+            slices.push((indices[i], indices[i] + 1));
+        }
+
+        slices
+    }
+
     fn generate(&self, g: &mut G) -> ObjectSet {
         //let mut objects = vec![];
 
@@ -330,23 +373,11 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
         
             let use_g_default: bool = Arbitrary::arbitrary(g);
 
-            let vertex_len = g.gen_range(1, 100000);
-            let mut vertex_set = vec![];
-            for _ in 0..vertex_len {
-                vertex_set.push(self.gen_vertex(g, true));
-            }
+            let len = g.gen_range(1, 100000);
+            let vertex_set = self.gen_vertex_set(g, len);
+            let texture_vertex_set = self.gen_texture_vertex_set(g, len);
+            let normal_vertex_len = self.gen_normal_vertex_set(g, len);
 
-            let texture_vertex_len = vertex_len;
-            let mut texture_vertex_set = vec![];
-            for _ in 0..texture_vertex_len {
-                texture_vertex_set.push(self.gen_texture_vertex(g));
-            }
-
-            let normal_vertex_len = vertex_len;
-            let mut normal_vertex_set = vec![];
-            for _ in 0..texture_vertex_len {
-                normal_vertex_set.push(self.gen_normal_vertex(g));
-            }
         }
 
         unimplemented!()
