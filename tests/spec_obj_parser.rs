@@ -284,7 +284,7 @@ impl fmt::Display for ParserModel {
 
 impl Arbitrary for ParserModel {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
-        unimplemented!()
+        unimplemented!();
     }
 }
 
@@ -295,8 +295,7 @@ struct Machine {
 }
 
 impl Machine {
-    fn new(model: ParserModel) -> Machine {
-        let text = model.to_string();
+    fn new(model: ParserModel, text: String) -> Machine {
         Machine { model: model, text: text }
     }
 
@@ -312,8 +311,9 @@ impl Machine {
 
 impl Arbitrary for Machine {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Machine {
-        let model = Arbitrary::arbitrary(g);
-        Machine::new(model)
+        let model: ParserModel = Arbitrary::arbitrary(g);
+        let text = TextObjectSetCompositor::new().compose(&model.data);
+        Machine::new(model, text)
     }
 }
 
