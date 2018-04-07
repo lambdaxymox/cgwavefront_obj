@@ -364,8 +364,43 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
         slices
     }
 
-    fn gen_element_set(&self, g: &mut G, count: usize) -> ElementSet {
-        unimplemented!()
+    fn gen_vtn_index(&self, g: &mut G, 
+        use_vt: bool, use_vn: bool, range: (u32, u32, u32)) -> VTNIndex {
+
+        let v = g.gen_range(1, range.0);
+        if use_vt && use_vn {
+            let vt = g.gen_range(1, range.1);
+            let vn = g.gen_range(1, range.2);
+
+            VTNIndex::VTN(v, vt, vn)
+        } else if use_vt {
+            let vt = g.gen_range(1, range.1);
+
+            VTNIndex::VT(v, vt)
+        } else if use_vn {
+            let vn = g.gen_range(1, range.2);
+
+            VTNIndex::VN(v, vn)
+        } else {
+            VTNIndex::V(v)
+        }
+    }
+
+    fn gen_element_set(
+        &self, g: &mut G, element_count: u32,
+        v_count: u32, vt_count: u32, vn_count: u32) -> ElementSet {
+        
+        let mut element_set = vec![];
+        for _ in 0..element_count {
+            let vtn_index1 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
+            let vtn_index2 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
+            let vtn_index3 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
+
+            element_set.push(Element::Face(vtn_index1, vtn_index2, vtn_index3));
+        }
+
+        element_set
+
     }
 
     fn gen_group_set(&self, g: &mut G, group_slices: &[(usize, usize)]) -> GroupSet {
@@ -401,7 +436,11 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
             let normal_vertex_set = self.gen_normal_vertex_set(g, len);
 
             let element_count = g.gen_range(len, 2*len);
-            let element_set = self.gen_element_set(g, element_count);
+            let element_set = self.gen_element_set(
+                g,  element_count as u32,
+                vertex_set.len() as u32, texture_vertex_set.len() as u32, 
+                normal_vertex_set.len() as u32,
+            );
 
             let group_count = g.gen_range(1, 6);
             let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
