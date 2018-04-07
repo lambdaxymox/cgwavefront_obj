@@ -158,7 +158,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
 
     }
 
-    fn gen_group_set(&self, g: &mut G, use_default: bool, count: usize) -> GroupSet {
+    fn gen_group_set(&self, use_default: bool, count: usize) -> GroupSet {
         let mut group_set = vec![];
         if use_default && count == 1 {
             group_set.push(Default::default());
@@ -173,7 +173,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         group_set
     }
 
-    fn gen_smoothing_group_set(&self, g: &mut G, count: usize) -> SmoothingGroupSet {
+    fn gen_smoothing_group_set(&self, count: usize) -> SmoothingGroupSet {
         let mut smoothing_group_set = vec![];
         for i in 0..count {
             let smoothing_group_i = SmoothingGroup::new(i as u32);
@@ -189,8 +189,13 @@ impl<G> ObjectSetGen<G> where G: Gen {
         smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]
     ) -> ShapeSet {
         
+        debug_assert!(group_slices.len() > 0);
+        debug_assert!(group_set.len() > 0);
+        debug_assert!(smoothing_group_slices.len() > 0);
+        debug_assert!(smoothing_group_set.len() > 0);
+
         let mut shape_set = vec![];
-        for i in 1..(group_slices.len() + 1) {
+        for i in 0..group_slices.len() {
             for j in group_slices[i].0..group_slices[i].1 {
                 let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i+1)], &vec![]);
                 shape_set.push(shape_entry);
@@ -198,8 +203,10 @@ impl<G> ObjectSetGen<G> where G: Gen {
         }
 
         for i in 0..smoothing_group_slices.len() {
+            println!("i = {}", i);
+            println!("shape_set.len() = {}", shape_set.len());
             for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
-                shape_set[j].smoothing_groups = vec![smoothing_group_set[i].clone()];
+                shape_set[j - 1].smoothing_groups = vec![smoothing_group_set[i].clone()];
             }
         }
 
@@ -222,13 +229,13 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let use_g_default: bool = Arbitrary::arbitrary(g);
         let group_count = if use_g_default { 1 } else { g.gen_range(2, 6) };
         let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
-        let group_set = self.gen_group_set(g, use_g_default, group_count);
+        let group_set = self.gen_group_set(use_g_default, group_count);
 
         let smoothing_group_count = g.gen_range(1, 6);
         let smoothing_group_slices = self.gen_slices(
             g, (0, element_set.len()), smoothing_group_count
         );
-        let smoothing_group_set = self.gen_smoothing_group_set(g, smoothing_group_count);
+        let smoothing_group_set = self.gen_smoothing_group_set(smoothing_group_count);
 
         let shape_set = self.gen_shape_set(
             &element_set, 
