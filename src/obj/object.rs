@@ -537,3 +537,95 @@ impl ObjectCompositor for DisplayObjectCompositor {
         string
     } 
 }
+
+struct TextObjectCompositor { }
+
+impl TextObjectCompositor {
+    fn new() -> TextObjectCompositor { TextObjectCompositor {} }
+}
+
+impl ObjectCompositor for TextObjectCompositor {
+    fn compose(&self, object: &Object) -> String {
+        let object_group_map = object.get_group_map();
+        let mut string = String::new();
+
+        if object.name != "" {
+            string += &format!("o {} \n", object.name);
+        }
+            
+        for v in object.vertex_set.iter() {
+            if v.w == 1.0 {
+                string += &format!("v {} {} {} \n", v.x, v.y, v.z);
+            } else {
+                string += &format!("v {} {} {} {} \n", v.x, v.y, v.z, v.w);
+            }
+        }
+
+        string += &format!("# {} vertices\n", object.vertex_set.len());
+        string += &format!("\n");
+
+        for vt in object.texture_vertex_set.iter() {
+            string += &format!("vt {} {} {} \n", vt.u, vt.v, vt.w);
+        }
+
+        string += &format!("# {} texture vertices\n", object.texture_vertex_set.len());
+        string += &format!("\n");
+
+        for vn in object.normal_vertex_set.iter() {
+            string += &format!("vn {} {} {} \n", vn.i, vn.j, vn.k);
+        }
+
+        string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
+        string += &format!("\n");
+
+        let mut current_groups = &object_group_map[&0].0;
+        let mut current_smoothing_groups = &object_group_map[&0].1;
+        let mut group_string = String::from("g ");
+        for group in current_groups.iter() {
+            group_string += &format!(" {} ", group);
+        }
+
+        let mut smoothing_group_string = String::from("s ");
+        for smoothing_group in current_smoothing_groups.iter() {
+            group_string += &format!(" {} ", smoothing_group);
+        }
+
+        string += &format!("{}", group_string);
+        string += &format!("{}", smoothing_group_string);
+
+        for i in 0..object.element_set.len() {
+            if &object_group_map[&(i as u32)].0 != current_groups {
+                // If the current set of groups is different from the current
+                // element's set of groups, we must place a new group statement
+                // to signify the change.
+                current_groups = &object_group_map[&(i as u32)].0;
+                let mut group_string = String::from("g ");
+                for group in current_groups.iter() {
+                    group_string += &format!(" {} ", group);
+                }
+                string += &format!("\n");
+                string += &format!("{}", group_string);
+            }
+            // We continue with the current group. Recall that group statements
+            // are state setting; each successive element is associated with the 
+            // current group until the next group statement.
+            if &object_group_map[&(i as u32)].1 != current_smoothing_groups {
+                // If the current active smoothing group is different from the current
+                // element's smoothing group, we must place a new smoothing group statement
+                // to signify the change.
+                current_smoothing_groups = &object_group_map[&(i as u32)].1;
+                let mut smoothing_group_string = String::from("s ");
+                for smoothing_group in current_smoothing_groups.iter() {
+                    smoothing_group_string += &format!(" {} ", smoothing_group);
+                }
+                string += &format!("{}", smoothing_group_string);
+            }
+            // We continue with the current smoothing group. Recall that smoothing group 
+            // statements are state setting; each successive element is associated with the 
+            // current smoothing group until the next smoothing group statement.
+                
+            string += &format!("{}", object.element_set[i]);
+        }
+        string
+    }
+}
