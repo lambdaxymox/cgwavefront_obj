@@ -92,6 +92,12 @@ impl Default for SmoothingGroup {
     fn default() -> SmoothingGroup { SmoothingGroup::new(0) }
 }
 
+impl fmt::Display for SmoothingGroup {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
 type ElementIndex = u32;
 type VertexIndex = u32;
 type TextureVertexIndex = u32;

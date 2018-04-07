@@ -14,6 +14,7 @@ use std::cmp;
 use std::str;
 use std::convert;
 use fmt::Write;
+use std::collections::HashMap;
 
 
 #[derive(Clone, Debug)]
@@ -260,36 +261,27 @@ impl ParserModel {
         ParserModel { data: data }
     }
 
-    fn get_group_map(&self) -> Vec<Vec<Vec<GroupName>>> {
+    fn get_group_map(&self) -> Vec<HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)>> {
         let mut group_map = vec![];
         for object in self.data.iter() {
-            let mut object_groups = vec![];
+            let mut object_groups = HashMap::new();
             for shape_entry in object.shape_set.iter() {
                 let mut entry_groups = vec![];
+                let mut entry_smoothing_groups = vec![];
                 for i in shape_entry.groups.iter() {
-                    entry_groups.push(object.element_set[*i as usize].clone());
+                    entry_groups.push(object.group_set[*i as usize].clone());
                 }
+
+                for j in shape_entry.smoothing_groups.iter() {
+                    entry_smoothing_groups.push(object.smoothing_group_set[*j as usize].clone());
+                }
+
+                object_groups.insert(shape_entry.element, (entry_groups, entry_smoothing_groups));
             }
             group_map.push(object_groups);
         }
 
         group_map
-    }
-
-    fn get_smoothing_group_map(&self) -> Vec<Vec<Vec<SmoothingGroup>>> {
-        let mut sgroup_map = vec![];
-        for object in self.data.iter() {
-            let mut object_sgroups = vec![];
-            for shape_entry in object.shape_set.iter() {
-                let mut entry_sgroups = vec![];
-                for i in shape_entry.smoothing_groups.iter() {
-                    entry_sgroups.push(object.element_set[*i as usize].clone());
-                }
-            }
-            sgroup_map.push(object_sgroups);
-        }
-
-        sgroup_map
     }
 
     fn parse(&self) -> Result<ObjectSet, ParseError> {
@@ -299,11 +291,8 @@ impl ParserModel {
 
 impl fmt::Display for ParserModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let group_map = self.get_group_map();
-        let smoothing_group_map = self.get_smoothing_group_map();
-        for ((object, groups), smoothing_groups) 
-            in self.data.iter().zip(group_map.iter()).zip(smoothing_group_map.iter()) {
-            
+        let object_set_group_map = self.get_group_map();
+        for (object, object_group_map) in self.data.iter().zip(object_set_group_map) {    
             if object.name != "" {
                 write!(f, "o {} \n", object.name)?;
             }
@@ -332,6 +321,65 @@ impl fmt::Display for ParserModel {
 
             write!(f, "# {} normal vertices\n", object.normal_vertex_set.len())?;
             write!(f, "\n")?;
+
+            let mut current_groups = &object_group_map[&0].0;
+            let mut current_smoothing_groups = &object_group_map[&0].1;
+            let mut group_string = String::from("g ");
+            for group in current_groups.iter() {
+                group_string += &format!(" {} ", group);
+            }
+
+            let mut smoothing_group_string = String::from("s ");
+            for smoothing_group in current_smoothing_groups.iter() {
+                group_string += &format!(" {} ", smoothing_group);
+            }
+
+            write!(f, "{}", group_string)?;
+            write!(f, "{}", smoothing_group_string)?;
+
+            for i in 0..object.element_set.len() {
+                if &object_group_map[&(i as u32)].0 != current_groups {
+                    // If the current set of groups is different from the current
+                    // element's set of groups, we must place a new group statement
+                    // to signify the change.
+                    current_groups = &object_group_map[&(i as u32)].0;
+                    let mut group_string = String::from("g ");
+                    for group in current_groups.iter() {
+                        group_string += &format!(" {} ", group);
+                    }
+                    write!(f, "\n")?;
+                    write!(f, "{}", group_string)?;
+                }
+                // We continue with the current group. Recall that group statements
+                // are state setting; each successive element is associated with the 
+                // current group until the next group statement.
+                if &object_group_map[&(i as u32)].1 != current_smoothing_groups {
+                    // If the current active smoothing group is different from the current
+                    // element's smoothing group, we must place a new smoothing group statement
+                    // to signify the change.
+                    current_smoothing_groups = &object_group_map[&(i as u32)].1;
+                    let mut smoothing_group_string = String::from("s ");
+                    for smoothing_group in current_smoothing_groups.iter() {
+                        smoothing_group_string += &format!(" {} ", smoothing_group);
+                    }
+                    write!(f, "{}", smoothing_group_string)?;
+                }
+                // We continue with the current smoothing group. Recall that smoothing group 
+                // statements are state setting; each successive element is associated with the 
+                // current smoothing group until the next smoothing group statement.
+                
+                match object.element_set[i] {
+                    Element::Point(vtn) => {
+                        write!(f, "p {:?}", vtn)?;
+                    }
+                    Element::Line(vtn1, vtn2) => {
+                        write!(f, "l {:?} {:?}", vtn1, vtn2)?;
+                    }
+                    Element::Face(vtn1, vtn2, vtn3) => {
+                        write!(f, "f {:?} {:?} {:?}", vtn1, vtn2, vtn3)?;
+                    }
+                }
+            }
         }
 
         Ok(())
