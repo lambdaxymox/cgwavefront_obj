@@ -90,6 +90,16 @@ pub enum Element {
     Face(VTNIndex, VTNIndex, VTNIndex),
 }
 
+impl fmt::Display for Element {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            Element::Point(vtn) => write!(f, "p  {}", vtn),
+            Element::Line(vtn1, vtn2) => write!(f, "l  {}  {}", vtn1, vtn2),
+            Element::Face(vtn1, vtn2, vtn3) => write!(f, "f  {}  {}  {}", vtn1, vtn2, vtn3),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GroupName(String);
 
