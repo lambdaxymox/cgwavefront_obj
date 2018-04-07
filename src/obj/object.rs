@@ -462,29 +462,28 @@ impl ObjectCompositor for DisplayObjectCompositor {
     fn compose(&self, object: &Object) -> String {
         let mut string = String::from("Object {\n");
     
-        string.push_str(&format!("    name: {:?}\n", object.name));
+        string.push_str(&format!("    name: {}\n", object.name));
         if object.vertex_set.is_empty() {
             string.push_str(&format!("    vertex set: []\n"));
         } else {
             let length = object.vertex_set.len();
-            string.push_str(&format!("    vertex set: [{:?} ... {:?}]\n", 
+            string.push_str(&format!("    vertex set: [{} ... {}]\n", 
                 object.vertex_set[0], object.vertex_set[length - 1]
             ));
         }
         string.push_str(&format!(
-            "    vertex set length: {:?}\n", object.vertex_set.len()
+            "    vertex set length: {}\n", object.vertex_set.len()
         ));
-        
         if object.texture_vertex_set.is_empty() {
             string.push_str(&format!("    texture vertex set: []\n"));
         } else {
             let length = object.texture_vertex_set.len();
-            string.push_str(&format!("    texture vertex set: [{:?} ... {:?}]\n", 
+            string.push_str(&format!("    texture vertex set: [{} ... {}]\n", 
                 object.texture_vertex_set[0], object.texture_vertex_set[length - 1]
             ));
         }
         string.push_str(&format!(
-            "    texture vertex set length: {:?}\n", 
+            "    texture vertex set length: {}\n", 
             object.texture_vertex_set.len()
         ));
 
@@ -492,12 +491,12 @@ impl ObjectCompositor for DisplayObjectCompositor {
             string.push_str(&format!("    normal vertex set: []\n"));
         } else {
             let length = object.normal_vertex_set.len();
-            string.push_str(&format!("    normal vertex set: [{:?} ... {:?}]\n", 
+            string.push_str(&format!("    normal vertex set: [{} ... {}]\n", 
                 object.normal_vertex_set[0], object.normal_vertex_set[length - 1]
             ));
         }
         string.push_str(&format!(
-            "    normal vertex set length: {:?}\n", 
+            "    normal vertex set length: {}\n", 
             object.normal_vertex_set.len()
         ));
 
@@ -505,12 +504,12 @@ impl ObjectCompositor for DisplayObjectCompositor {
             string.push_str(&format!("    group set: []\n"));
         } else {
             let length = object.group_set.len();
-            string.push_str(&format!("    group set: [{:?} ... {:?}]\n", 
+            string.push_str(&format!("    group set: [{} ... {}]\n", 
                 object.group_set[0], object.group_set[length - 1]
             ));
         }
         string.push_str(&format!(
-            "    group set length: {:?}\n", 
+            "    group set length: {}\n", 
             object.group_set.len()
         ));
 
@@ -518,12 +517,12 @@ impl ObjectCompositor for DisplayObjectCompositor {
             string.push_str(&format!("    smoothing group set: []\n"));
         } else {
             let length = object.smoothing_group_set.len();
-            string.push_str(&format!("    smoothing group set: [{:?} ... {:?}]\n", 
+            string.push_str(&format!("    smoothing group set: [{} ... {}]\n", 
                 object.smoothing_group_set[0], object.smoothing_group_set[length - 1]
             ));
         }
         string.push_str(&format!(
-            "    smoothing group set length: {:?}\n", 
+            "    smoothing group set length: {}\n", 
             object.smoothing_group_set.len()
         ));
 
@@ -531,12 +530,12 @@ impl ObjectCompositor for DisplayObjectCompositor {
             string.push_str(&format!("    smoothing group set: []\n"));
         } else {
             let length = object.element_set.len();
-            string.push_str(&format!("    element set: [{:?} ... {:?}]\n", 
+            string.push_str(&format!("    element set: [{} ... {}]\n", 
                 object.element_set[0], object.element_set[length - 1]
             ));
         }
         string.push_str(&format!(
-            "    element set length: {:?}\n", object.element_set.len()
+            "    element set length: {}\n", object.element_set.len()
         ));
 
         string.push_str(&format!("}}\n"));
