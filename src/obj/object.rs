@@ -473,9 +473,8 @@ impl ObjectCompositor for DisplayObjectCompositor {
                         $set[0], $set[length - 1]
                     ));
                 }
-                $out.push_str(&format!(
-                    "        length: {}\n", $set.len()
-                ));            
+
+                $out.push_str(&format!("        length: {}\n", $set.len()));            
             }
         };
 
