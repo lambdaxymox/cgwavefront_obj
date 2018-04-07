@@ -425,7 +425,8 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 
     fn gen_shape_set(&self, 
         elements: &ElementSet, 
-        group_slices: &[(usize, usize)], smoothing_group_slices: &[(usize, usize)]
+        group_slices: &[(usize, usize)], group_set: &[GroupName],
+        smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[SmoothingGroup]
     ) -> ShapeSet {
         unimplemented!()
     }
@@ -463,7 +464,9 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
             let smoothing_group_set = self.gen_smoothing_group_set(g, smoothing_group_count);
 
             let shape_set = self.gen_shape_set(
-                &element_set, &group_slices, &smoothing_group_slices
+                &element_set, 
+                &group_slices, &group_set, 
+                &smoothing_group_slices, &smoothing_group_set
             );
 
             let mut builder = ObjectBuilder::new(vertex_set, element_set);
