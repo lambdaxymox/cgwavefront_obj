@@ -6,6 +6,7 @@ use wavefront::obj::{
     Object, ObjectSet, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex, Element, VTNIndex,
     GroupName, SmoothingGroup, ShapeEntry,
+    TextObjectSetCompositor, Compositor
 };
 use wavefront::obj::{Parser, ParseError};
 
@@ -269,10 +270,6 @@ impl ParserModel {
         ParserModel { data: data }
     }
 
-    fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)>> {
-        self.data.get_group_maps()
-    }
-
     fn parse(&self) -> Result<ObjectSet, ParseError> {
         Ok(self.data.clone())
     }
@@ -280,88 +277,8 @@ impl ParserModel {
 
 impl fmt::Display for ParserModel {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let object_set_group_map = self.get_group_maps();
-        for (object, object_group_map) in self.data.iter().zip(object_set_group_map) {    
-            if object.name != "" {
-                write!(f, "o {} \n", object.name)?;
-            }
-            
-            for v in object.vertex_set.iter() {
-                if v.w == 1.0 {
-                    write!(f, "v {} {} {} \n", v.x, v.y, v.z)?;
-                } else {
-                    write!(f, "v {} {} {} {} \n", v.x, v.y, v.z, v.w)?;
-                }
-            }
-
-            write!(f, "# {} vertices\n", object.vertex_set.len())?;
-            write!(f, "\n")?;
-
-            for vt in object.texture_vertex_set.iter() {
-                write!(f, "vt {} {} {} \n", vt.u, vt.v, vt.w)?;
-            }
-
-            write!(f, "# {} texture vertices\n", object.texture_vertex_set.len())?;
-            write!(f, "\n")?;
-
-            for vn in object.normal_vertex_set.iter() {
-                write!(f, "vn {} {} {} \n", vn.i, vn.j, vn.k)?;
-            }
-
-            write!(f, "# {} normal vertices\n", object.normal_vertex_set.len())?;
-            write!(f, "\n")?;
-
-            let mut current_groups = &object_group_map[&0].0;
-            let mut current_smoothing_groups = &object_group_map[&0].1;
-            let mut group_string = String::from("g ");
-            for group in current_groups.iter() {
-                group_string += &format!(" {} ", group);
-            }
-
-            let mut smoothing_group_string = String::from("s ");
-            for smoothing_group in current_smoothing_groups.iter() {
-                group_string += &format!(" {} ", smoothing_group);
-            }
-
-            write!(f, "{}", group_string)?;
-            write!(f, "{}", smoothing_group_string)?;
-
-            for i in 0..object.element_set.len() {
-                if &object_group_map[&(i as u32)].0 != current_groups {
-                    // If the current set of groups is different from the current
-                    // element's set of groups, we must place a new group statement
-                    // to signify the change.
-                    current_groups = &object_group_map[&(i as u32)].0;
-                    let mut group_string = String::from("g ");
-                    for group in current_groups.iter() {
-                        group_string += &format!(" {} ", group);
-                    }
-                    write!(f, "\n")?;
-                    write!(f, "{}", group_string)?;
-                }
-                // We continue with the current group. Recall that group statements
-                // are state setting; each successive element is associated with the 
-                // current group until the next group statement.
-                if &object_group_map[&(i as u32)].1 != current_smoothing_groups {
-                    // If the current active smoothing group is different from the current
-                    // element's smoothing group, we must place a new smoothing group statement
-                    // to signify the change.
-                    current_smoothing_groups = &object_group_map[&(i as u32)].1;
-                    let mut smoothing_group_string = String::from("s ");
-                    for smoothing_group in current_smoothing_groups.iter() {
-                        smoothing_group_string += &format!(" {} ", smoothing_group);
-                    }
-                    write!(f, "{}", smoothing_group_string)?;
-                }
-                // We continue with the current smoothing group. Recall that smoothing group 
-                // statements are state setting; each successive element is associated with the 
-                // current smoothing group until the next smoothing group statement.
-                
-                write!(f, "{}", object.element_set[i])?;
-            }
-        }
-
-        Ok(())
+        let string = TextObjectSetCompositor::new().compose(&self.data);
+        write!(f, "{}", string)
     }
 }
 

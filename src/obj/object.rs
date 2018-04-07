@@ -636,17 +636,17 @@ impl ObjectCompositor for TextObjectCompositor {
     }
 }
 
-trait ObjectSetCompositor {
+pub trait Compositor {
     fn compose(&self, object_set: &ObjectSet) -> String;
 }
 
-struct DisplayObjectSetCompositor { }
+pub struct DisplayObjectSetCompositor { }
 
 impl DisplayObjectSetCompositor {
-    fn new() -> Self { Self {} }
+    pub fn new() -> Self { Self {} }
 }
 
-impl ObjectSetCompositor for DisplayObjectSetCompositor {
+impl Compositor for DisplayObjectSetCompositor {
     fn compose(&self, object_set: &ObjectSet) -> String {
         let compositor = DisplayObjectCompositor::new();
         let mut string = String::from("ObjectSet {\n");
@@ -661,13 +661,13 @@ impl ObjectSetCompositor for DisplayObjectSetCompositor {
     }
 }
 
-struct TextObjectSetCompositor { }
+pub struct TextObjectSetCompositor { }
 
 impl TextObjectSetCompositor {
-    fn new() -> Self { Self {} }
+    pub fn new() -> Self { Self {} }
 }
 
-impl ObjectSetCompositor for TextObjectSetCompositor {
+impl Compositor for TextObjectSetCompositor {
     fn compose(&self, object_set: &ObjectSet) -> String {
         let compositor = TextObjectCompositor::new();
         

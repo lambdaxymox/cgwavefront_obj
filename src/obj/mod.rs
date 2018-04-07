@@ -13,6 +13,9 @@ pub use obj::object::GroupName;
 pub use obj::object::SmoothingGroup;
 pub use obj::object::ShapeEntry;
 
+pub use obj::object::TextObjectSetCompositor;
+pub use obj::object::Compositor;
+
 pub use obj::parser::Parser;
 pub use obj::parser::ParseError;
 
