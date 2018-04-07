@@ -7,7 +7,8 @@ use wavefront::obj::{
     Vertex, TextureVertex, NormalVertex, Element, VTNIndex,
     GroupName, SmoothingGroup, ShapeEntry,
     TextObjectSetCompositor, Compositor,
-    VertexSet, TextureVertexSet, NormalVertexSet,
+    VertexSet, TextureVertexSet, NormalVertexSet, ElementSet, ShapeSet,
+    GroupSet, SmoothingGroupSet,
 };
 use wavefront::obj::{Parser, ParseError};
 
@@ -351,7 +352,8 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 
         let mut indices = vec![g.gen_range(range.0, range.1)];
         for i in 1..count {
-            indices.push(g.gen_range(indices[i -1], range.1));
+            let lower = indices[i - 1];
+            indices.push(g.gen_range(lower, range.1));
         }
 
         let mut slices = vec![];
@@ -362,25 +364,73 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
         slices
     }
 
-    fn generate(&self, g: &mut G) -> ObjectSet {
-        //let mut objects = vec![];
+    fn gen_element_set(&self, g: &mut G, count: usize) -> ElementSet {
+        unimplemented!()
+    }
 
+    fn gen_group_set(&self, g: &mut G, group_slices: &[(usize, usize)]) -> GroupSet {
+        unimplemented!()
+    }
+
+    fn gen_smoothing_group_set(&self, g: &mut G, 
+        smoothing_group_slices: &[(usize, usize)]
+    ) -> SmoothingGroupSet {
+        unimplemented!()
+    }
+
+    fn gen_shape_set(&self, 
+        elements: &ElementSet, 
+        group_slices: &[(usize, usize)], smoothing_group_slices: &[(usize, usize)]
+    ) -> ShapeSet {
+        unimplemented!()
+    }
+
+    fn generate(&self, g: &mut G) -> ObjectSet {
+        // We want one object sets to appear frequently since that is the most
+        // commonly encountered case.
         let one_obj: bool = Arbitrary::arbitrary(g);
         let object_count = if one_obj { 1 } else { g.gen_range(2, 20) };
 
-        for _ in 0..object_count {
-            let one_g: bool = Arbitrary::arbitrary(g);
-        
+        let mut objects = vec![];
+        for _ in 0..object_count {  
             let use_g_default: bool = Arbitrary::arbitrary(g);
 
             let len = g.gen_range(1, 100000);
             let vertex_set = self.gen_vertex_set(g, len);
             let texture_vertex_set = self.gen_texture_vertex_set(g, len);
-            let normal_vertex_len = self.gen_normal_vertex_set(g, len);
+            let normal_vertex_set = self.gen_normal_vertex_set(g, len);
+
+            let element_count = g.gen_range(len, 2*len);
+            let element_set = self.gen_element_set(g, element_count);
+
+            let group_count = g.gen_range(1, 6);
+            let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
+            let group_set = self.gen_group_set(g, &group_slices);
+
+            let smoothing_group_count = g.gen_range(1, 6);
+            let smoothing_group_slices = self.gen_slices(
+                g, (0, element_set.len()), smoothing_group_count
+            );
+            let smoothing_group_set = self.gen_smoothing_group_set(g, &group_slices);
+
+            let shape_set = self.gen_shape_set(
+                &element_set, &group_slices, &smoothing_group_slices
+            );
+
+            let mut builder = ObjectBuilder::new(vertex_set, element_set);
+            builder
+                .with_texture_vertex_set(texture_vertex_set)
+                .with_normal_vertex_set(normal_vertex_set)
+                .with_group_set(group_set)
+                .with_smoothing_group_set(smoothing_group_set)
+                .with_shape_set(shape_set);
+            let object = builder.build();
+
+            objects.push(object);
 
         }
 
-        unimplemented!()
+        ObjectSet::new(objects)
     }
 }
 

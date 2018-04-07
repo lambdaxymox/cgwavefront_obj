@@ -18,6 +18,10 @@ pub use obj::object::Object;
 pub use obj::object::VertexSet;
 pub use obj::object::TextureVertexSet;
 pub use obj::object::NormalVertexSet;
+pub use obj::object::ElementSet;
+pub use obj::object::ShapeSet;
+pub use obj::object::GroupSet;
+pub use obj::object::SmoothingGroupSet;
 
 pub use obj::object::TextObjectSetCompositor;
 pub use obj::object::Compositor;
