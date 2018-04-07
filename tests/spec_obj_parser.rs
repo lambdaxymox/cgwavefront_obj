@@ -446,6 +446,50 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
         shape_set
     }
 
+    fn gen_object(&self, g: &mut G) -> Object {
+        let use_g_default: bool = Arbitrary::arbitrary(g);
+
+        let len = g.gen_range(1, 100000);
+        let vertex_set = self.gen_vertex_set(g, len);
+        let texture_vertex_set = self.gen_texture_vertex_set(g, len);
+        let normal_vertex_set = self.gen_normal_vertex_set(g, len);
+
+        let element_count = g.gen_range(len, 2*len);
+        let element_set = self.gen_element_set(
+            g,  element_count as u32,
+            vertex_set.len() as u32, texture_vertex_set.len() as u32, 
+            normal_vertex_set.len() as u32,
+        );
+
+        let group_count = g.gen_range(1, 6);
+        let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
+        let group_set = self.gen_group_set(g, group_count);
+
+        let smoothing_group_count = g.gen_range(1, 6);
+        let smoothing_group_slices = self.gen_slices(
+            g, (0, element_set.len()), smoothing_group_count
+        );
+        let smoothing_group_set = self.gen_smoothing_group_set(g, smoothing_group_count);
+
+        let shape_set = self.gen_shape_set(
+            &element_set, 
+            &group_slices,
+            &(0..(group_set.len() as u32)).collect::<Vec<u32>>(), 
+            &smoothing_group_slices, 
+            &(0..(smoothing_group_set.len() as u32)).collect::<Vec<u32>>(), 
+        );
+
+        let mut builder = ObjectBuilder::new(vertex_set, element_set);
+        builder
+            .with_texture_vertex_set(texture_vertex_set)
+            .with_normal_vertex_set(normal_vertex_set)
+            .with_group_set(group_set)
+            .with_smoothing_group_set(smoothing_group_set)
+            .with_shape_set(shape_set);
+        
+        builder.build()
+    }
+
     fn generate(&self, g: &mut G) -> ObjectSet {
         // We want one object sets to appear frequently since that is the most
         // commonly encountered case in the wild.
@@ -454,49 +498,8 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 
         let mut objects = vec![];
         for _ in 0..object_count {  
-            let use_g_default: bool = Arbitrary::arbitrary(g);
-
-            let len = g.gen_range(1, 100000);
-            let vertex_set = self.gen_vertex_set(g, len);
-            let texture_vertex_set = self.gen_texture_vertex_set(g, len);
-            let normal_vertex_set = self.gen_normal_vertex_set(g, len);
-
-            let element_count = g.gen_range(len, 2*len);
-            let element_set = self.gen_element_set(
-                g,  element_count as u32,
-                vertex_set.len() as u32, texture_vertex_set.len() as u32, 
-                normal_vertex_set.len() as u32,
-            );
-
-            let group_count = g.gen_range(1, 6);
-            let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
-            let group_set = self.gen_group_set(g, group_count);
-
-            let smoothing_group_count = g.gen_range(1, 6);
-            let smoothing_group_slices = self.gen_slices(
-                g, (0, element_set.len()), smoothing_group_count
-            );
-            let smoothing_group_set = self.gen_smoothing_group_set(g, smoothing_group_count);
-
-            let shape_set = self.gen_shape_set(
-                &element_set, 
-                &group_slices,
-                &(0..(group_set.len() as u32)).collect::<Vec<u32>>(), 
-                &smoothing_group_slices, 
-                &(0..(smoothing_group_set.len() as u32)).collect::<Vec<u32>>(), 
-            );
-
-            let mut builder = ObjectBuilder::new(vertex_set, element_set);
-            builder
-                .with_texture_vertex_set(texture_vertex_set)
-                .with_normal_vertex_set(normal_vertex_set)
-                .with_group_set(group_set)
-                .with_smoothing_group_set(smoothing_group_set)
-                .with_shape_set(shape_set);
-            let object = builder.build();
-
+            let object = self.gen_object(g);
             objects.push(object);
-
         }
 
         ObjectSet::new(objects)
