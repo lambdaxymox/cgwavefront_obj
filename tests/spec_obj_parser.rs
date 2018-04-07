@@ -368,17 +368,7 @@ impl fmt::Display for ParserModel {
                 // statements are state setting; each successive element is associated with the 
                 // current smoothing group until the next smoothing group statement.
                 
-                match object.element_set[i] {
-                    Element::Point(vtn) => {
-                        write!(f, "p {:?}", vtn)?;
-                    }
-                    Element::Line(vtn1, vtn2) => {
-                        write!(f, "l {:?} {:?}", vtn1, vtn2)?;
-                    }
-                    Element::Face(vtn1, vtn2, vtn3) => {
-                        write!(f, "f {:?} {:?} {:?}", vtn1, vtn2, vtn3)?;
-                    }
-                }
+                write!(f, "{}", object.element_set[i])?;
             }
         }
 
