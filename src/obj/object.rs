@@ -637,7 +637,7 @@ trait ObjectSetCompositor {
 struct DisplayObjectSetCompositor { }
 
 impl DisplayObjectSetCompositor {
-    fn new() -> Self { DisplayObjectSetCompositor {} }
+    fn new() -> Self { Self {} }
 }
 
 impl ObjectSetCompositor for DisplayObjectSetCompositor {
@@ -647,6 +647,7 @@ impl ObjectSetCompositor for DisplayObjectSetCompositor {
         
         for object in object_set.iter() {
             string += &object_compositor.compose(&object);
+            string += &"\n";
         }
 
         string += &"}\n";
