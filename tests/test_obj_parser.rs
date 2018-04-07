@@ -3191,8 +3191,7 @@ fn test_parse_object_set() {
         let result = parser.parse().unwrap();
 
         println!("{}", result);
-        assert!(false);
-        //assert_eq!(result, test.expected);
+        assert_eq!(result, test.expected);
     }
 }
 
