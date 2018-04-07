@@ -464,16 +464,17 @@ impl ObjectCompositor for DisplayObjectCompositor {
     
         macro_rules! compose_set {
             ($set:expr, $out:ident, $name:expr) => {
+                $out.push_str(&format!("    {} set:\n", $name));
                 if $set.is_empty() {
-                    $out.push_str(&format!("    {} set: []\n", $name));
+                    $out.push_str(&format!("        data: []\n"));
                 } else {
                     let length = $set.len();
-                    $out.push_str(&format!("    {} set: [{} ... {}]\n", 
-                        $name, $set[0], $set[length - 1]
+                    $out.push_str(&format!("        data: [({}) ... ({})]\n", 
+                        $set[0], $set[length - 1]
                     ));
                 }
                 $out.push_str(&format!(
-                    "    {} set length: {}\n", $name, $set.len()
+                    "        length: {}\n", $set.len()
                 ));            
             }
         };
