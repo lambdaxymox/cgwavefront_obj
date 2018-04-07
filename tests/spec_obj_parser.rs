@@ -10,6 +10,7 @@ use wavefront::obj::{
 };
 use wavefront::obj::{Parser, ParseError};
 
+use std::marker;
 use std::fmt;
 use std::cmp;
 use std::str;
@@ -282,9 +283,79 @@ impl fmt::Display for ParserModel {
     }
 }
 
+struct ObjectSetGen<G> { 
+    _marker: marker::PhantomData<G>
+}
+
+impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
+    fn new() -> Self { 
+        ObjectSetGen { 
+            _marker: marker::PhantomData 
+        } 
+    }
+
+    fn gen_vertex(&self, g: &mut G, use_w: bool) -> Vertex {
+        let x = Arbitrary::arbitrary(g);
+        let y = Arbitrary::arbitrary(g);
+        let z = Arbitrary::arbitrary(g);
+        let w = if use_w { Arbitrary::arbitrary(g) } else { 1.0 };
+
+        Vertex::new(x, y, z, w)
+    }
+
+    fn gen_texture_vertex(&self, g: &mut G) -> TextureVertex {
+        let u = Arbitrary::arbitrary(g);
+        let v = Arbitrary::arbitrary(g);
+        let w = Arbitrary::arbitrary(g);
+
+        TextureVertex::new(u, v, w)
+    }
+
+    fn gen_normal_vertex(&self, g: &mut G) -> NormalVertex {
+        let i = Arbitrary::arbitrary(g);
+        let j = Arbitrary::arbitrary(g);
+        let k = Arbitrary::arbitrary(g);
+
+        NormalVertex::new(i, j, k)
+    }
+
+    fn generate(&self, g: &mut G) -> ObjectSet {
+        //let mut objects = vec![];
+
+        let one_obj: bool = Arbitrary::arbitrary(g);
+        let object_count = if one_obj { 1 } else { g.gen_range(2, 20) };
+
+        for _ in 0..object_count {
+            let one_g: bool = Arbitrary::arbitrary(g);
+        
+            let use_g_default: bool = Arbitrary::arbitrary(g);
+
+            let vertex_len = g.gen_range(1, 100000);
+            let mut vertex_set = vec![];
+            for _ in 0..vertex_len {
+                vertex_set.push(self.gen_vertex(g, true));
+            }
+
+            let texture_vertex_len = vertex_len;
+            let mut texture_vertex_set = vec![];
+            for _ in 0..texture_vertex_len {
+                texture_vertex_set.push(self.gen_texture_vertex(g));
+            }
+
+            let normal_vertex_len = vertex_len;
+            let mut normal_vertex_set = vec![];
+            for _ in 0..texture_vertex_len {
+                normal_vertex_set.push(self.gen_normal_vertex(g));
+            }
+        }
+
+        unimplemented!()
+    }
+}
+
 impl Arbitrary for ParserModel {
     fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
-        unimplemented!();
+        ParserModel::new(ObjectSetGen::new().generate(g))
     }
 }
 

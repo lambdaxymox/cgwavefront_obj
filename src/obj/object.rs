@@ -13,6 +13,12 @@ pub struct Vertex {
     pub w: f32,
 }
 
+impl Vertex {
+    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Vertex {
+        Vertex { x: x, y: y, z: z, w: w }
+    }
+}
+
 impl fmt::Display for Vertex {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "v  {}  {}  {}  {}", self.x, self.y, self.z, self.w)
@@ -26,6 +32,12 @@ pub struct TextureVertex {
     pub w: f32,
 }
 
+impl TextureVertex {
+    pub fn new(u: f32, v: f32, w: f32) -> TextureVertex {
+        TextureVertex { u: u, v: v, w: w }
+    }
+}
+
 impl fmt::Display for TextureVertex {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "vt  {}  {}  {}", self.u, self.v, self.w)
@@ -37,6 +49,12 @@ pub struct NormalVertex {
     pub i: f32,
     pub j: f32,
     pub k: f32,
+}
+
+impl NormalVertex {
+    pub fn new(i: f32, j: f32, k: f32) -> NormalVertex {
+        NormalVertex { i: i, j: j, k: k }
+    }
 }
 
 impl fmt::Display for NormalVertex {
