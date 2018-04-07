@@ -306,8 +306,7 @@ fn prop_parser_correctly_parses_valid_obj_files() {
         let result = machine.actual().parse();
         let expected = machine.model().parse();
 
-        //result == expected
-        unimplemented!();
+        result == expected
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
