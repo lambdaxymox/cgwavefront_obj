@@ -629,3 +629,27 @@ impl ObjectCompositor for TextObjectCompositor {
         string
     }
 }
+
+trait ObjectSetCompositor {
+    fn compose(&self, object_set: &ObjectSet) -> String;
+}
+
+struct DisplayObjectSetCompositor { }
+
+impl DisplayObjectSetCompositor {
+    fn new() -> Self { DisplayObjectSetCompositor {} }
+}
+
+impl ObjectSetCompositor for DisplayObjectSetCompositor {
+    fn compose(&self, object_set: &ObjectSet) -> String {
+        let object_compositor = DisplayObjectCompositor::new();
+        let mut string = String::from("ObjectSet {\n");
+        
+        for object in object_set.iter() {
+            string += &object_compositor.compose(&object);
+        }
+
+        string += &"}\n";
+        string
+    }
+}
