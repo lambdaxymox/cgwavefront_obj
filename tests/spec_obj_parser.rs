@@ -286,7 +286,7 @@ impl fmt::Display for ParserModel {
 }
 
 struct ObjectSetGen<G> { 
-    _marker: marker::PhantomData<G>
+    _marker: marker::PhantomData<G>,
 }
 
 impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
@@ -425,15 +425,30 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 
     fn gen_shape_set(&self, 
         elements: &ElementSet, 
-        group_slices: &[(usize, usize)], group_set: &[GroupName],
-        smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[SmoothingGroup]
+        group_slices: &[(usize, usize)], group_set: &[u32],
+        smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]
     ) -> ShapeSet {
-        unimplemented!()
+        
+        let mut shape_set = vec![];
+        for i in 0..group_slices.len() {
+            for j in group_slices[i].0..group_slices[i].1 {
+                let shape_entry = ShapeEntry::new(i as u32, &group_set[i..i+1], &vec![]);
+                shape_set.push(shape_entry);
+            }
+        }
+
+        for i in 0..smoothing_group_slices.len() {
+            for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
+                shape_set[i].smoothing_groups = vec![smoothing_group_set[i].clone()];
+            }
+        }
+
+        shape_set
     }
 
     fn generate(&self, g: &mut G) -> ObjectSet {
         // We want one object sets to appear frequently since that is the most
-        // commonly encountered case.
+        // commonly encountered case in the wild.
         let one_obj: bool = Arbitrary::arbitrary(g);
         let object_count = if one_obj { 1 } else { g.gen_range(2, 20) };
 
@@ -465,8 +480,10 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 
             let shape_set = self.gen_shape_set(
                 &element_set, 
-                &group_slices, &group_set, 
-                &smoothing_group_slices, &smoothing_group_set
+                &group_slices,
+                &(0..(group_set.len() as u32)).collect::<Vec<u32>>(), 
+                &smoothing_group_slices, 
+                &(0..(smoothing_group_set.len() as u32)).collect::<Vec<u32>>(), 
             );
 
             let mut builder = ObjectBuilder::new(vertex_set, element_set);
