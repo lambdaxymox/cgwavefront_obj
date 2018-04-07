@@ -12,11 +12,23 @@ pub struct Vertex {
     pub w: f32,
 }
 
+impl fmt::Display for Vertex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "v  {}  {}  {}  {}", self.x, self.y, self.z, self.w)
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TextureVertex {
     pub u: f32,
     pub v: f32,
     pub w: f32,
+}
+
+impl fmt::Display for TextureVertex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "vt  {}  {}  {}", self.u, self.v, self.w)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -26,11 +38,94 @@ pub struct NormalVertex {
     pub k: f32,
 }
 
+impl fmt::Display for NormalVertex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "vt  {}  {}  {}", self.i, self.j, self.k)
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum VTNIndex { 
+    V(VertexIndex),
+    VT(VertexIndex, TextureVertexIndex), 
+    VN(VertexIndex, NormalVertexIndex),
+    VTN(VertexIndex, TextureVertexIndex, NormalVertexIndex),
+}
+
+impl VTNIndex {
+    pub fn has_same_type_as(&self, other: &VTNIndex) -> bool {
+        match (self, other) {
+            (&VTNIndex::V(_),   &VTNIndex::V(_)) |
+            (&VTNIndex::VT(_,_),  &VTNIndex::VT(_,_)) | 
+            (&VTNIndex::VN(_,_),  &VTNIndex::VN(_,_)) | 
+            (&VTNIndex::VTN(_,_,_), &VTNIndex::VTN(_,_,_)) => true,
+            _ => false,
+        }
+    }
+}
+
+impl fmt::Display for VTNIndex {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match *self {
+            VTNIndex::V(v) => write!(f, "{}", v),
+            VTNIndex::VT(v, vt) => write!(f, "{}/{}", v ,vt),
+            VTNIndex::VN(v, vn) => write!(f, "{}//{}", v, vn),
+            VTNIndex::VTN(v, vt, vn) => write!(f, "{}/{}/{}", v, vt, vn),
+        }
+    }
+}
+
+type ElementIndex = u32;
+type VertexIndex = u32;
+type TextureVertexIndex = u32;
+type NormalVertexIndex = u32;
+type GroupIndex = u32;
+type ShapeIndex = u32;
+type SmoothingGroupIndex = u32;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Element {
     Point(VTNIndex),
     Line(VTNIndex, VTNIndex),
     Face(VTNIndex, VTNIndex, VTNIndex),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct GroupName(String);
+
+impl GroupName {
+    pub fn new(name: &str) -> GroupName { GroupName(String::from(name)) }
+}
+
+impl fmt::Display for GroupName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Default for GroupName {
+    fn default() -> GroupName { GroupName::new("default") }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SmoothingGroup(u32);
+
+impl SmoothingGroup {
+    pub fn new(name: u32) -> SmoothingGroup { 
+        SmoothingGroup(name)
+    }
+
+    pub fn as_int(&self) -> u32 { self.0 }
+}
+
+impl Default for SmoothingGroup {
+    fn default() -> SmoothingGroup { SmoothingGroup::new(0) }
+}
+
+impl fmt::Display for SmoothingGroup {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{}", self.0)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -60,52 +155,6 @@ pub struct Shape {
     smoothing_groups: Vec<SmoothingGroup>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct GroupName(String);
-
-impl fmt::Display for GroupName {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl GroupName {
-    pub fn new(name: &str) -> GroupName { GroupName(String::from(name)) }
-}
-
-impl Default for GroupName {
-    fn default() -> GroupName { GroupName::new("default") }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SmoothingGroup(u32);
-
-impl SmoothingGroup {
-    pub fn new(name: u32) -> SmoothingGroup { 
-        SmoothingGroup(name)
-    }
-
-    pub fn as_int(&self) -> u32 { self.0 }
-}
-
-impl Default for SmoothingGroup {
-    fn default() -> SmoothingGroup { SmoothingGroup::new(0) }
-}
-
-impl fmt::Display for SmoothingGroup {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.0)
-    }
-}
-
-type ElementIndex = u32;
-type VertexIndex = u32;
-type TextureVertexIndex = u32;
-type NormalVertexIndex = u32;
-type GroupIndex = u32;
-type ShapeIndex = u32;
-type SmoothingGroupIndex = u32;
-
 pub type VertexSet = Vec<Vertex>;
 pub type TextureVertexSet = Vec<TextureVertex>;
 pub type NormalVertexSet = Vec<NormalVertex>;
@@ -114,25 +163,7 @@ pub type ShapeSet = Vec<ShapeEntry>;
 pub type GroupSet = Vec<GroupName>;
 pub type SmoothingGroupSet = Vec<SmoothingGroup>;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum VTNIndex { 
-    V(VertexIndex),
-    VT(VertexIndex, TextureVertexIndex), 
-    VN(VertexIndex, NormalVertexIndex),
-    VTN(VertexIndex, TextureVertexIndex, NormalVertexIndex),
-}
 
-impl VTNIndex {
-    pub fn has_same_type_as(&self, other: &VTNIndex) -> bool {
-        match (self, other) {
-            (&VTNIndex::V(_),   &VTNIndex::V(_)) |
-            (&VTNIndex::VT(_,_),  &VTNIndex::VT(_,_)) | 
-            (&VTNIndex::VN(_,_),  &VTNIndex::VN(_,_)) | 
-            (&VTNIndex::VTN(_,_,_), &VTNIndex::VTN(_,_,_)) => true,
-            _ => false,
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub enum VTNTriple<'a> {
