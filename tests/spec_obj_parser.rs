@@ -193,16 +193,16 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
     ) -> ShapeSet {
         
         let mut shape_set = vec![];
-        for i in 0..group_slices.len() {
+        for i in 1..(group_slices.len() + 1) {
             for j in group_slices[i].0..group_slices[i].1 {
-                let shape_entry = ShapeEntry::new(i as u32, &group_set[i..i+1], &vec![]);
+                let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i+1)], &vec![]);
                 shape_set.push(shape_entry);
             }
         }
 
         for i in 0..smoothing_group_slices.len() {
             for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
-                shape_set[i].smoothing_groups = vec![smoothing_group_set[i].clone()];
+                shape_set[j].smoothing_groups = vec![smoothing_group_set[i].clone()];
             }
         }
 
