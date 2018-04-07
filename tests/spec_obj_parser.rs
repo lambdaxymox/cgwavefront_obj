@@ -106,16 +106,17 @@ impl<G> ObjectSetGen<G> where G: Gen {
         range: (usize, usize), count: usize) -> Vec<(usize, usize)> {
 
         let mut indices = vec![g.gen_range(range.0, range.1)];
-        for i in 1..(count + 1) {
+        for i in 1..(count + 2) {
             let lower = indices[i - 1];
             indices.push(g.gen_range(lower, range.1));
         }
 
         let mut slices = vec![];
-        for i in 0..count-1 {
+        for i in 0..count {
             slices.push((indices[i], indices[i + 1]));
         }
 
+        debug_assert_eq!(slices.len(), count);
         slices
     }
 
@@ -170,6 +171,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
             group_set.push(group_i);
         }
 
+        debug_assert_eq!(group_set.len(), count);
         group_set
     }
 
@@ -199,7 +201,6 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let mut shape_set = vec![];
         for i in 0..group_slices.len() {
             for j in group_slices[i].0..group_slices[i].1 {
-                println!("(i, j) = ({}, {})", i, j);
                 let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i+1)], &vec![]);
                 shape_set.push(shape_entry);
             }
