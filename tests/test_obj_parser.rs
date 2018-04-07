@@ -3190,7 +3190,9 @@ fn test_parse_object_set() {
         let mut parser = Parser::new(test.data.chars());
         let result = parser.parse().unwrap();
 
-        assert_eq!(result, test.expected);
+        println!("{}", result);
+        assert!(false);
+        //assert_eq!(result, test.expected);
     }
 }
 

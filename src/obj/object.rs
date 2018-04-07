@@ -462,81 +462,30 @@ impl ObjectCompositor for DisplayObjectCompositor {
     fn compose(&self, object: &Object) -> String {
         let mut string = String::from("Object {\n");
     
+        macro_rules! compose_set {
+            ($set:expr, $out:ident, $name:expr) => {
+                if $set.is_empty() {
+                    $out.push_str(&format!("    {} set: []\n", $name));
+                } else {
+                    let length = $set.len();
+                    $out.push_str(&format!("    {} set: [{} ... {}]\n", 
+                        $name, $set[0], $set[length - 1]
+                    ));
+                }
+                $out.push_str(&format!(
+                    "    {} set length: {}\n", $name, $set.len()
+                ));            
+            }
+        };
+
         string.push_str(&format!("    name: {}\n", object.name));
-        if object.vertex_set.is_empty() {
-            string.push_str(&format!("    vertex set: []\n"));
-        } else {
-            let length = object.vertex_set.len();
-            string.push_str(&format!("    vertex set: [{} ... {}]\n", 
-                object.vertex_set[0], object.vertex_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    vertex set length: {}\n", object.vertex_set.len()
-        ));
-        if object.texture_vertex_set.is_empty() {
-            string.push_str(&format!("    texture vertex set: []\n"));
-        } else {
-            let length = object.texture_vertex_set.len();
-            string.push_str(&format!("    texture vertex set: [{} ... {}]\n", 
-                object.texture_vertex_set[0], object.texture_vertex_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    texture vertex set length: {}\n", 
-            object.texture_vertex_set.len()
-        ));
 
-        if object.normal_vertex_set.is_empty() {
-            string.push_str(&format!("    normal vertex set: []\n"));
-        } else {
-            let length = object.normal_vertex_set.len();
-            string.push_str(&format!("    normal vertex set: [{} ... {}]\n", 
-                object.normal_vertex_set[0], object.normal_vertex_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    normal vertex set length: {}\n", 
-            object.normal_vertex_set.len()
-        ));
-
-        if object.group_set.is_empty() {
-            string.push_str(&format!("    group set: []\n"));
-        } else {
-            let length = object.group_set.len();
-            string.push_str(&format!("    group set: [{} ... {}]\n", 
-                object.group_set[0], object.group_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    group set length: {}\n", 
-            object.group_set.len()
-        ));
-
-        if object.smoothing_group_set.is_empty() {
-            string.push_str(&format!("    smoothing group set: []\n"));
-        } else {
-            let length = object.smoothing_group_set.len();
-            string.push_str(&format!("    smoothing group set: [{} ... {}]\n", 
-                object.smoothing_group_set[0], object.smoothing_group_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    smoothing group set length: {}\n", 
-            object.smoothing_group_set.len()
-        ));
-
-        if object.element_set.is_empty() {
-            string.push_str(&format!("    smoothing group set: []\n"));
-        } else {
-            let length = object.element_set.len();
-            string.push_str(&format!("    element set: [{} ... {}]\n", 
-                object.element_set[0], object.element_set[length - 1]
-            ));
-        }
-        string.push_str(&format!(
-            "    element set length: {}\n", object.element_set.len()
-        ));
+        compose_set!(object.vertex_set, string, "vertex");
+        compose_set!(object.texture_vertex_set, string, "texture vertex");
+        compose_set!(object.normal_vertex_set, string, "normal vertex");
+        compose_set!(object.group_set, string, "group");
+        compose_set!(object.smoothing_group_set, string, "smoothing group");
+        compose_set!(object.element_set, string, "element");
 
         string.push_str(&format!("}}\n"));
 
