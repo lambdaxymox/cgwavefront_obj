@@ -106,14 +106,14 @@ impl<G> ObjectSetGen<G> where G: Gen {
         range: (usize, usize), count: usize) -> Vec<(usize, usize)> {
 
         let mut indices = vec![g.gen_range(range.0, range.1)];
-        for i in 1..count {
+        for i in 1..(count + 1) {
             let lower = indices[i - 1];
             indices.push(g.gen_range(lower, range.1));
         }
 
         let mut slices = vec![];
         for i in 0..count-1 {
-            slices.push((indices[i], indices[i] + 1));
+            slices.push((indices[i], indices[i + 1]));
         }
 
         slices
@@ -191,20 +191,23 @@ impl<G> ObjectSetGen<G> where G: Gen {
         
         debug_assert!(group_slices.len() > 0);
         debug_assert!(group_set.len() > 0);
+        debug_assert_eq!(group_slices.len(), group_set.len());
         debug_assert!(smoothing_group_slices.len() > 0);
         debug_assert!(smoothing_group_set.len() > 0);
+        debug_assert_eq!(smoothing_group_slices.len(), smoothing_group_set.len());
 
         let mut shape_set = vec![];
         for i in 0..group_slices.len() {
             for j in group_slices[i].0..group_slices[i].1 {
+                println!("(i, j) = ({}, {})", i, j);
                 let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i+1)], &vec![]);
                 shape_set.push(shape_entry);
             }
         }
 
+        debug_assert_eq!(shape_set.len(), elements.len());
+
         for i in 0..smoothing_group_slices.len() {
-            println!("i = {}", i);
-            println!("shape_set.len() = {}", shape_set.len());
             for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
                 shape_set[j - 1].smoothing_groups = vec![smoothing_group_set[i].clone()];
             }
