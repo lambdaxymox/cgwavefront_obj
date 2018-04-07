@@ -52,8 +52,8 @@ enum MTextureVertex {
     VTUVW(TextureVertex),
 }
 
-impl MTextureVertex {
-    fn to_vertex(&self) -> TextureVertex {
+impl<'a> convert::Into<TextureVertex> for &'a MTextureVertex {
+    fn into(self) -> TextureVertex {
         match *self {
             MTextureVertex::VTU(tv) => tv.clone(),
             MTextureVertex::VTUV(tv) => tv.clone(),
@@ -74,13 +74,13 @@ impl fmt::Display for MTextureVertex {
 
 impl cmp::PartialEq<TextureVertex> for MTextureVertex {
     fn eq(&self, other: &TextureVertex) -> bool {
-        &self.to_vertex() == other
+        &Into::<TextureVertex>::into(self) == other
     }
 }
 
 impl<'a> cmp::PartialEq<&'a TextureVertex> for MTextureVertex {
     fn eq(&self, other: & &TextureVertex) -> bool { 
-        &&self.to_vertex() == other
+        &&Into::<TextureVertex>::into(self) == other
     }
 }
 
@@ -108,8 +108,10 @@ impl quickcheck::Arbitrary for MTextureVertex {
 #[derive(Clone, Debug)]
 struct MNormalVertex(NormalVertex);
 
-impl MNormalVertex {
-    fn to_vertex(&self) -> NormalVertex { self.0 }
+impl<'a> convert::Into<NormalVertex> for &'a MNormalVertex {
+    fn into(self) -> NormalVertex {
+        self.0
+    }
 }
 
 impl fmt::Display for MNormalVertex {
@@ -143,8 +145,10 @@ impl MSmoothingGroup {
     fn new(smoothing_group: SmoothingGroup) -> MSmoothingGroup {
         MSmoothingGroup(smoothing_group)
     }
+}
 
-    fn to_smoothing_group(&self) -> SmoothingGroup {
+impl<'a> convert::Into<SmoothingGroup> for &'a MSmoothingGroup {
+    fn into(self) -> SmoothingGroup {
         self.0.clone()
     }
 }
@@ -187,8 +191,10 @@ impl MVTNIndex {
             VTNIndex::VTN(v, vt, vn) => MVTNIndex::VTN(v, vt, vn),
         }
     }
+}
 
-    fn to_vtn_index(&self) -> VTNIndex {
+impl<'a> convert::Into<VTNIndex> for &'a MVTNIndex {
+    fn into(self) -> VTNIndex {
         match *self {
             MVTNIndex::V(v) => VTNIndex::V(v),
             MVTNIndex::VT(v, vt) => VTNIndex::VT(v, vt),
@@ -239,15 +245,17 @@ struct MGroupName(GroupName);
 
 impl MGroupName {
     fn new(group: GroupName) -> MGroupName { MGroupName(group) }
+}
 
-    fn to_group(&self) -> GroupName {
+impl<'a> convert::Into<GroupName> for &'a MGroupName {
+    fn into(self) -> GroupName {
         self.0.clone()
     }
 }
 
 impl fmt::Display for MGroupName {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.to_group())
+        write!(f, "{}", Into::<GroupName>::into(self))
     }
 }
 
