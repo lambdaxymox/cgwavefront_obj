@@ -403,14 +403,24 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 
     }
 
-    fn gen_group_set(&self, g: &mut G, group_slices: &[(usize, usize)]) -> GroupSet {
-        unimplemented!()
+    fn gen_group_set(&self, g: &mut G, count: usize) -> GroupSet {
+        let mut group_set = vec![];
+        for i in 0..count {
+            let group_i = GroupName::new(&format!("Group{}", i));
+            group_set.push(group_i);
+        }
+
+        group_set
     }
 
-    fn gen_smoothing_group_set(&self, g: &mut G, 
-        smoothing_group_slices: &[(usize, usize)]
-    ) -> SmoothingGroupSet {
-        unimplemented!()
+    fn gen_smoothing_group_set(&self, g: &mut G, count: usize) -> SmoothingGroupSet {
+        let mut smoothing_group_set = vec![];
+        for i in 0..count {
+            let smoothing_group_i = SmoothingGroup::new(i as u32);
+            smoothing_group_set.push(smoothing_group_i);
+        }
+
+        smoothing_group_set
     }
 
     fn gen_shape_set(&self, 
@@ -444,13 +454,13 @@ impl<G> ObjectSetGen<G> where G: quickcheck::Gen {
 
             let group_count = g.gen_range(1, 6);
             let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
-            let group_set = self.gen_group_set(g, &group_slices);
+            let group_set = self.gen_group_set(g, group_count);
 
             let smoothing_group_count = g.gen_range(1, 6);
             let smoothing_group_slices = self.gen_slices(
                 g, (0, element_set.len()), smoothing_group_count
             );
-            let smoothing_group_set = self.gen_smoothing_group_set(g, &group_slices);
+            let smoothing_group_set = self.gen_smoothing_group_set(g, smoothing_group_count);
 
             let shape_set = self.gen_shape_set(
                 &element_set, &group_slices, &smoothing_group_slices
