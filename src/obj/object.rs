@@ -660,3 +660,26 @@ impl ObjectSetCompositor for DisplayObjectSetCompositor {
         string
     }
 }
+
+struct TextObjectSetCompositor { }
+
+impl TextObjectSetCompositor {
+    fn new() -> Self { Self {} }
+}
+
+impl ObjectSetCompositor for TextObjectSetCompositor {
+    fn compose(&self, object_set: &ObjectSet) -> String {
+        let compositor = TextObjectCompositor::new();
+        
+        let mut string = String::from("ObjectSet {\n");
+        for (i, object_i) in object_set.iter().enumerate() {
+            string += &compositor.compose(&object_i);
+            string += &format!("#### Object {}", i);
+            string += &"\n";
+        }
+
+        string += &"}\n";
+        string
+    }
+}
+
