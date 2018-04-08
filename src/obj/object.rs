@@ -560,11 +560,11 @@ impl ObjectCompositor for TextObjectCompositor {
 
         let mut smoothing_group_string = String::from("s ");
         for smoothing_group in current_smoothing_groups.iter() {
-            group_string += &format!(" {} ", smoothing_group);
+            smoothing_group_string += &format!(" {} ", smoothing_group);
         }
 
-        string += &format!("{}", group_string);
-        string += &format!("{}", smoothing_group_string);
+        string += &format!("{}\n", group_string);
+        string += &format!("{}\n", smoothing_group_string);
 
         for i in 0..object.element_set.len() {
             if &object_group_map[&(i as u32)].0 != current_groups {
@@ -591,13 +591,13 @@ impl ObjectCompositor for TextObjectCompositor {
                 for smoothing_group in current_smoothing_groups.iter() {
                     smoothing_group_string += &format!(" {} ", smoothing_group);
                 }
-                string += &format!("{}", smoothing_group_string);
+                string += &format!("{}\n", smoothing_group_string);
             }
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
             // current smoothing group until the next smoothing group statement.
                 
-            string += &format!("{}", object.element_set[i]);
+            string += &format!("{}\n", object.element_set[i]);
         }
         string
     }
@@ -638,14 +638,14 @@ impl Compositor for TextObjectSetCompositor {
     fn compose(&self, object_set: &ObjectSet) -> String {
         let compositor = TextObjectCompositor::new();
         
-        let mut string = String::from("ObjectSet {\n");
+        let mut string = String::new();
         for (i, object_i) in object_set.iter().enumerate() {
             string += &compositor.compose(&object_i);
             string += &format!("#### Object {}", i);
             string += &"\n";
         }
 
-        string += &"}\n";
+        string += &"\n";
         string
     }
 }

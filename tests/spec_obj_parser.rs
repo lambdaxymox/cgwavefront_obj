@@ -116,15 +116,10 @@ impl<G> ObjectSetGen<G> where G: Gen {
         }
         indices.push(range.1);
 
-        println!("{:?}", count);
-        println!("{:?}", indices);
-
         let mut slices = vec![];
         for i in 0..count {
             slices.push((indices[i], indices[i + 1]));
         }
-
-        println!("{:?}", slices);
 
         assert_eq!(slices.len(), count);
         slices
@@ -239,7 +234,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
     }
 
     fn gen_object(&self, g: &mut G) -> Object {
-        let len = g.gen_range(1, 100000);
+        let len = g.gen_range(1, 10);
         let vertex_set = self.gen_vertex_set(g, len);
         let texture_vertex_set = self.gen_texture_vertex_set(g, len);
         let normal_vertex_set = self.gen_normal_vertex_set(g, len);
@@ -340,6 +335,7 @@ fn prop_parser_correctly_parses_valid_obj_files() {
         let result = machine.actual().parse();
         let expected = machine.model().parse();
 
+        println!("{:?}", result);
         result == expected
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
