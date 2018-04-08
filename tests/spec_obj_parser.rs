@@ -109,16 +109,22 @@ impl<G> ObjectSetGen<G> where G: Gen {
     fn gen_slices(&self, g: &mut G, 
         range: (usize, usize), count: usize) -> Vec<(usize, usize)> {
 
-        let mut indices = vec![g.gen_range(range.0, range.1)];
-        for i in 1..(count + 2) {
-            let lower = indices[i - 1];
+        let mut indices = vec![range.0];
+        for i in 0..(count - 1) {
+            let lower = indices[i];
             indices.push(g.gen_range(lower, range.1));
         }
+        indices.push(range.1);
+
+        println!("{:?}", count);
+        println!("{:?}", indices);
 
         let mut slices = vec![];
         for i in 0..count {
             slices.push((indices[i], indices[i + 1]));
         }
+
+        println!("{:?}", slices);
 
         assert_eq!(slices.len(), count);
         slices
@@ -150,7 +156,6 @@ impl<G> ObjectSetGen<G> where G: Gen {
         &self, g: &mut G, element_count: u32,
         v_count: u32, vt_count: u32, vn_count: u32) -> ElementSet {
 
-
         let mut element_set = vec![];
         for _ in 0..element_count {
             let vtn_index1 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
@@ -162,14 +167,13 @@ impl<G> ObjectSetGen<G> where G: Gen {
 
         assert_eq!(element_set.len(), element_count as usize);
         element_set
-
     }
 
     fn gen_group_set(&self, use_default: bool, count: usize) -> GroupSet {
         assert!(count > 0);
 
         let mut group_set = vec![];
-        if use_default && count == 1 {
+        if use_default && (count == 1) {
             group_set.push(Default::default());
             return group_set;
         }
@@ -198,7 +202,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
     }
 
     fn gen_shape_set(&self, 
-        elements: &ElementSet, 
+        element_set: &ElementSet, 
         group_slices: &[(usize, usize)], group_set: &[u32],
         smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]
     ) -> ShapeSet {
@@ -220,17 +224,17 @@ impl<G> ObjectSetGen<G> where G: Gen {
 
         // The group slices should contain the entire range of elements
         // in the element set, and no more.
-        assert_eq!(shape_set.len(), elements.len());
+        assert_eq!(shape_set.len(), element_set.len());
 
         for i in 0..smoothing_group_slices.len() {
             for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
-                shape_set[j - 1].smoothing_groups = vec![smoothing_group_set[i].clone()];
+                shape_set[j].smoothing_groups = vec![smoothing_group_set[i].clone()];
             }
         }
 
         // The smoothing group iteration should not change the length
         // of the shape set.
-        assert_eq!(shape_set.len(), elements.len());
+        assert_eq!(shape_set.len(), element_set.len());
         shape_set
     }
 
