@@ -82,6 +82,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
             vertex_set.push(self.gen_vertex(g, true));
         }
 
+        assert_eq!(vertex_set.len(), len);
         vertex_set
     }
 
@@ -91,6 +92,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
             texture_vertex_set.push(self.gen_texture_vertex(g));
         }
 
+        assert_eq!(texture_vertex_set.len(), len);
         texture_vertex_set
     }
 
@@ -99,6 +101,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
         for _ in 0..len {
             normal_vertex_set.push(self.gen_normal_vertex(g));
         }
+
+        assert_eq!(normal_vertex_set.len(), len);
         normal_vertex_set
     }
 
@@ -116,7 +120,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
             slices.push((indices[i], indices[i + 1]));
         }
 
-        debug_assert_eq!(slices.len(), count);
+        assert_eq!(slices.len(), count);
         slices
     }
 
@@ -145,7 +149,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
     fn gen_element_set(
         &self, g: &mut G, element_count: u32,
         v_count: u32, vt_count: u32, vn_count: u32) -> ElementSet {
-        
+
+
         let mut element_set = vec![];
         for _ in 0..element_count {
             let vtn_index1 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
@@ -155,11 +160,14 @@ impl<G> ObjectSetGen<G> where G: Gen {
             element_set.push(Element::Face(vtn_index1, vtn_index2, vtn_index3));
         }
 
+        assert_eq!(element_set.len(), element_count as usize);
         element_set
 
     }
 
     fn gen_group_set(&self, use_default: bool, count: usize) -> GroupSet {
+        assert!(count > 0);
+
         let mut group_set = vec![];
         if use_default && count == 1 {
             group_set.push(Default::default());
@@ -171,17 +179,21 @@ impl<G> ObjectSetGen<G> where G: Gen {
             group_set.push(group_i);
         }
 
-        debug_assert_eq!(group_set.len(), count);
+        assert!(count > 1);
+        assert_eq!(group_set.len(), count);
         group_set
     }
 
     fn gen_smoothing_group_set(&self, count: usize) -> SmoothingGroupSet {
+        assert!(count > 0);
+
         let mut smoothing_group_set = vec![];
         for i in 0..count {
             let smoothing_group_i = SmoothingGroup::new(i as u32);
             smoothing_group_set.push(smoothing_group_i);
         }
 
+        assert_eq!(smoothing_group_set.len(), count);
         smoothing_group_set
     }
 
@@ -191,12 +203,12 @@ impl<G> ObjectSetGen<G> where G: Gen {
         smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]
     ) -> ShapeSet {
         
-        debug_assert!(group_slices.len() > 0);
-        debug_assert!(group_set.len() > 0);
-        debug_assert_eq!(group_slices.len(), group_set.len());
-        debug_assert!(smoothing_group_slices.len() > 0);
-        debug_assert!(smoothing_group_set.len() > 0);
-        debug_assert_eq!(smoothing_group_slices.len(), smoothing_group_set.len());
+        assert!(group_slices.len() > 0);
+        assert!(group_set.len() > 0);
+        assert_eq!(group_slices.len(), group_set.len());
+        assert!(smoothing_group_slices.len() > 0);
+        assert!(smoothing_group_set.len() > 0);
+        assert_eq!(smoothing_group_slices.len(), smoothing_group_set.len());
 
         let mut shape_set = vec![];
         for i in 0..group_slices.len() {
@@ -206,7 +218,9 @@ impl<G> ObjectSetGen<G> where G: Gen {
             }
         }
 
-        debug_assert_eq!(shape_set.len(), elements.len());
+        // The group slices should contain the entire range of elements
+        // in the element set, and no more.
+        assert_eq!(shape_set.len(), elements.len());
 
         for i in 0..smoothing_group_slices.len() {
             for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
@@ -214,6 +228,9 @@ impl<G> ObjectSetGen<G> where G: Gen {
             }
         }
 
+        // The smoothing group iteration should not change the length
+        // of the shape set.
+        assert_eq!(shape_set.len(), elements.len());
         shape_set
     }
 
@@ -272,6 +289,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
             objects.push(object);
         }
 
+        assert_eq!(objects.len(), object_count);
         ObjectSet::new(objects)
     }
 }
