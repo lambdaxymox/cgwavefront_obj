@@ -266,18 +266,12 @@ impl Object {
         let mut group_map = HashMap::new();
         for shape_entry in self.shape_set.iter() {
             let mut entry_groups = vec![];
-            // let mut entry_smoothing_groups = vec![];
 
             for i in shape_entry.groups.iter() {
                 entry_groups.push(self.group_set[*i as usize].clone());
             }
 
             let entry_smoothing_group = self.smoothing_group_set[shape_entry.smoothing_group as usize];
-            /*
-            for j in shape_entry.smoothing_groups.iter() {
-                entry_smoothing_groups.push(self.smoothing_group_set[*j as usize].clone());
-            }
-            */
             group_map.insert(shape_entry.element, (entry_groups, entry_smoothing_group));
         }
 
