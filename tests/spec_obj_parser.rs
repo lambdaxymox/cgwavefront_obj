@@ -369,14 +369,16 @@ fn prop_parse_object_set_should_parse_vertices() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-/*
+
 #[test]
 fn prop_parse_object_set_should_parse_texture_vertices() {
     fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
+        let result_set = machine.actual().parse().unwrap();
+        let expected_set = machine.model().parse().unwrap();
 
-        unimplemented!();
+        result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            result.texture_vertex_set == expected.texture_vertex_set
+        })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
@@ -384,14 +386,16 @@ fn prop_parse_object_set_should_parse_texture_vertices() {
 #[test]
 fn prop_parse_object_set_should_parse_normal_vertices() {
     fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
+        let result_set = machine.actual().parse().unwrap();
+        let expected_set = machine.model().parse().unwrap();
 
-        unimplemented!();
+        result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            result.normal_vertex_set == expected.normal_vertex_set
+        })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+/*
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
     fn property(machine: Machine) -> bool {
