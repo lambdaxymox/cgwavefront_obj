@@ -360,12 +360,10 @@ impl ObjectSet {
     pub fn len(&self) -> usize { self.objects.len() }
 
     pub fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)>> {
-        let mut group_maps = vec![];
-        for object in self.iter() {
+        self.iter().fold(vec![], |mut group_maps, object| {
             group_maps.push(object.get_group_map());
-        }
-
-        group_maps
+            group_maps
+        })
     }
 }
 
