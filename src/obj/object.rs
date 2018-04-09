@@ -521,56 +521,47 @@ impl TextObjectCompositor {
     fn compose_object_name(&self, object: &Object) -> String {
         match object.name.as_ref() {
             "" => String::from(""),
-            _ => format!("o {} \n", object.name),
+            _  => format!("o {} \n", object.name),
         }     
     }
 
     fn compose_groups(&self, groups: &[GroupName]) -> String {
-        let string = groups.iter().fold(String::from("g "), |acc, group| {
-            acc + &format!(" {} ", group)
-        });
+        let string = groups.iter().fold(
+            String::from("g "), |acc, group| {
+                acc + &format!(" {} ", group)
+            }
+        );
         format!("{}\n", string)
     }
 
     fn compose_smoothing_group(&self, smoothing_groups: &[SmoothingGroup]) -> String {
-        let mut string = String::from("s ");
-        for smoothing_group in smoothing_groups.iter() {
-            string += &format!(" {} ", smoothing_group);
-        }
-        string += &format!("\n");
-
-        string
+        let string = smoothing_groups.iter().fold(
+            String::from("s "), |acc, smoothing_group| {
+                acc + &format!(" {} ", smoothing_group)
+            }
+        );
+        format!("{}\n", string)
     }
 
     fn compose_vertex_set(&self, object: &Object) -> String {
-        let mut string = String::new();
-        for v in object.vertex_set.iter() {
-            if v.w == 1.0 {
-                string += &format!("v {} {} {} \n", v.x, v.y, v.z);
-            } else {
-                string += &format!("v {} {} {} {} \n", v.x, v.y, v.z, v.w);
+        object.vertex_set.iter().fold(String::new(), |acc, v| {
+            match v.w == 1.0 {
+                true  => acc + &format!("v {} {} {} \n", v.x, v.y, v.z),
+                false => acc + &format!("v {} {} {} {} \n", v.x, v.y, v.z, v.w),
             }
-        }
-
-        string
+        })
     }
 
     fn compose_texture_vertex_set(&self, object: &Object) -> String {
-        let mut string = String::new();
-        for vt in object.texture_vertex_set.iter() {
-            string += &format!("vt {} {} {} \n", vt.u, vt.v, vt.w);
-        }
-
-        string
+        object.texture_vertex_set.iter().fold(String::new(), |acc, vt| {
+            acc + &format!("vt {} {} {} \n", vt.u, vt.v, vt.w)
+        })
     }
 
     fn compose_normal_vertex_set(&self, object: &Object) -> String {
-        let mut string = String::new();
-        for vn in object.normal_vertex_set.iter() {
-            string += &format!("vt {} {} {} \n", vn.i, vn.j, vn.k);
-        }
-
-        string        
+        object.normal_vertex_set.iter().fold(String::new(), |acc, vn| {
+            acc + &format!("vt {} {} {} \n", vn.i, vn.j, vn.k)
+        })        
     }
 
     fn compose(&self, object: &Object) -> String {
