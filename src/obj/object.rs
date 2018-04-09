@@ -515,9 +515,7 @@ struct TextObjectCompositor { }
 
 impl TextObjectCompositor {
     fn new() -> TextObjectCompositor { TextObjectCompositor {} }
-}
 
-impl ObjectCompositor for TextObjectCompositor {
     fn compose(&self, object: &Object) -> String {
         let object_group_map = object.get_group_map();
         let mut string = String::new();
@@ -603,6 +601,12 @@ impl ObjectCompositor for TextObjectCompositor {
     }
 }
 
+impl ObjectCompositor for TextObjectCompositor {
+    fn compose(&self, object: &Object) -> String {
+        self.compose(object)
+    }
+}
+
 pub trait Compositor {
     fn compose(&self, object_set: &ObjectSet) -> String;
 }
@@ -641,7 +645,7 @@ impl Compositor for TextObjectSetCompositor {
         let mut string = String::new();
         for (i, object_i) in object_set.iter().enumerate() {
             string += &compositor.compose(&object_i);
-            string += &format!("#### Object {}", i);
+            string += &format!("#### Object {}\n", i);
             string += &"\n";
         }
 
