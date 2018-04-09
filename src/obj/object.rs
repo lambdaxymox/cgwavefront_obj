@@ -516,6 +516,15 @@ struct TextObjectCompositor { }
 impl TextObjectCompositor {
     fn new() -> TextObjectCompositor { TextObjectCompositor {} }
 
+    fn compose_groups(&self, groups: &[GroupName]) -> String {
+        let mut string = String::from("g ");
+        for group in groups.iter() {
+            string += &format!(" {} ", group);
+        }
+        string += &format!("\n");
+        string
+    }
+
     fn compose(&self, object: &Object) -> String {
         let object_group_map = object.get_group_map();
         let mut string = String::new();
@@ -570,11 +579,15 @@ impl TextObjectCompositor {
                 // element's set of groups, we must place a new group statement
                 // to signify the change.
                 current_groups = &object_group_map[&(i as u32)].0;
+                
+                /*
                 let mut group_string = String::from("g ");
                 for group in current_groups.iter() {
                     group_string += &format!(" {} ", group);
                 }
                 string += &format!("\n");
+                */
+                let group_string = self.compose_groups(current_groups);
                 string += &format!("{}", group_string);
             }
             // We continue with the current group. Recall that group statements
