@@ -421,14 +421,16 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-/*
+
 #[test]
 fn prop_parse_object_set_should_parse_elements() {
     fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
+        let result_set = machine.actual().parse().unwrap();
+        let expected_set = machine.model().parse().unwrap();
 
-        unimplemented!();
+        result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            result.element_set == expected.element_set
+        })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
@@ -436,11 +438,13 @@ fn prop_parse_object_set_should_parse_elements() {
 #[test]
 fn prop_parse_object_set_should_parse_shape_entries() {
     fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
+        let result_set = machine.actual().parse().unwrap();
+        let expected_set = machine.model().parse().unwrap();
 
-        unimplemented!();
+        result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            result.shape_set == expected.shape_set
+        })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-*/
+
