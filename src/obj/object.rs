@@ -480,21 +480,19 @@ impl ObjectCompositor for DisplayObjectCompositor {
     
         macro_rules! compose_set {
             ($set:expr, $out:ident, $name:expr) => {
-                $out.push_str(&format!("    {} set:\n", $name));
+                $out += &format!("    {} set:\n", $name);
                 if $set.is_empty() {
-                    $out.push_str(&format!("        data: []\n"));
+                    $out += &format!("        data: []\n");
                 } else {
                     let length = $set.len();
-                    $out.push_str(&format!("        data: [({}) ... ({})]\n", 
-                        $set[0], $set[length - 1]
-                    ));
+                    $out += &format!("        data: [({}) ... ({})]\n", $set[0], $set[length-1]);
                 }
 
-                $out.push_str(&format!("        length: {}\n", $set.len()));            
+                $out += &format!("        length: {}\n", $set.len());            
             }
         };
 
-        string.push_str(&format!("    name: {}\n", object.name));
+        string += &format!("    name: {}\n", object.name);
 
         compose_set!(object.vertex_set, string, "vertex");
         compose_set!(object.texture_vertex_set, string, "texture vertex");
@@ -503,7 +501,7 @@ impl ObjectCompositor for DisplayObjectCompositor {
         compose_set!(object.smoothing_group_set, string, "smoothing group");
         compose_set!(object.element_set, string, "element");
 
-        string.push_str(&format!("}}\n"));
+        string += &format!("}}\n");
 
         string
     } 
