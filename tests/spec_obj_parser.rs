@@ -109,6 +109,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
     fn gen_slices(&self, g: &mut G, 
         range: (usize, usize), count: usize) -> Vec<(usize, usize)> {
 
+        assert!(range.0 < range.1);
+
         let mut indices = vec![range.0];
         for i in 0..(count - 1) {
             let lower = indices[i];
@@ -126,20 +128,21 @@ impl<G> ObjectSetGen<G> where G: Gen {
     }
 
     fn gen_vtn_index(&self, g: &mut G, 
-        use_vt: bool, use_vn: bool, range: (u32, u32, u32)) -> VTNIndex {
+        use_vt: bool, use_vn: bool, 
+        v_count: u32, vt_count: u32, vn_count: u32) -> VTNIndex {
 
-        let v = g.gen_range(1, range.0);
+        let v = g.gen_range(1, v_count + 1);
         if use_vt && use_vn {
-            let vt = g.gen_range(1, range.1);
-            let vn = g.gen_range(1, range.2);
+            let vt = g.gen_range(1, vt_count + 1);
+            let vn = g.gen_range(1, vn_count + 1);
 
             VTNIndex::VTN(v, vt, vn)
         } else if use_vt {
-            let vt = g.gen_range(1, range.1);
+            let vt = g.gen_range(1, vt_count + 1);
 
             VTNIndex::VT(v, vt)
         } else if use_vn {
-            let vn = g.gen_range(1, range.2);
+            let vn = g.gen_range(1, vn_count + 1);
 
             VTNIndex::VN(v, vn)
         } else {
@@ -153,9 +156,9 @@ impl<G> ObjectSetGen<G> where G: Gen {
 
         let mut element_set = vec![];
         for _ in 0..element_count {
-            let vtn_index1 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
-            let vtn_index2 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
-            let vtn_index3 = self.gen_vtn_index(g, true, true, (v_count, vt_count, vn_count));
+            let vtn_index1 = self.gen_vtn_index(g, true, true, v_count, vt_count, vn_count);
+            let vtn_index2 = self.gen_vtn_index(g, true, true, v_count, vt_count, vn_count);
+            let vtn_index3 = self.gen_vtn_index(g, true, true, v_count, vt_count, vn_count);
 
             element_set.push(Element::Face(vtn_index1, vtn_index2, vtn_index3));
         }
@@ -233,6 +236,14 @@ impl<G> ObjectSetGen<G> where G: Gen {
         shape_set
     }
 
+    fn gen_group_count(&self, g: &mut G, use_default: bool) -> usize {
+        if use_default { 
+            1 
+        } else { 
+            g.gen_range(2, 6)
+        }
+    }
+
     fn gen_object(&self, g: &mut G) -> Object {
         let len = g.gen_range(1, 10);
         let vertex_set = self.gen_vertex_set(g, len);
@@ -247,7 +258,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         );
 
         let use_g_default: bool = Arbitrary::arbitrary(g);
-        let group_count = if use_g_default { 1 } else { g.gen_range(2, 6) };
+        let group_count = self.gen_group_count(g, use_g_default);
         let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
         let group_set = self.gen_group_set(use_g_default, group_count);
 
@@ -280,7 +291,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         // We want one object sets to appear frequently since that is the most
         // commonly encountered case in the wild.
         let one_obj: bool = Arbitrary::arbitrary(g);
-        let object_count = if one_obj { 1 } else { g.gen_range(2, 20) };
+        let object_count = if one_obj { 1 } else { g.gen_range(2, 10) };
 
         let mut objects = vec![];
         for _ in 0..object_count {  
@@ -335,9 +346,6 @@ fn prop_parser_correctly_parses_valid_obj_files() {
         let result = machine.actual().parse();
         let expected = machine.model().parse();
 
-        println!("{:?}", result);
-        println!("\n\n");
-        println!("{:?}", expected);
         result == expected
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);

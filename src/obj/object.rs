@@ -626,6 +626,7 @@ impl TextObjectCompositor {
             // current smoothing group until the next smoothing group statement.        
             string += &format!("{}\n", object.element_set[i]);
         }
+
         string
     }
 }
