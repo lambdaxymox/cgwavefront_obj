@@ -388,9 +388,8 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_smoothing_group(&mut self,
-        smoothing_groups: &mut Vec<SmoothingGroup>
-    ) -> Result<u32, ParseError> {
-        
+        smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<u32, ParseError> {
+
         try!(self.expect("s"));
         if let Ok(name) = self.next_string() {
             if name == "off" {
@@ -399,8 +398,8 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 smoothing_groups.push(SmoothingGroup::new(number));
             } else {
                 return self.error(format!(
-                    "Expected integer or `off` for smoothing group name but got `{}`", name)
-                );
+                    "Expected integer or `off` for smoothing group name but got `{}`", name
+                ));
             }
         } else {
             return self.error(format!("Parser error: Invalid smoothing group name."));
@@ -423,12 +422,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 shape_entry_table.push(ShapeEntry::new(i, &groups, &vec![]));
             }
         }
-
         debug_assert!(shape_entry_table.len() == elements.len());
 
         for &((min_element_index, max_element_index), 
-              (min_smoothing_group_index, max_smoothing_group_index)) 
-            in smoothing_group_entry_table { 
+              (min_smoothing_group_index, max_smoothing_group_index))
+            in smoothing_group_entry_table {
 
             let smoothing_groups: Vec<u32> = 
                 (min_smoothing_group_index..max_smoothing_group_index + 1).collect();
@@ -436,7 +434,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 shape_entry_table[(i - 1) as usize].smoothing_groups = smoothing_groups.clone();
             }
         }
-
+        debug_assert!(shape_entry_table.len() == elements.len());
     }
 
     fn parse_object(&mut self,
@@ -547,6 +545,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         if smoothing_groups.is_empty() {
             smoothing_groups.push(SmoothingGroup::new(0));
         }
+
+        println!("{:?}", groups);
+        println!("{:?}", smoothing_groups);
 
         // At the end of file, collect any remaining shapes.
         // Fill in the shape entries for the current group.

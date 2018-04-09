@@ -336,6 +336,8 @@ fn prop_parser_correctly_parses_valid_obj_files() {
         let expected = machine.model().parse();
 
         println!("{:?}", result);
+        println!("\n\n");
+        println!("{:?}", expected);
         result == expected
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
