@@ -261,16 +261,12 @@ impl Object {
         }
     }
 
-    fn get_shape(&self, entry: &ShapeEntry) -> Option<&Shape> {
-        unimplemented!();
-    }
-
     pub fn get_group_map(&self) -> HashMap<u32, (Vec<Group>, Vec<SmoothingGroup>)> {
         let mut group_map = HashMap::new();
         for shape_entry in self.shape_set.iter() {
             let mut entry_groups = vec![];
             let mut entry_smoothing_groups = vec![];
-            
+
             for i in shape_entry.groups.iter() {
                 entry_groups.push(self.group_set[*i as usize].clone());
             }
