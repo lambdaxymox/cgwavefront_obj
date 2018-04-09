@@ -546,9 +546,6 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
             smoothing_groups.push(SmoothingGroup::new(0));
         }
 
-        println!("{:?}", groups);
-        println!("{:?}", smoothing_groups);
-
         // At the end of file, collect any remaining shapes.
         // Fill in the shape entries for the current group.
         let mut shape_entries = vec![];

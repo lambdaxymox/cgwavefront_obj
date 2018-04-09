@@ -519,21 +519,17 @@ impl TextObjectCompositor {
     }
 
     fn compose_object_name(&self, object: &Object) -> String {
-        if object.name != "" {
-            format!("o {} \n", object.name)
-        } else {
-            String::from("")
-        }       
+        match object.name.as_ref() {
+            "" => String::from(""),
+            _ => format!("o {} \n", object.name),
+        }     
     }
 
     fn compose_groups(&self, groups: &[GroupName]) -> String {
-        let mut string = String::from("g ");
-        for group in groups.iter() {
-            string += &format!(" {} ", group);
-        }
-        string += &format!("\n");
-
-        string
+        let string = groups.iter().fold(String::from("g "), |acc, group| {
+            acc + &format!(" {} ", group)
+        });
+        format!("{}\n", string)
     }
 
     fn compose_smoothing_group(&self, smoothing_groups: &[SmoothingGroup]) -> String {
@@ -578,7 +574,6 @@ impl TextObjectCompositor {
     }
 
     fn compose(&self, object: &Object) -> String {
-        let object_group_map = object.get_group_map();
         let mut string = String::new();
 
         string += &self.compose_object_name(object);
@@ -594,6 +589,8 @@ impl TextObjectCompositor {
         string += &self.compose_normal_vertex_set(object);
         string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
         string += &format!("\n");
+
+        let object_group_map = object.get_group_map();
 
         let mut current_groups = &object_group_map[&0].0;
         string += &self.compose_groups(&current_groups);
