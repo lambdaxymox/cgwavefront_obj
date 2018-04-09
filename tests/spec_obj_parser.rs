@@ -356,18 +356,20 @@ fn prop_parse_object_set_should_parse_object_names() {
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
-/*
+
 #[test]
 fn prop_parse_object_set_should_parse_vertices() {
     fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
+        let result_set = machine.actual().parse().unwrap();
+        let expected_set = machine.model().parse().unwrap();
 
-        unimplemented!();
+        result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            result.vertex_set == expected.vertex_set
+        })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+/*
 #[test]
 fn prop_parse_object_set_should_parse_texture_vertices() {
     fn property(machine: Machine) -> bool {
