@@ -518,6 +518,14 @@ impl TextObjectCompositor {
         TextObjectCompositor {} 
     }
 
+    fn compose_object_name(&self, object: &Object) -> String {
+        if object.name != "" {
+            format!("o {} \n", object.name)
+        } else {
+            String::from("")
+        }       
+    }
+
     fn compose_groups(&self, groups: &[GroupName]) -> String {
         let mut string = String::from("g ");
         for group in groups.iter() {
@@ -573,9 +581,7 @@ impl TextObjectCompositor {
         let object_group_map = object.get_group_map();
         let mut string = String::new();
 
-        if object.name != "" {
-            string += &format!("o {} \n", object.name);
-        }
+        string += &self.compose_object_name(object);
             
         string += &self.compose_vertex_set(object);
         string += &format!("# {} vertices\n", object.vertex_set.len());
@@ -590,18 +596,12 @@ impl TextObjectCompositor {
         string += &format!("\n");
 
         let mut current_groups = &object_group_map[&0].0;
-        let mut group_string = String::from("g ");
-        for group in current_groups.iter() {
-            group_string += &format!(" {} ", group);
-        }
-        string += &format!("{}\n", group_string);
+        string += &self.compose_groups(&current_groups);
+        string += &format!("\n");
 
         let mut current_smoothing_groups = &object_group_map[&0].1;
-        let mut smoothing_group_string = String::from("s ");
-        for smoothing_group in current_smoothing_groups.iter() {
-            smoothing_group_string += &format!(" {} ", smoothing_group);
-        }
-        string += &format!("{}\n", smoothing_group_string);
+        string += &self.compose_smoothing_group(current_smoothing_groups);
+        string += &format!("\n");
 
         for i in 0..object.element_set.len() {
             if &object_group_map[&(i as u32)].0 != current_groups {
@@ -609,9 +609,7 @@ impl TextObjectCompositor {
                 // element's set of groups, we must place a new group statement
                 // to signify the change.
                 current_groups = &object_group_map[&(i as u32)].0;
-
-                let group_string = self.compose_groups(current_groups);
-                string += &format!("{}", group_string);
+                string += &self.compose_groups(current_groups);
             }
             // We continue with the current group. Recall that group statements
             // are state setting; each successive element is associated with the 
@@ -621,13 +619,11 @@ impl TextObjectCompositor {
                 // element's smoothing group, we must place a new smoothing group statement
                 // to signify the change.
                 current_smoothing_groups = &object_group_map[&(i as u32)].1;
-                let smoothing_group_string = self.compose_smoothing_group(&current_smoothing_groups);
-                string += &format!("{}", smoothing_group_string);
+                string += &self.compose_smoothing_group(&current_smoothing_groups);
             }
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
-            // current smoothing group until the next smoothing group statement.
-                
+            // current smoothing group until the next smoothing group statement.        
             string += &format!("{}\n", object.element_set[i]);
         }
         string
