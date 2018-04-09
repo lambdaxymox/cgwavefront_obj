@@ -328,7 +328,7 @@ impl Arbitrary for Machine {
     }
 }
 
-
+/*
 #[test]
 fn prop_parser_correctly_parses_valid_obj_files() {
     fn property(machine: Machine) -> bool {
@@ -342,29 +342,21 @@ fn prop_parser_correctly_parses_valid_obj_files() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-/*
-#[test]
-fn prop_parse_object_set_should_parse_objects() {
-    fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
-
-        unimplemented!();
-    }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
-}
-
+*/
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
     fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
+        let result_set = machine.actual().parse().unwrap();
+        let expected_set = machine.model().parse().unwrap();
 
-        unimplemented!();
+        result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            result.name == expected.name
+        })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
+/*
 #[test]
 fn prop_parse_object_set_should_parse_vertices() {
     fn property(machine: Machine) -> bool {
