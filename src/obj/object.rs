@@ -514,7 +514,9 @@ impl ObjectCompositor for DisplayObjectCompositor {
 struct TextObjectCompositor { }
 
 impl TextObjectCompositor {
-    fn new() -> TextObjectCompositor { TextObjectCompositor {} }
+    fn new() -> TextObjectCompositor { 
+        TextObjectCompositor {} 
+    }
 
     fn compose_groups(&self, groups: &[GroupName]) -> String {
         let mut string = String::from("g ");
@@ -522,7 +524,49 @@ impl TextObjectCompositor {
             string += &format!(" {} ", group);
         }
         string += &format!("\n");
+
         string
+    }
+
+    fn compose_smoothing_group(&self, smoothing_groups: &[SmoothingGroup]) -> String {
+        let mut string = String::from("s ");
+        for smoothing_group in smoothing_groups.iter() {
+            string += &format!(" {} ", smoothing_group);
+        }
+        string += &format!("\n");
+
+        string
+    }
+
+    fn compose_vertex_set(&self, object: &Object) -> String {
+        let mut string = String::new();
+        for v in object.vertex_set.iter() {
+            if v.w == 1.0 {
+                string += &format!("v {} {} {} \n", v.x, v.y, v.z);
+            } else {
+                string += &format!("v {} {} {} {} \n", v.x, v.y, v.z, v.w);
+            }
+        }
+
+        string
+    }
+
+    fn compose_texture_vertex_set(&self, object: &Object) -> String {
+        let mut string = String::new();
+        for vt in object.texture_vertex_set.iter() {
+            string += &format!("vt {} {} {} \n", vt.u, vt.v, vt.w);
+        }
+
+        string
+    }
+
+    fn compose_normal_vertex_set(&self, object: &Object) -> String {
+        let mut string = String::new();
+        for vn in object.normal_vertex_set.iter() {
+            string += &format!("vt {} {} {} \n", vn.i, vn.j, vn.k);
+        }
+
+        string        
     }
 
     fn compose(&self, object: &Object) -> String {
@@ -533,44 +577,30 @@ impl TextObjectCompositor {
             string += &format!("o {} \n", object.name);
         }
             
-        for v in object.vertex_set.iter() {
-            if v.w == 1.0 {
-                string += &format!("v {} {} {} \n", v.x, v.y, v.z);
-            } else {
-                string += &format!("v {} {} {} {} \n", v.x, v.y, v.z, v.w);
-            }
-        }
-
+        string += &self.compose_vertex_set(object);
         string += &format!("# {} vertices\n", object.vertex_set.len());
         string += &format!("\n");
 
-        for vt in object.texture_vertex_set.iter() {
-            string += &format!("vt {} {} {} \n", vt.u, vt.v, vt.w);
-        }
-
+        string += &self.compose_texture_vertex_set(object);
         string += &format!("# {} texture vertices\n", object.texture_vertex_set.len());
         string += &format!("\n");
 
-        for vn in object.normal_vertex_set.iter() {
-            string += &format!("vn {} {} {} \n", vn.i, vn.j, vn.k);
-        }
-
+        string += &self.compose_normal_vertex_set(object);
         string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
         string += &format!("\n");
 
         let mut current_groups = &object_group_map[&0].0;
-        let mut current_smoothing_groups = &object_group_map[&0].1;
         let mut group_string = String::from("g ");
         for group in current_groups.iter() {
             group_string += &format!(" {} ", group);
         }
+        string += &format!("{}\n", group_string);
 
+        let mut current_smoothing_groups = &object_group_map[&0].1;
         let mut smoothing_group_string = String::from("s ");
         for smoothing_group in current_smoothing_groups.iter() {
             smoothing_group_string += &format!(" {} ", smoothing_group);
         }
-
-        string += &format!("{}\n", group_string);
         string += &format!("{}\n", smoothing_group_string);
 
         for i in 0..object.element_set.len() {
@@ -579,14 +609,7 @@ impl TextObjectCompositor {
                 // element's set of groups, we must place a new group statement
                 // to signify the change.
                 current_groups = &object_group_map[&(i as u32)].0;
-                
-                /*
-                let mut group_string = String::from("g ");
-                for group in current_groups.iter() {
-                    group_string += &format!(" {} ", group);
-                }
-                string += &format!("\n");
-                */
+
                 let group_string = self.compose_groups(current_groups);
                 string += &format!("{}", group_string);
             }
@@ -598,11 +621,8 @@ impl TextObjectCompositor {
                 // element's smoothing group, we must place a new smoothing group statement
                 // to signify the change.
                 current_smoothing_groups = &object_group_map[&(i as u32)].1;
-                let mut smoothing_group_string = String::from("s ");
-                for smoothing_group in current_smoothing_groups.iter() {
-                    smoothing_group_string += &format!(" {} ", smoothing_group);
-                }
-                string += &format!("{}\n", smoothing_group_string);
+                let smoothing_group_string = self.compose_smoothing_group(&current_smoothing_groups);
+                string += &format!("{}", smoothing_group_string);
             }
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
