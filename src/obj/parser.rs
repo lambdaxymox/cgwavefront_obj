@@ -1,7 +1,7 @@
 use obj::object::{
     ObjectSet, Object, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex,
-    GroupName, SmoothingGroup, Element, VTNIndex, ShapeEntry,
+    Group, SmoothingGroup, Element, VTNIndex, ShapeEntry,
 };
 use lexer::Lexer;
 use std::iter;
@@ -371,13 +371,13 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    fn parse_groups(&mut self, groups: &mut Vec<GroupName>) -> Result<u32, ParseError> {
+    fn parse_groups(&mut self, groups: &mut Vec<Group>) -> Result<u32, ParseError> {
         try!(self.expect("g"));
         let mut groups_parsed = 0;
         loop {
             match slice_res(&self.next_string()) {
                 Ok(name) if name != "\n" => {
-                    groups.push(GroupName::new(name));
+                    groups.push(Group::new(name));
                     groups_parsed += 1;
                 }
                 _ => break,
@@ -1337,13 +1337,13 @@ mod element_tests {
 
 #[cfg(test)]
 mod group_tests {
-    use obj::object::GroupName;
+    use obj::object::Group;
 
     #[test]
     fn parse_group_name1() {
         let mut parser = super::Parser::new("g group".chars());
         let mut result = vec![];
-        let expected = vec![GroupName::new("group")];
+        let expected = vec![Group::new("group")];
         let parsed = parser.parse_groups(&mut result);
 
         assert!(parsed.is_ok());
@@ -1356,7 +1356,7 @@ mod group_tests {
         let mut result = vec![];
         let parsed = parser.parse_groups(&mut result);
         let expected = vec![
-            GroupName::new("group1"), GroupName::new("group2"), GroupName::new("group3")
+            Group::new("group1"), Group::new("group2"), Group::new("group3")
         ];
 
         assert!(parsed.is_ok());
@@ -1407,7 +1407,7 @@ mod objectset_tests {
     use obj::object::{
         ObjectSet, ObjectBuilder,
         Vertex, NormalVertex, Element, VTNIndex, 
-        GroupName, SmoothingGroup, ShapeEntry,
+        Group, SmoothingGroup, ShapeEntry,
     };
 
     fn test_case() -> (Result<ObjectSet, super::ParseError>, Result<ObjectSet, super::ParseError>){
@@ -1479,7 +1479,7 @@ mod objectset_tests {
             NormalVertex { i:  1.0, j:  0.0, k:  0.0 },
             NormalVertex { i: -1.0, j:  0.0, k:  0.0 },
         ])
-        .with_group_set(vec![GroupName::new("cube")])
+        .with_group_set(vec![Group::new("cube")])
         .with_smoothing_group_set(vec![SmoothingGroup::new(0)])
         .with_shape_set(vec![
             ShapeEntry { element: 1,  groups: vec![1], smoothing_groups: vec![1] },

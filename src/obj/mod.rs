@@ -7,7 +7,7 @@ pub use obj::object::TextureVertex;
 pub use obj::object::NormalVertex;
 pub use obj::object::Element;
 pub use obj::object::VTNIndex;
-pub use obj::object::GroupName;
+pub use obj::object::Group;
 pub use obj::object::SmoothingGroup;
 pub use obj::object::ShapeEntry;
 

@@ -5,7 +5,7 @@ use quickcheck::{Arbitrary, Gen};
 use wavefront::obj::{
     Object, ObjectSet, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex, Element, VTNIndex,
-    GroupName, SmoothingGroup, ShapeEntry,
+    Group, SmoothingGroup, ShapeEntry,
     TextObjectSetCompositor, Compositor,
     VertexSet, TextureVertexSet, NormalVertexSet, ElementSet, ShapeSet,
     GroupSet, SmoothingGroupSet,
@@ -177,7 +177,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         }
 
         for i in 0..count {
-            let group_i = GroupName::new(&format!("Group{}", i));
+            let group_i = Group::new(&format!("Group{}", i));
             group_set.push(group_i);
         }
 

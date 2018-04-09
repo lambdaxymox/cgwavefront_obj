@@ -120,20 +120,20 @@ impl fmt::Display for Element {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct GroupName(String);
+pub struct Group(String);
 
-impl GroupName {
-    pub fn new(name: &str) -> GroupName { GroupName(String::from(name)) }
+impl Group {
+    pub fn new(name: &str) -> Group { Group(String::from(name)) }
 }
 
-impl fmt::Display for GroupName {
+impl fmt::Display for Group {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "{}", self.0)
     }
 }
 
-impl Default for GroupName {
-    fn default() -> GroupName { GroupName::new("default") }
+impl Default for Group {
+    fn default() -> Group { Group::new("default") }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -180,7 +180,7 @@ impl ShapeEntry {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Shape {
     element: Element,
-    groups: Vec<GroupName>,
+    groups: Vec<Group>,
     smoothing_groups: Vec<SmoothingGroup>,
 }
 
@@ -189,7 +189,7 @@ pub type TextureVertexSet = Vec<TextureVertex>;
 pub type NormalVertexSet = Vec<NormalVertex>;
 pub type ElementSet = Vec<Element>;
 pub type ShapeSet = Vec<ShapeEntry>;
-pub type GroupSet = Vec<GroupName>;
+pub type GroupSet = Vec<Group>;
 pub type SmoothingGroupSet = Vec<SmoothingGroup>;
 
 
@@ -265,7 +265,7 @@ impl Object {
         unimplemented!();
     }
 
-    pub fn get_group_map(&self) -> HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)> {
+    pub fn get_group_map(&self) -> HashMap<u32, (Vec<Group>, Vec<SmoothingGroup>)> {
         let mut group_map = HashMap::new();
         for shape_entry in self.shape_set.iter() {
             let mut entry_groups = vec![];
@@ -321,8 +321,8 @@ impl ObjectQuery<ElementIndex, Element> for Object {
     }
 }
 
-impl ObjectQuery<GroupIndex, GroupName> for Object {
-    fn query(&self, key: GroupIndex) -> Option<GroupName> {
+impl ObjectQuery<GroupIndex, Group> for Object {
+    fn query(&self, key: GroupIndex) -> Option<Group> {
         self.group_set.get(key as usize).map(|x| x.clone())
     }
 }
@@ -359,7 +359,7 @@ impl ObjectSet {
 
     pub fn len(&self) -> usize { self.objects.len() }
 
-    pub fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<GroupName>, Vec<SmoothingGroup>)>> {
+    pub fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<Group>, Vec<SmoothingGroup>)>> {
         self.iter().fold(vec![], |mut group_maps, object| {
             group_maps.push(object.get_group_map());
             group_maps
@@ -434,7 +434,7 @@ impl ObjectBuilder {
         self
     }
 
-    pub fn with_group_set(&mut self, group_set: Vec<GroupName>) -> &mut Self {
+    pub fn with_group_set(&mut self, group_set: Vec<Group>) -> &mut Self {
         self.group_set = Some(Vec::from(group_set));
         self
     }
@@ -521,7 +521,7 @@ impl TextObjectCompositor {
         }     
     }
 
-    fn compose_groups(&self, groups: &[GroupName]) -> String {
+    fn compose_groups(&self, groups: &[Group]) -> String {
         let string = groups.iter().fold(
             String::from("g "), |acc, group| {
                 acc + &format!(" {} ", group)

@@ -2,7 +2,7 @@ extern crate wavefront;
 
 use wavefront::obj::{
     Vertex, NormalVertex, Element, VTNIndex, ObjectSet, ObjectBuilder,
-    GroupName, ShapeEntry,
+    Group, ShapeEntry,
 };
 use wavefront::obj::Parser;
 
@@ -2142,7 +2142,7 @@ fn test_cases(file_path: &str) -> TestSet {
             NormalVertex { i:  0.48559,     j:  0.850653,   k: -0.201474    },
         ])
         .with_group_set(vec![
-            GroupName::new("Object001"), GroupName::new("Object002"), GroupName::new("Object003")
+            Group::new("Object001"), Group::new("Object002"), Group::new("Object003")
         ])
         .with_shape_set(vec![
             ShapeEntry { element: 1,    groups: vec![1, 2, 3], smoothing_groups: vec![1] },
