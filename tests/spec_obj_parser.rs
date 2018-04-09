@@ -215,7 +215,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let mut shape_set = vec![];
         for i in 0..group_slices.len() {
             for j in group_slices[i].0..group_slices[i].1 {
-                let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i+1)], &vec![]);
+                let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i+1)], 1);
                 shape_set.push(shape_entry);
             }
         }
@@ -226,7 +226,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
 
         for i in 0..smoothing_group_slices.len() {
             for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
-                shape_set[j].smoothing_groups = vec![smoothing_group_set[i].clone()];
+                shape_set[j].smoothing_group = smoothing_group_set[i];
             }
         }
 

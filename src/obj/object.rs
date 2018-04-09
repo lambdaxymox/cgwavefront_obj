@@ -136,7 +136,7 @@ impl Default for Group {
     fn default() -> Group { Group::new("default") }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroup(u32);
 
 impl SmoothingGroup {
@@ -161,18 +161,19 @@ impl fmt::Display for SmoothingGroup {
 pub struct ShapeEntry {
     pub element: ElementIndex,
     pub groups: Vec<GroupIndex>,
-    pub smoothing_groups: Vec<SmoothingGroupIndex>,
+    pub smoothing_group: SmoothingGroupIndex,
 }
 
 impl ShapeEntry {
     pub fn new(
         element: ElementIndex, 
-        groups: &[GroupIndex], smoothing_groups: &[SmoothingGroupIndex]
-    ) -> ShapeEntry {
+        groups: &[GroupIndex], 
+        smoothing_group: SmoothingGroupIndex) -> ShapeEntry {
+
         ShapeEntry {
             element: element,
             groups: Vec::from(groups),
-            smoothing_groups: Vec::from(smoothing_groups),
+            smoothing_group: smoothing_group,
         }
     }
 }
@@ -261,21 +262,23 @@ impl Object {
         }
     }
 
-    pub fn get_group_map(&self) -> HashMap<u32, (Vec<Group>, Vec<SmoothingGroup>)> {
+    pub fn get_group_map(&self) -> HashMap<u32, (Vec<Group>, SmoothingGroup)> {
         let mut group_map = HashMap::new();
         for shape_entry in self.shape_set.iter() {
             let mut entry_groups = vec![];
-            let mut entry_smoothing_groups = vec![];
+            // let mut entry_smoothing_groups = vec![];
 
             for i in shape_entry.groups.iter() {
                 entry_groups.push(self.group_set[*i as usize].clone());
             }
 
+            let entry_smoothing_group = self.smoothing_group_set[shape_entry.smoothing_group as usize];
+            /*
             for j in shape_entry.smoothing_groups.iter() {
                 entry_smoothing_groups.push(self.smoothing_group_set[*j as usize].clone());
             }
-
-            group_map.insert(shape_entry.element, (entry_groups, entry_smoothing_groups));
+            */
+            group_map.insert(shape_entry.element, (entry_groups, entry_smoothing_group));
         }
 
         group_map
@@ -355,7 +358,7 @@ impl ObjectSet {
 
     pub fn len(&self) -> usize { self.objects.len() }
 
-    pub fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<Group>, Vec<SmoothingGroup>)>> {
+    pub fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<Group>, SmoothingGroup)>> {
         self.iter().fold(vec![], |mut group_maps, object| {
             group_maps.push(object.get_group_map());
             group_maps
@@ -526,13 +529,8 @@ impl TextObjectCompositor {
         format!("{}\n", string)
     }
 
-    fn compose_smoothing_group(&self, smoothing_groups: &[SmoothingGroup]) -> String {
-        let string = smoothing_groups.iter().fold(
-            String::from("s "), |acc, smoothing_group| {
-                acc + &format!(" {} ", smoothing_group)
-            }
-        );
-        format!("{}\n", string)
+    fn compose_smoothing_group(&self, smoothing_group: SmoothingGroup) -> String {
+        format!("s {} \n", smoothing_group)
     }
 
     fn compose_vertex_set(&self, object: &Object) -> String {
@@ -579,8 +577,8 @@ impl TextObjectCompositor {
         string += &self.compose_groups(&current_groups);
         string += &format!("\n");
 
-        let mut current_smoothing_groups = &object_group_map[&0].1;
-        string += &self.compose_smoothing_group(current_smoothing_groups);
+        let mut current_smoothing_group = object_group_map[&0].1;
+        string += &self.compose_smoothing_group(current_smoothing_group);
         string += &format!("\n");
 
         for i in 0..object.element_set.len() {
@@ -594,12 +592,12 @@ impl TextObjectCompositor {
             // We continue with the current group. Recall that group statements
             // are state setting; each successive element is associated with the 
             // current group until the next group statement.
-            if &object_group_map[&(i as u32)].1 != current_smoothing_groups {
+            if object_group_map[&(i as u32)].1 != current_smoothing_group {
                 // If the current active smoothing group is different from the current
                 // element's smoothing group, we must place a new smoothing group statement
                 // to signify the change.
-                current_smoothing_groups = &object_group_map[&(i as u32)].1;
-                string += &self.compose_smoothing_group(&current_smoothing_groups);
+                current_smoothing_group = object_group_map[&(i as u32)].1;
+                string += &self.compose_smoothing_group(current_smoothing_group);
             }
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
