@@ -59,7 +59,7 @@ impl NormalVertex {
 
 impl fmt::Display for NormalVertex {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "vt  {}  {}  {}", self.i, self.j, self.k)
+        write!(f, "vn  {}  {}  {}", self.i, self.j, self.k)
     }
 }
 
@@ -578,7 +578,7 @@ impl TextObjectCompositor {
 
     fn compose_normal_vertex_set(&self, object: &Object) -> String {
         object.normal_vertex_set.iter().fold(String::new(), |acc, vn| {
-            acc + &format!("vt {} {} {} \n", vn.i, vn.j, vn.k)
+            acc + &format!("vn {} {} {} \n", vn.i, vn.j, vn.k)
         })        
     }
 
@@ -586,7 +586,7 @@ impl TextObjectCompositor {
         let mut string = String::new();
 
         string += &self.compose_object_name(object);
-            
+
         string += &self.compose_vertex_set(object);
         string += &format!("# {} vertices\n", object.vertex_set.len());
         string += &format!("\n");

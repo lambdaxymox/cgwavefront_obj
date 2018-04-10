@@ -411,7 +411,6 @@ fn prop_parse_object_set_should_parse_object_names() {
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
-
 #[test]
 fn prop_parse_object_set_should_parse_vertices() {
     fn property(machine: Machine) -> bool {
@@ -419,12 +418,14 @@ fn prop_parse_object_set_should_parse_vertices() {
         let expected_set = machine.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            println!("{:?}\n", result.vertex_set);
+            println!("{:?}\n", expected.vertex_set);
             result.vertex_set == expected.vertex_set
         })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+/*
 #[test]
 fn prop_parse_object_set_should_parse_texture_vertices() {
     fn property(machine: Machine) -> bool {
@@ -514,3 +515,4 @@ fn prop_parser_correctly_parses_valid_obj_files() {
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
 
+*/
