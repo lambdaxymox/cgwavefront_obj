@@ -15,7 +15,6 @@ use wavefront::obj::{Parser, ParseError};
 use std::marker;
 use std::fmt;
 use std::str;
-use std::collections::HashMap;
 
 
 #[derive(Clone, Debug)]
