@@ -216,11 +216,12 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new(name: String,
-                vertex_set: VertexSet, texture_vertex_set: TextureVertexSet, normal_vertex_set: NormalVertexSet,
-                group_set: GroupSet, smoothing_group_set: SmoothingGroupSet,
-                element_set: ElementSet,
-                shape_set: ShapeSet) -> Object {
+    pub fn new(
+        name: String,
+        vertex_set: VertexSet, texture_vertex_set: TextureVertexSet, normal_vertex_set: NormalVertexSet,
+        group_set: GroupSet, smoothing_group_set: SmoothingGroupSet, element_set: ElementSet,
+        shape_set: ShapeSet) -> Object {
+        
         Object {
             name: name,
             vertex_set: vertex_set,
@@ -321,6 +322,17 @@ impl fmt::Display for Object {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let string = DisplayObjectCompositor::new().compose(self);
         write!(f, "{}", string)
+    }
+}
+
+impl Default for Object {
+    fn default() -> Object {
+        Object::new(
+            String::from(""),   
+            Default::default(), Default::default(), Default::default(), 
+            Default::default(), Default::default(), Default::default(),
+            Default::default()
+        )
     }
 }
 
@@ -617,14 +629,13 @@ impl TextObjectCompositor {
         let mut current_interval = first_entry.0;
         let mut current_groups = &(first_entry.1).0;
         let mut current_smoothing_group = (first_entry.1).1;
-
+        println!("interval={:?}; groups={:?}; smoothing_group={:?}.", current_interval, current_groups, current_smoothing_group);
         string += &self.compose_groups(&current_groups);
         string += &self.compose_smoothing_group(current_smoothing_group);
         string += &self.compose_elements(object, *current_interval);
         string += &format!("# {} elements \n", (current_interval.1 - current_interval.0));
 
         for (interval, &(ref groups, smoothing_group)) in it {
-            println!("interval={:?}; groups={:?}; smoothing_group={:?}.", interval, groups, smoothing_group);
             if current_groups != groups {
                 // If the current set of groups is different from the current
                 // element's set of groups, we must place a new group statement
@@ -646,7 +657,8 @@ impl TextObjectCompositor {
             }
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
-            // current smoothing group until the next smoothing group statement.        
+            // current smoothing group until the next smoothing group statement.
+            println!("interval={:?}; groups={:?}; smoothing_group={:?}.", current_interval, current_groups, current_smoothing_group);        
             string += &self.compose_elements(object, *current_interval);
             string += &format!("# {} elements \n", (current_interval.1 - current_interval.0));
         }
