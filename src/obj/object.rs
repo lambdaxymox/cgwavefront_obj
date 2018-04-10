@@ -699,12 +699,12 @@ impl Compositor for TextObjectSetCompositor {
         
         let mut string = String::new();
         for (i, object_i) in object_set.iter().enumerate() {
+            string += &format!("#### BEGIN Object {}\n", i);
             string += &compositor.compose(&object_i);
-            string += &format!("#### Object {}\n", i);
+            string += &format!("#### END Object {}\n", i);
             string += &"\n";
         }
 
-        string += &"\n";
         string
     }
 }
