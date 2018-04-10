@@ -216,16 +216,20 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new() -> Object {
+    pub fn new(name: String,
+                vertex_set: VertexSet, texture_vertex_set: TextureVertexSet, normal_vertex_set: NormalVertexSet,
+                group_set: GroupSet, smoothing_group_set: SmoothingGroupSet,
+                element_set: ElementSet,
+                shape_set: ShapeSet) -> Object {
         Object {
-            name: String::from(""),
-            vertex_set: Default::default(),
-            texture_vertex_set: Default::default(),
-            normal_vertex_set: Default::default(),
-            group_set: Default::default(),
-            smoothing_group_set: Default::default(),
-            element_set: Default::default(),
-            shape_set: Default::default(),
+            name: name,
+            vertex_set: vertex_set,
+            texture_vertex_set: texture_vertex_set,
+            normal_vertex_set: normal_vertex_set,
+            group_set: group_set,
+            smoothing_group_set: smoothing_group_set,
+            element_set: element_set,
+            shape_set: shape_set,
         }
     }
 
@@ -619,6 +623,7 @@ impl TextObjectCompositor {
         string += &format!("\n");
 
         for (interval, &(ref groups, smoothing_group)) in it {
+            println!("interval={:?}; groups={:?}; smoothing_group={:?}.", interval, groups, smoothing_group);
             if current_groups != groups {
                 // If the current set of groups is different from the current
                 // element's set of groups, we must place a new group statement

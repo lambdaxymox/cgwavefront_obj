@@ -480,7 +480,7 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+*/
 #[test]
 fn prop_parse_object_set_should_parse_elements() {
     fn property(machine: Machine) -> bool {
@@ -493,7 +493,7 @@ fn prop_parse_object_set_should_parse_elements() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+/*
 #[test]
 fn prop_parse_object_set_should_parse_shape_entries() {
     fn property(machine: Machine) -> bool {
@@ -506,7 +506,8 @@ fn prop_parse_object_set_should_parse_shape_entries() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+*/
+/*
 #[test]
 fn prop_parser_correctly_parses_valid_obj_files() {
     fn property(machine: Machine) -> bool {
@@ -517,5 +518,4 @@ fn prop_parser_correctly_parses_valid_obj_files() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
 */
