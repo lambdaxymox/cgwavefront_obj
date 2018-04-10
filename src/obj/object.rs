@@ -612,7 +612,6 @@ impl TextObjectCompositor {
 
         //let mut current_smoothing_group = object_group_map[&0].1;
         string += &self.compose_smoothing_group(current_smoothing_group);
-        string += &format!("\n");
 
         for i in current_interval.0..current_interval.1 {
             string += &format!("{}\n", object.element_set[i as usize]);

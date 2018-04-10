@@ -424,9 +424,6 @@ fn prop_parse_object_set_should_parse_vertices() {
         let expected_set = machine.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
-            println!("TEXT: \n{}\n", machine.text);
-            println!("RESULT: {:?}\n", result.vertex_set);
-            println!("EXPECTED: {:?}\n", expected.vertex_set);
             result.vertex_set == expected.vertex_set
         })
     }
