@@ -60,6 +60,7 @@ fn test_cases() -> TestSet {
                     s  1
                     g  Group3
                     f 1/1/1 1/1/1 1/1/1
+                    # 1 elements
 
                     g  Group4                    
                     s  2 
@@ -79,6 +80,37 @@ fn test_cases() -> TestSet {
                         vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
                         vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
                         vec![ShapeEntry::new(1, &vec![4], 2)],
+                    )
+                ])
+            },
+            Test {
+                data: String::from(r"
+                    o  Object0
+                    v  -36.84435  -31.289864  -23.619797  -8.21862 
+                    # 1 vertices
+
+                    vt  -44.275238  28.583176  -23.780418
+                    # 1 texture vertices
+
+                    vn  93.94331  -61.460472  -32.00753 
+                    # 1 normal vertices
+
+                    f 1/1/1 1/1/1 1/1/1
+                    # 1 elements
+
+                    #### End Object 0
+
+                "),
+                expected: ObjectSet::new(vec![
+                    Object::new(
+                        String::from("Object0"),
+                        vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
+                        vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
+                        vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
+                        vec![Group::new("default")],
+                        vec![SmoothingGroup::new(0)],
+                        vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
+                        vec![ShapeEntry::new(1, &vec![1], 1)],
                     )
                 ])
             }

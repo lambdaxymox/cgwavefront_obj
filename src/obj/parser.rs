@@ -446,7 +446,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         let mut texture_vertices = vec![];
         let mut normal_vertices = vec![];        
         let mut elements = vec![];
-        
+
         let mut group_entry_table = vec![];
         let mut groups = vec![];
         let mut min_element_group_index = 1;
@@ -478,6 +478,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                 }
                 Some("s") => {
                     // Save the shape entry ranges for the current smoothing group.
+                    println!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    println!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
+                    println!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
                         smoothing_group_index
@@ -488,6 +491,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     smoothing_group_index += amount_parsed;
                     //Update the element indices.
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
+                    println!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    println!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
+                    println!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
                 }
                 Some("v")  => {
                     let vertex = try!(self.parse_vertex());
@@ -515,14 +521,19 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                         (min_element_group_index, max_element_group_index), 
                         (min_group_index, max_group_index)
                     ));
-                    //min_element_group_index = max_element_group_index;
-
+                    min_element_group_index = max_element_group_index;
+                    println!("LAST SMOOTHING GROUP FOUND.");
+                    println!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    println!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
+                    println!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
                         smoothing_group_index
                     ));
-                    //min_element_smoothing_group_index = max_element_smoothing_group_index;
-
+                    min_element_smoothing_group_index = max_element_smoothing_group_index;
+                    println!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    println!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
+                    println!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
                     break;
                 }
                 Some(other_st) => {
@@ -547,6 +558,10 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         self.parse_shape_entries(
             &mut shape_entries, &elements, &group_entry_table, &smoothing_group_entry_table
         );
+
+        println!("{:?}", groups);
+        println!("{:?}", smoothing_groups);
+        println!("{:?}", shape_entries);
 
         *min_vertex_index  += vertices.len();
         *max_vertex_index  += vertices.len();
