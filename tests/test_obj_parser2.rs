@@ -79,12 +79,11 @@ fn test_cases() -> TestSet {
                         vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
                         vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
                         vec![ShapeEntry::new(1, &vec![4], 2)],
-                    )]
-                )
+                    )
+                ])
             }
         ],
     }
-    
 }
 
 
@@ -126,8 +125,7 @@ fn test_parse_object_set_should_parse_object_names() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        
+        let result_set = parser.parse().unwrap(); 
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.name, expected.name);
         }
@@ -159,8 +157,7 @@ fn test_parse_object_set_should_parse_texture_vertices() {
     for test in tests.iter() {
         let mut parser = Parser::new(test.data.chars());
         let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-            
+        for (result, expected) in result_set.iter().zip(test.expected.iter()) {         
             assert_eq!(result.texture_vertex_set.len(), expected.texture_vertex_set.len(), "Length mismatch.");
             for (result_tv, expected_tv) in 
                 result.texture_vertex_set.iter().zip(expected.texture_vertex_set.iter()) {
@@ -179,7 +176,6 @@ fn test_parse_object_set_should_parse_normal_vertices() {
         let mut parser = Parser::new(test.data.chars());
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-
             assert_eq!(result.normal_vertex_set.len(), expected.normal_vertex_set.len(), "Length mismatch.");
             for (result_nv, expected_nv) in 
                 result.normal_vertex_set.iter().zip(expected.normal_vertex_set.iter()) {
