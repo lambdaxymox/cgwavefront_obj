@@ -429,7 +429,7 @@ fn prop_parse_object_set_should_parse_vertices() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-/*
+
 #[test]
 fn prop_parse_object_set_should_parse_texture_vertices() {
     fn property(machine: Machine) -> bool {
@@ -455,7 +455,7 @@ fn prop_parse_object_set_should_parse_normal_vertices() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+/*
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
     fn property(machine: Machine) -> bool {
