@@ -69,13 +69,16 @@ fn test_cases() -> TestSet {
                 expected: ObjectSet::new(vec![
                     Object::new(
                         String::from("Object0"),
-                        vec![Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }],
-                        vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
-                        vec![NormalVertex { i: 93.94331, j: -61.460472, k: -32.00753 }],
-                        vec![Group::new("Group0"), Group::new("Group1"), Group::new("Group2"), Group::new("Group3"), Group::new("Group4")],
+                        vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
+                        vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
+                        vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
+                        vec![
+                            Group::new("Group0"), Group::new("Group1"), 
+                            Group::new("Group2"), Group::new("Group3"), Group::new("Group4")
+                        ],
                         vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
                         vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
-                        vec![ShapeEntry { element: 1, groups: vec![4], smoothing_group: 2 }],
+                        vec![ShapeEntry::new(1, &vec![4], 2)],
                     )]
                 )
             }
