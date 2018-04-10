@@ -201,8 +201,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
     fn gen_shape_set(&self, 
         element_set: &ElementSet, 
         group_slices: &[(usize, usize)], group_set: &[u32],
-        smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]
-    ) -> ShapeSet {
+        smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]) -> ShapeSet {
         
         assert!(group_slices.len() > 0);
         assert!(group_set.len() > 0);
