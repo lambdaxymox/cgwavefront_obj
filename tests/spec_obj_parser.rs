@@ -244,7 +244,12 @@ impl<G> ObjectSetGen<G> where G: Gen {
         }
     }
 
-    fn gen_object(&self, g: &mut G) -> Object {
+    fn gen_object_name(&self, index: usize) -> String {
+        format!("Object{}", index)
+    }
+
+    fn gen_object(&self, g: &mut G, index: usize) -> Object {
+        let object_name = self.gen_object_name(index);
         let len = g.gen_range(1, 10);
         let vertex_set = self.gen_vertex_set(g, len);
         let texture_vertex_set = self.gen_texture_vertex_set(g, len);
@@ -278,6 +283,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
 
         let mut builder = ObjectBuilder::new(vertex_set, element_set);
         builder
+            .with_name(object_name)
             .with_texture_vertex_set(texture_vertex_set)
             .with_normal_vertex_set(normal_vertex_set)
             .with_group_set(group_set)
@@ -294,8 +300,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let object_count = if one_obj { 1 } else { g.gen_range(2, 10) };
 
         let mut objects = vec![];
-        for _ in 0..object_count {  
-            let object = self.gen_object(g);
+        for index in 0..object_count {
+            let object = self.gen_object(g, index);
             objects.push(object);
         }
 
@@ -418,8 +424,9 @@ fn prop_parse_object_set_should_parse_vertices() {
         let expected_set = machine.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
-            println!("{:?}\n", result.vertex_set);
-            println!("{:?}\n", expected.vertex_set);
+            println!("TEXT: \n{}\n", machine.text);
+            println!("RESULT: {:?}\n", result.vertex_set);
+            println!("EXPECTED: {:?}\n", expected.vertex_set);
             result.vertex_set == expected.vertex_set
         })
     }

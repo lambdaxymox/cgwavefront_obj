@@ -544,41 +544,41 @@ impl TextObjectCompositor {
     fn compose_object_name(&self, object: &Object) -> String {
         match object.name.as_ref() {
             "" => String::from(""),
-            _  => format!("o {} \n", object.name),
+            _  => format!("o  {} \n", object.name),
         }     
     }
 
     fn compose_groups(&self, groups: &[Group]) -> String {
         let string = groups.iter().fold(
-            String::from("g "), |acc, group| {
-                acc + &format!(" {} ", group)
+            String::from("g  "), |acc, group| {
+                acc + &format!("{}  ", group)
             }
         );
         format!("{}\n", string)
     }
 
     fn compose_smoothing_group(&self, smoothing_group: SmoothingGroup) -> String {
-        format!("s {} \n", smoothing_group)
+        format!("s  {} \n", smoothing_group)
     }
 
     fn compose_vertex_set(&self, object: &Object) -> String {
         object.vertex_set.iter().fold(String::new(), |acc, v| {
             match v.w == 1.0 {
-                true  => acc + &format!("v {} {} {} \n", v.x, v.y, v.z),
-                false => acc + &format!("v {} {} {} {} \n", v.x, v.y, v.z, v.w),
+                true  => acc + &format!("v  {}  {}  {} \n", v.x, v.y, v.z),
+                false => acc + &format!("v  {}  {}  {}  {} \n", v.x, v.y, v.z, v.w),
             }
         })
     }
 
     fn compose_texture_vertex_set(&self, object: &Object) -> String {
         object.texture_vertex_set.iter().fold(String::new(), |acc, vt| {
-            acc + &format!("vt {} {} {} \n", vt.u, vt.v, vt.w)
+            acc + &format!("vt  {}  {}  {} \n", vt.u, vt.v, vt.w)
         })
     }
 
     fn compose_normal_vertex_set(&self, object: &Object) -> String {
         object.normal_vertex_set.iter().fold(String::new(), |acc, vn| {
-            acc + &format!("vn {} {} {} \n", vn.i, vn.j, vn.k)
+            acc + &format!("vn  {}  {}  {} \n", vn.i, vn.j, vn.k)
         })        
     }
 
@@ -645,7 +645,7 @@ impl TextObjectCompositor {
             for i in (current_interval.0)..(current_interval.1) {
                 string += &format!("{}\n", object.element_set[i as usize]);
             }
-            string += &format!("\n");
+            string += &format!("# {} elements \n", object.element_set.len());
         }
 
         string
