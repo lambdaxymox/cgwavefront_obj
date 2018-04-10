@@ -2,7 +2,7 @@ use std::default::Default;
 use std::slice;
 use std::fmt;
 use std::ops;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -262,18 +262,52 @@ impl Object {
         }
     }
 
-    pub fn get_group_map(&self) -> HashMap<u32, (Vec<Group>, SmoothingGroup)> {
-        let mut group_map = HashMap::new();
-        for shape_entry in self.shape_set.iter() {
-            let mut entry_groups = vec![];
-
-            for i in shape_entry.groups.iter() {
-                entry_groups.push(self.group_set[*i as usize].clone());
-            }
-
-            let entry_smoothing_group = self.smoothing_group_set[shape_entry.smoothing_group as usize];
-            group_map.insert(shape_entry.element, (entry_groups, entry_smoothing_group));
+    pub fn get_group_map(&self) -> BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)> {
+        let mut group_map = BTreeMap::new();
+        if self.shape_set.is_empty() {
+            return group_map;
         }
+
+        let mut it = self.shape_set.iter();
+        let mut lower = 1;
+        let mut upper = 1;
+        let first_shape_entry = it.next().unwrap();
+
+        let mut current_group_indices = first_shape_entry.groups.clone();
+        let mut current_groups = vec![];
+        for i in current_group_indices.iter() {
+            current_groups.push(self.group_set[*i as usize].clone());
+        }
+
+        let mut current_smoothing_group_idx = first_shape_entry.smoothing_group;
+        let mut current_smoothing_group = self.smoothing_group_set[current_smoothing_group_idx as usize];
+
+        for shape_entry in it {
+            if (shape_entry.groups != current_group_indices) || 
+                (shape_entry.smoothing_group != current_smoothing_group_idx) {
+
+                // Save the current interval.
+                group_map.insert((lower, upper), (current_groups, current_smoothing_group));
+
+                // Update the groups.
+                current_group_indices = shape_entry.groups.clone();
+                current_groups = vec![];
+                for i in current_group_indices.iter() {
+                    current_groups.push(self.group_set[*i as usize].clone());
+                }
+
+                // Update the smoothing groups.
+                current_smoothing_group_idx = shape_entry.smoothing_group;
+                current_smoothing_group = self.smoothing_group_set[current_smoothing_group_idx as usize];
+
+                // Jump to the next interval.
+                lower = upper;
+            } else {
+                upper += 1;
+            }
+        }
+
+        group_map.insert((lower, upper), (current_groups, current_smoothing_group));
 
         group_map
     }
@@ -352,7 +386,7 @@ impl ObjectSet {
 
     pub fn len(&self) -> usize { self.objects.len() }
 
-    pub fn get_group_maps(&self) -> Vec<HashMap<u32, (Vec<Group>, SmoothingGroup)>> {
+    pub fn get_group_maps(&self) -> Vec<BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)>> {
         self.iter().fold(vec![], |mut group_maps, object| {
             group_maps.push(object.get_group_map());
             group_maps
@@ -566,37 +600,52 @@ impl TextObjectCompositor {
         string += &format!("\n");
 
         let object_group_map = object.get_group_map();
+        let mut it = object_group_map.iter();
+        let first_entry = it.next().unwrap();
 
-        let mut current_groups = &object_group_map[&0].0;
+        let mut current_interval = first_entry.0;
+        let mut current_groups = &(first_entry.1).0;
+        let mut current_smoothing_group = (first_entry.1).1;
+
         string += &self.compose_groups(&current_groups);
         string += &format!("\n");
 
-        let mut current_smoothing_group = object_group_map[&0].1;
+        //let mut current_smoothing_group = object_group_map[&0].1;
         string += &self.compose_smoothing_group(current_smoothing_group);
         string += &format!("\n");
 
-        for i in 0..object.element_set.len() {
-            if &object_group_map[&(i as u32)].0 != current_groups {
+        for i in current_interval.0..current_interval.1 {
+            string += &format!("{}\n", object.element_set[i as usize]);
+        }
+        string += &format!("\n");
+
+        for (interval, &(ref groups, smoothing_group)) in it {
+            if current_groups != groups {
                 // If the current set of groups is different from the current
                 // element's set of groups, we must place a new group statement
                 // to signify the change.
-                current_groups = &object_group_map[&(i as u32)].0;
-                string += &self.compose_groups(current_groups);
+                current_interval = interval;
+                current_groups = groups;
+                string += &self.compose_groups(&current_groups);
             }
             // We continue with the current group. Recall that group statements
             // are state setting; each successive element is associated with the 
             // current group until the next group statement.
-            if object_group_map[&(i as u32)].1 != current_smoothing_group {
+            if current_smoothing_group != smoothing_group {
                 // If the current active smoothing group is different from the current
                 // element's smoothing group, we must place a new smoothing group statement
                 // to signify the change.
-                current_smoothing_group = object_group_map[&(i as u32)].1;
+                current_interval = interval;
+                current_smoothing_group = smoothing_group;
                 string += &self.compose_smoothing_group(current_smoothing_group);
             }
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
             // current smoothing group until the next smoothing group statement.        
-            string += &format!("{}\n", object.element_set[i]);
+            for i in (current_interval.0)..(current_interval.1) {
+                string += &format!("{}\n", object.element_set[i as usize]);
+            }
+            string += &format!("\n");
         }
 
         string
