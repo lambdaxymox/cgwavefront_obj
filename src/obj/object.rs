@@ -586,6 +586,15 @@ impl TextObjectCompositor {
         })        
     }
 
+    fn compose_elements(&self, object: &Object, interval: (u32, u32)) -> String {
+        let string = (interval.0..interval.1).fold(String::new(), 
+            |acc, i| {
+                acc + &format!("{}\n", object.element_set[i as usize])
+            }
+        );
+        format!("{}\n", string)
+    }
+
     fn compose(&self, object: &Object) -> String {
         let mut string = String::new();
 
@@ -614,13 +623,8 @@ impl TextObjectCompositor {
         string += &self.compose_groups(&current_groups);
         string += &format!("\n");
 
-        //let mut current_smoothing_group = object_group_map[&0].1;
         string += &self.compose_smoothing_group(current_smoothing_group);
-
-        for i in current_interval.0..current_interval.1 {
-            string += &format!("{}\n", object.element_set[i as usize]);
-        }
-        string += &format!("\n");
+        string += &self.compose_elements(object, *current_interval);
 
         for (interval, &(ref groups, smoothing_group)) in it {
             println!("interval={:?}; groups={:?}; smoothing_group={:?}.", interval, groups, smoothing_group);
@@ -646,9 +650,7 @@ impl TextObjectCompositor {
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
             // current smoothing group until the next smoothing group statement.        
-            for i in (current_interval.0)..(current_interval.1) {
-                string += &format!("{}\n", object.element_set[i as usize]);
-            }
+            string += &self.compose_elements(object, *current_interval);
             string += &format!("# {} elements \n", object.element_set.len());
         }
 
