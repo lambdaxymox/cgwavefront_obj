@@ -249,6 +249,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
     fn gen_object(&self, g: &mut G, index: usize) -> Object {
         let object_name = self.gen_object_name(index);
         let len = g.gen_range(1, 10);
+
         let vertex_set = self.gen_vertex_set(g, len);
         let texture_vertex_set = self.gen_texture_vertex_set(g, len);
         let normal_vertex_set = self.gen_normal_vertex_set(g, len);
@@ -295,7 +296,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
         // We want one object sets to appear frequently since that is the most
         // commonly encountered case in the wild.
         let one_obj: bool = Arbitrary::arbitrary(g);
-        let object_count = if one_obj { 1 } else { g.gen_range(2, 10) };
+        //let object_count = if one_obj { 1 } else { g.gen_range(2, 10) };
+        let object_count = 1;
 
         let mut objects = vec![];
         for index in 0..object_count {
@@ -401,7 +403,7 @@ fn prop_parser_satisfies_specification() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-*/
+
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
     fn property(machine: Machine) -> bool {
@@ -453,7 +455,7 @@ fn prop_parse_object_set_should_parse_normal_vertices() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-/*
+
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
     fn property(machine: Machine) -> bool {
@@ -474,11 +476,14 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
         let expected_set = machine.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            eprintln!("RESULT: \n{:?}\n", result.smoothing_group_set);
+            eprintln!("EXPECTED: \n{:?}\n", expected.smoothing_group_set);
             result.smoothing_group_set == expected.smoothing_group_set
         })
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
+
 /*
 #[test]
 fn prop_parse_object_set_should_parse_elements() {

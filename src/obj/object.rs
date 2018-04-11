@@ -266,66 +266,6 @@ impl Object {
             }
         }
     }
-
-    pub fn get_group_map(&self) -> BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)> {
-        let mut group_map = BTreeMap::new();
-        if self.shape_set.is_empty() {
-            return group_map;
-        }
-
-        let mut it = self.shape_set.iter();
-        let mut lower = 1;
-        let mut upper = 1;
-        let first_shape_entry = it.next().unwrap();
-
-        let mut current_group_indices = first_shape_entry.groups.clone();
-        let mut current_groups = vec![];
-        for i in current_group_indices.iter() {
-            current_groups.push(self.group_set[*i as usize].clone());
-        }
-
-        let mut current_smoothing_group_index = first_shape_entry.smoothing_group;
-        let mut current_smoothing_group = self.smoothing_group_set[current_smoothing_group_index as usize];
-
-        for shape_entry in it {
-            if (shape_entry.groups != current_group_indices) || 
-                (shape_entry.smoothing_group != current_smoothing_group_index) {
-
-                // Save the current interval.
-                group_map.insert((lower, upper), (current_groups, current_smoothing_group));
-
-                // Update the groups.
-                current_group_indices = shape_entry.groups.clone();
-                current_groups = vec![];
-                for i in current_group_indices.iter() {
-                    current_groups.push(self.group_set[*i as usize].clone());
-                }
-
-                // We must check that any gaps in the
-                // group indices are accounted for. The shape set is in monotone increasing order
-                // in the element indices as well as the smoothing group indices and group indices.
-                // This is a consequence of the fact that vertices, elements, and groups are implicitly indexed
-                // in increasing order from the beginning to the end of a Wavefront OBJ file.
-                let diff = shape_entry.smoothing_group - current_smoothing_group_index;
-                for i in current_smoothing_group_index..(current_smoothing_group_index + diff) {
-                    group_map.insert((lower, upper), (current_groups.clone(), self.smoothing_group_set[i as usize]));
-                }
-
-                // Jump to the next nonempty smoothing group.
-                current_smoothing_group_index = shape_entry.smoothing_group;
-                current_smoothing_group = self.smoothing_group_set[current_smoothing_group_index as usize];
-
-                // Jump to the next interval.
-                lower = upper;
-            } else {
-                upper += 1;
-            }
-        }
-        eprintln!("group_map={:?}", group_map);
-        group_map.insert((lower, upper), (current_groups, current_smoothing_group));
-
-        group_map
-    }
 }
 
 impl fmt::Display for Object {
@@ -411,13 +351,6 @@ impl ObjectSet {
     }
 
     pub fn len(&self) -> usize { self.objects.len() }
-
-    pub fn get_group_maps(&self) -> Vec<BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)>> {
-        self.iter().fold(vec![], |mut group_maps, object| {
-            group_maps.push(object.get_group_map());
-            group_maps
-        })
-    }
 }
 
 pub struct ObjectSetIter<'a> {
@@ -560,6 +493,134 @@ impl ObjectCompositor for DisplayObjectCompositor {
     } 
 }
 
+struct CompositorInstructions {
+    instructions: BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)>,
+}
+
+impl CompositorInstructions {
+    fn new(instructions: BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)>) -> Self {
+        Self { instructions: instructions }
+    }
+
+    fn generate(object: &Object) -> CompositorInstructions {
+        let mut group_map = BTreeMap::new();
+
+        if object.shape_set.is_empty() {
+            return Self::new(group_map);
+        }
+
+        let mut it = object.shape_set.iter();
+        let mut lower = 1;
+        let mut upper = 1;
+        let first_shape_entry = it.next().unwrap();
+
+        let mut current_group_indices = first_shape_entry.groups.clone();
+        let mut current_groups = vec![];
+        for i in current_group_indices.iter() {
+            current_groups.push(object.group_set[*i as usize].clone());
+        }
+
+        let mut current_smoothing_group_index = first_shape_entry.smoothing_group;
+        let mut current_smoothing_group = object.smoothing_group_set[current_smoothing_group_index as usize];
+
+        // Which groups are missing? There is ambiguity in the ordering any possible missing groups and smoothing groups.
+        // We choose to break ties by finding the missing groups and dropping them in first, followed by the missing 
+        // smoothing groups before proceeding with the groups that have elements.
+        let diff = current_group_indices[0];
+        for i in 1..diff {
+            group_map.insert(
+                (lower, upper),
+                (vec![object.group_set[(i - 1) as usize].clone()], object.smoothing_group_set[0 as usize])
+            );
+        }
+
+        let diff = first_shape_entry.smoothing_group;
+        for i in 1..(diff+1) {
+            group_map.insert(
+                (lower, upper),
+                (current_groups.clone(), object.smoothing_group_set[(i-1) as usize])
+            );
+        }
+        eprintln!("object.name = {:?}", object.name);
+        for shape_entry in it {
+            if (shape_entry.groups != current_group_indices) || 
+                (shape_entry.smoothing_group != current_smoothing_group_index) {
+
+                // Save the current interval.
+                group_map.insert((lower, upper), (current_groups.clone(), current_smoothing_group));
+
+                // Jump to the next interval.
+                lower = upper;
+
+                // We must account for any gaps in the group indices. The shape set is in monotone increasing order
+                // in the element indices. In each entry, the group indices are in monotone increasing order.
+                // This is a consequence of the fact that vertices, elements, and groups are implicitly indexed
+                // in increasing order from the beginning to the end of a Wavefront OBJ file. Consequently,
+                // the missing groups and smoothing groups can be found by calculating the gaps in the indices.
+                
+                // Insert the missing groups.
+                let last_index = current_group_indices[current_group_indices.len()-1];
+                let diff = shape_entry.groups[0] - last_index;
+
+                eprintln!("FILLING IN MISSING GROUPS: ");
+                eprintln!("BEFORE: ");
+                eprintln!("    last_index = {:?}", last_index);
+                eprintln!("    diff = {:?}", diff);
+                eprintln!("    current_group_indices = {:?}", current_group_indices);
+                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
+                eprintln!("    group_map = {:?}", group_map);
+                for i in (last_index+1)..(last_index + 1 + diff) {
+                    group_map.insert(
+                        (lower, upper),
+                        (vec![object.group_set[(i - 1) as usize].clone()], current_smoothing_group)
+                    );
+                }
+                eprintln!("AFTER: ");
+                eprintln!("    current_group_indices = {:?}", current_group_indices);
+                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
+                eprintln!("    group_map = {:?}", group_map);
+
+                // Jump to the new found groups.
+                current_group_indices = shape_entry.groups.clone();
+                current_groups = vec![];
+                for i in current_group_indices.iter() {
+                    current_groups.push(object.group_set[*i as usize].clone());
+                }
+                eprintln!("FILLING IN MISSING SMOOTHING GROUPS: ");
+                eprintln!("BEFORE: ");
+                eprintln!("    last_index = {:?}", last_index);
+                eprintln!("    diff = {:?}", diff);
+                eprintln!("    current_group_indices = {:?}", current_group_indices);
+                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
+                eprintln!("    group_map = {:?}", group_map);
+                eprintln!("    BEGIN LOOP.");
+                // Insert the missing smoothing groups.
+                let diff = shape_entry.smoothing_group - current_smoothing_group_index;
+                for i in current_smoothing_group_index..(current_smoothing_group_index + diff) {
+                    group_map.insert((lower, upper), (current_groups.clone(), object.smoothing_group_set[i as usize]));
+                    eprintln!("        UPDATE: group_map = {:?}", group_map);
+                }
+                eprintln!("    END LOOP.");
+                eprintln!("AFTER: ");
+                eprintln!("    current_group_indices = {:?}", current_group_indices);
+                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
+                eprintln!("    group_map = {:?}", group_map);
+
+                // Jump to the next nonempty smoothing group.
+                current_smoothing_group_index = shape_entry.smoothing_group;
+                current_smoothing_group = object.smoothing_group_set[current_smoothing_group_index as usize];
+
+            } else {
+                upper += 1;
+            }
+        }
+        eprintln!("GROUP MAP = {:?}", group_map);
+        group_map.insert((lower, upper), (current_groups, current_smoothing_group));
+
+        Self::new(group_map)
+    }
+}
+
 struct TextObjectCompositor { }
 
 impl TextObjectCompositor {
@@ -615,6 +676,11 @@ impl TextObjectCompositor {
         format!("{}", string)
     }
 
+    fn get_group_instructions(&self, object: &Object) -> BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)> {
+        let instructions = CompositorInstructions::generate(object);
+        instructions.instructions
+    }
+
     fn compose(&self, object: &Object) -> String {
         let mut string = String::new();
 
@@ -629,7 +695,7 @@ impl TextObjectCompositor {
         string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
         string += &format!("\n");
 
-        let object_group_map = object.get_group_map();
+        let object_group_map = self.get_group_instructions(object);
 
         let mut it = object_group_map.iter();
         let first_entry = it.next().unwrap();
