@@ -284,12 +284,12 @@ impl Object {
             current_groups.push(self.group_set[*i as usize].clone());
         }
 
-        let mut current_smoothing_group_idx = first_shape_entry.smoothing_group;
-        let mut current_smoothing_group = self.smoothing_group_set[current_smoothing_group_idx as usize];
+        let mut current_smoothing_group_index = first_shape_entry.smoothing_group;
+        let mut current_smoothing_group = self.smoothing_group_set[current_smoothing_group_index as usize];
 
         for shape_entry in it {
             if (shape_entry.groups != current_group_indices) || 
-                (shape_entry.smoothing_group != current_smoothing_group_idx) {
+                (shape_entry.smoothing_group != current_smoothing_group_index) {
 
                 // Save the current interval.
                 group_map.insert((lower, upper), (current_groups, current_smoothing_group));
@@ -301,9 +301,19 @@ impl Object {
                     current_groups.push(self.group_set[*i as usize].clone());
                 }
 
-                // Update the smoothing groups.
-                current_smoothing_group_idx = shape_entry.smoothing_group;
-                current_smoothing_group = self.smoothing_group_set[current_smoothing_group_idx as usize];
+                // We must check that any gaps in the
+                // group indices are accounted for. The shape set is in monotone increasing order
+                // in the element indices as well as the smoothing group indices and group indices.
+                // This is a consequence of the fact that vertices, elements, and groups are implicitly indexed
+                // in increasing order from the beginning to the end of a Wavefront OBJ file.
+                let diff = shape_entry.smoothing_group - current_smoothing_group_index;
+                for i in current_smoothing_group_index..(current_smoothing_group_index + diff) {
+                    group_map.insert((lower, upper), (current_groups.clone(), self.smoothing_group_set[i as usize]));
+                }
+
+                // Jump to the next nonempty smoothing group.
+                current_smoothing_group_index = shape_entry.smoothing_group;
+                current_smoothing_group = self.smoothing_group_set[current_smoothing_group_index as usize];
 
                 // Jump to the next interval.
                 lower = upper;
@@ -311,7 +321,7 @@ impl Object {
                 upper += 1;
             }
         }
-
+        eprintln!("group_map={:?}", group_map);
         group_map.insert((lower, upper), (current_groups, current_smoothing_group));
 
         group_map
@@ -602,45 +612,43 @@ impl TextObjectCompositor {
         let string = (interval.0..interval.1).fold(String::new(), |acc, i| {
             acc + &format!("{}\n", object.element_set[i as usize])
         });
-        format!("{}\n", string)
+        format!("{}", string)
     }
 
     fn compose(&self, object: &Object) -> String {
         let mut string = String::new();
 
         string += &self.compose_object_name(object);
-
         string += &self.compose_vertex_set(object);
         string += &format!("# {} vertices\n", object.vertex_set.len());
         string += &format!("\n");
-
         string += &self.compose_texture_vertex_set(object);
         string += &format!("# {} texture vertices\n", object.texture_vertex_set.len());
         string += &format!("\n");
-
         string += &self.compose_normal_vertex_set(object);
         string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
         string += &format!("\n");
 
         let object_group_map = object.get_group_map();
+
         let mut it = object_group_map.iter();
         let first_entry = it.next().unwrap();
 
         let mut current_interval = first_entry.0;
         let mut current_groups = &(first_entry.1).0;
         let mut current_smoothing_group = (first_entry.1).1;
-        println!("interval={:?}; groups={:?}; smoothing_group={:?}.", current_interval, current_groups, current_smoothing_group);
+
         string += &self.compose_groups(&current_groups);
         string += &self.compose_smoothing_group(current_smoothing_group);
         string += &self.compose_elements(object, *current_interval);
-        string += &format!("# {} elements \n", (current_interval.1 - current_interval.0));
+        string += &format!("# {} elements\n\n", (current_interval.1 - current_interval.0));
 
         for (interval, &(ref groups, smoothing_group)) in it {
+            current_interval = interval;
             if current_groups != groups {
                 // If the current set of groups is different from the current
                 // element's set of groups, we must place a new group statement
                 // to signify the change.
-                current_interval = interval;
                 current_groups = groups;
                 string += &self.compose_groups(&current_groups);
             }
@@ -651,16 +659,14 @@ impl TextObjectCompositor {
                 // If the current active smoothing group is different from the current
                 // element's smoothing group, we must place a new smoothing group statement
                 // to signify the change.
-                current_interval = interval;
                 current_smoothing_group = smoothing_group;
                 string += &self.compose_smoothing_group(current_smoothing_group);
             }
             // We continue with the current smoothing group. Recall that smoothing group 
             // statements are state setting; each successive element is associated with the 
             // current smoothing group until the next smoothing group statement.
-            println!("interval={:?}; groups={:?}; smoothing_group={:?}.", current_interval, current_groups, current_smoothing_group);        
             string += &self.compose_elements(object, *current_interval);
-            string += &format!("# {} elements \n", (current_interval.1 - current_interval.0));
+            string += &format!("# {} elements\n\n", (current_interval.1 - current_interval.0));
         }
 
         string
@@ -715,7 +721,7 @@ impl Compositor for TextObjectSetCompositor {
             string += &format!("#### END Object {}\n", i);
             string += &"\n";
         }
-
+        eprintln!("TEXT GENERATED: \n\n{}\n\n", string);
         string
     }
 }
