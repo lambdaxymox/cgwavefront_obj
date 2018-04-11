@@ -437,8 +437,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_object(&mut self,
         min_vertex_index:  &mut usize,  max_vertex_index:  &mut usize,
         min_texture_index: &mut usize,  max_texture_index: &mut usize,
-        min_normal_index:  &mut usize,  max_normal_index:  &mut usize
-    ) -> Result<Object, ParseError> {
+        min_normal_index:  &mut usize,  max_normal_index:  &mut usize) -> Result<Object, ParseError> {
         
         let object_name = try!(self.parse_object_name());
 
@@ -449,25 +448,37 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         let mut group_entry_table = vec![];
         let mut groups = vec![];
-        let mut min_element_group_index = 1;
-        let mut max_element_group_index = 1;
-        let mut min_group_index = 1;
-        let mut max_group_index = 1;
+        let mut min_element_group_index = 0;
+        let mut max_element_group_index = 0;
+        let mut min_group_index = 0;
+        let mut max_group_index = 0;
 
         let mut smoothing_group_entry_table = vec![];        
         let mut smoothing_groups = vec![];
-        let mut min_element_smoothing_group_index = 1;
-        let mut max_element_smoothing_group_index = 1;
-        let mut smoothing_group_index = 1;
+        let mut min_element_smoothing_group_index = 0;
+        let mut max_element_smoothing_group_index = 0;
+        let mut smoothing_group_index = 0;
 
         loop {
             match slice(&self.peek()) {
-                Some("g")  => {            
+                Some("g") if groups.is_empty() => {
+                    min_element_group_index = 1;
+                    max_element_group_index = 1;
+                    min_group_index = 1;
+                    max_group_index = 1;
+
+                    // Fetch the new groups.
+                    let amount_parsed = try!(self.parse_groups(&mut groups));
+                    // Update range of group indices.
+                    max_group_index += amount_parsed;
+                }
+                Some("g") => {
                     // Save the shape entry ranges for the current group.
                     group_entry_table.push((
                         (min_element_group_index, max_element_group_index), 
                         (min_group_index, max_group_index)
                     ));
+
                     // Fetch the new groups.
                     let amount_parsed = try!(self.parse_groups(&mut groups));
                     // Update range of group indices.
@@ -476,24 +487,46 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     // Update the element indices.
                     min_element_group_index = max_element_group_index;
                 }
+                Some("s") if smoothing_groups.is_empty() => {
+                    eprintln!("GOT `s` with empty smoothing_groups.");
+                    eprintln!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("BEFORE: smoothing_groups={:?}", smoothing_groups);
+                    min_element_smoothing_group_index = 1;
+                    max_element_smoothing_group_index = 1;
+
+                    // Fetch the next smoothing group.
+                    try!(self.parse_smoothing_group(&mut smoothing_groups));
+                    // Update the smoothing group index.
+                    smoothing_group_index = 1;
+                    eprintln!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("AFTER: smoothing_groups={:?}", smoothing_groups);
+                }
                 Some("s") => {
+                    eprintln!("GOT `s` with nonempty smoothing_groups.");
+                    eprintln!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("BEFORE: smoothing_groups={:?}", smoothing_groups);
                     // Save the shape entry ranges for the current smoothing group.
-                    println!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
-                    println!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
-                    println!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
                         smoothing_group_index
                     ));
+
                     // Fetch the next smoothing group.
-                    let amount_parsed = try!(self.parse_smoothing_group(&mut smoothing_groups));
+                    try!(self.parse_smoothing_group(&mut smoothing_groups));
                     // Update the smoothing group index.
-                    smoothing_group_index += amount_parsed;
+                    smoothing_group_index += 1;
                     //Update the element indices.
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
-                    println!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
-                    println!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
-                    println!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("AFTER: smoothing_groups={:?}", smoothing_groups);
                 }
                 Some("v")  => {
                     let vertex = try!(self.parse_vertex());
@@ -508,32 +541,58 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     normal_vertices.push(normal_vertex);
                 }
                 Some("p") | Some("l") | Some("f") => {
+                    eprintln!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("BEFORE: smoothing_groups={:?}", smoothing_groups);
+                    if groups.is_empty() {
+                        groups.push(Default::default());
+                        min_element_group_index = 1;
+                        max_element_group_index = 1;
+                        min_group_index = 1;
+                        max_group_index = 2;
+                    }
+                    
+                    if smoothing_groups.is_empty() {
+                        smoothing_groups.push(Default::default());
+                        min_element_smoothing_group_index = 1;
+                        max_element_smoothing_group_index = 1;
+                        smoothing_group_index = 1;
+                    }
+
                     let amount_parsed = try!(self.parse_elements(&mut elements));
                     max_element_group_index += amount_parsed;
                     max_element_smoothing_group_index += amount_parsed;
+                    eprintln!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("AFTER: smoothing_groups={:?}", smoothing_groups);
                 }
-                Some("\n") => { 
+                Some("\n") => {
                     try!(self.skip_one_or_more_newlines());
                 }
                 Some("o") | None => {
+                    eprintln!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("BEFORE: smoothing_groups={:?}", smoothing_groups);
                     // At the end of file or object, collect any remaining shapes.
                     group_entry_table.push((
                         (min_element_group_index, max_element_group_index), 
                         (min_group_index, max_group_index)
                     ));
                     min_element_group_index = max_element_group_index;
-                    println!("LAST SMOOTHING GROUP FOUND.");
-                    println!("BEFORE: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
-                    println!("BEFORE: smoothing_group_index={:?}", smoothing_group_index);
-                    println!("BEFORE: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
                         smoothing_group_index
                     ));
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
-                    println!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
-                    println!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
-                    println!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+
+                    eprintln!("AFTER: (min_element_smoothing_group_index={:?}, max_element_smoothing_group_index={:?})", min_element_smoothing_group_index, max_element_smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_index={:?}", smoothing_group_index);
+                    eprintln!("AFTER: smoothing_group_entry_table={:?}", smoothing_group_entry_table);
+                    eprintln!("AFTER: smoothing_groups={:?}", smoothing_groups);
                     break;
                 }
                 Some(other_st) => {
@@ -544,24 +603,12 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
             }
         }
 
-        if groups.is_empty() {
-            groups.push(Default::default());
-        }
-
-        if smoothing_groups.is_empty() {
-            smoothing_groups.push(SmoothingGroup::new(0));
-        }
-
         // At the end of file, collect any remaining shapes.
         // Fill in the shape entries for the current group.
         let mut shape_entries = vec![];
         self.parse_shape_entries(
             &mut shape_entries, &elements, &group_entry_table, &smoothing_group_entry_table
         );
-
-        println!("{:?}", groups);
-        println!("{:?}", smoothing_groups);
-        println!("{:?}", shape_entries);
 
         *min_vertex_index  += vertices.len();
         *max_vertex_index  += vertices.len();
