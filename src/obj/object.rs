@@ -493,18 +493,23 @@ impl ObjectCompositor for DisplayObjectCompositor {
     } 
 }
 
+enum GroupingStatement {
+    G(Vec<Group>),
+    S(SmoothingGroup),
+}
+
 struct CompositorInstructions {
-    instructions: BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)>,
+    instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>>,
 }
 
 impl CompositorInstructions {
-    fn new(instructions: BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)>) -> Self {
+    fn new(instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>>) -> Self {
         Self { instructions: instructions }
     }
 
     fn generate(object: &Object) -> CompositorInstructions {
         let mut group_map = BTreeMap::new();
-
+        /*
         if object.shape_set.is_empty() {
             return Self::new(group_map);
         }
@@ -616,7 +621,7 @@ impl CompositorInstructions {
         }
         eprintln!("GROUP MAP = {:?}", group_map);
         group_map.insert((lower, upper), (current_groups, current_smoothing_group));
-
+        */
         Self::new(group_map)
     }
 }
@@ -676,9 +681,18 @@ impl TextObjectCompositor {
         format!("{}", string)
     }
 
-    fn get_group_instructions(&self, object: &Object) -> BTreeMap<(u32, u32), (Vec<Group>, SmoothingGroup)> {
+    fn get_group_instructions(&self, object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
         let instructions = CompositorInstructions::generate(object);
         instructions.instructions
+    }
+
+    fn compose_instructions(&self, instructions: &[GroupingStatement]) -> String {
+        instructions.iter().fold(String::new(), |acc, statement| {
+            match *statement {
+                GroupingStatement::G(ref groups)      => acc + &self.compose_groups(&groups),
+                GroupingStatement::S(smoothing_group) => acc + &self.compose_smoothing_group(smoothing_group)
+            }
+        })
     }
 
     fn compose(&self, object: &Object) -> String {
@@ -695,44 +709,11 @@ impl TextObjectCompositor {
         string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
         string += &format!("\n");
 
-        let object_group_map = self.get_group_instructions(object);
-
-        let mut it = object_group_map.iter();
-        let first_entry = it.next().unwrap();
-
-        let mut current_interval = first_entry.0;
-        let mut current_groups = &(first_entry.1).0;
-        let mut current_smoothing_group = (first_entry.1).1;
-
-        string += &self.compose_groups(&current_groups);
-        string += &self.compose_smoothing_group(current_smoothing_group);
-        string += &self.compose_elements(object, *current_interval);
-        string += &format!("# {} elements\n\n", (current_interval.1 - current_interval.0));
-
-        for (interval, &(ref groups, smoothing_group)) in it {
-            current_interval = interval;
-            if current_groups != groups {
-                // If the current set of groups is different from the current
-                // element's set of groups, we must place a new group statement
-                // to signify the change.
-                current_groups = groups;
-                string += &self.compose_groups(&current_groups);
-            }
-            // We continue with the current group. Recall that group statements
-            // are state setting; each successive element is associated with the 
-            // current group until the next group statement.
-            if current_smoothing_group != smoothing_group {
-                // If the current active smoothing group is different from the current
-                // element's smoothing group, we must place a new smoothing group statement
-                // to signify the change.
-                current_smoothing_group = smoothing_group;
-                string += &self.compose_smoothing_group(current_smoothing_group);
-            }
-            // We continue with the current smoothing group. Recall that smoothing group 
-            // statements are state setting; each successive element is associated with the 
-            // current smoothing group until the next smoothing group statement.
-            string += &self.compose_elements(object, *current_interval);
-            string += &format!("# {} elements\n\n", (current_interval.1 - current_interval.0));
+        let group_instructions = self.get_group_instructions(object);
+        for (interval, instructions) in group_instructions.iter() {
+            string += &self.compose_instructions(&instructions);
+            string += &self.compose_elements(object, *interval);
+            string += &format!("# {} elements\n\n", (interval.1 - interval.0));
         }
 
         string
