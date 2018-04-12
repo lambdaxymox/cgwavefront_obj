@@ -460,8 +460,7 @@ impl DisplayObjectCompositor {
     fn new() -> Self { Self {} }
 
     fn compose_set<T: fmt::Display>(&self, set: &[T], name: &str) -> String {
-        let mut string = String::new();
-        string += &format!("    {} set:\n", name);
+        let mut string = String::from(format!("    {} set:\n", name));
         if set.is_empty() {
             string += &format!("        data: []\n");
         } else {
@@ -469,6 +468,7 @@ impl DisplayObjectCompositor {
             string += &format!("        data: [({}) ... ({})]\n", set[0], set[length-1]);
         }
         string += &format!("        length: {}\n", set.len());
+
         string           
     }
 
