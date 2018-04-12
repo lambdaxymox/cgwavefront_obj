@@ -3363,3 +3363,68 @@ fn test_parse_object_set_should_parse_shape_entries() {
     }
 }
 
+#[test]
+fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(test.data.chars());
+        let result_set = parser.parse().unwrap();
+        for result in result_set.iter() { 
+            for (shape, next_shape) in result.shape_set.iter().zip(result.shape_set[1..].iter()) {
+                assert!(shape.element <= next_shape.element);
+            }
+        }
+    }    
+}
+
+#[test]
+fn test_parse_object_every_element_belongs_to_a_group() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(test.data.chars());
+        let result_set = parser.parse().unwrap();
+        for result in result_set.iter() { 
+            for shape in result.shape_set.iter() {
+                assert!(!shape.groups.is_empty());
+            }
+        }
+    }      
+}
+
+#[test]
+fn test_parse_object_every_element_group_exists() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(test.data.chars());
+        let result_set = parser.parse().unwrap();
+        for result in result_set.iter() { 
+            for shape in result.shape_set.iter() {
+                assert!(shape.groups.iter().all(|&group_index| {
+                    ((group_index  as usize)) > 0 &&
+                    ((group_index  as usize)) <= result.group_set.len()
+                }));
+            }
+        }
+    }      
+}
+
+#[test]
+fn test_parse_object_every_element_smoothing_group_exists() {
+    let tests = test_cases(SAMPLE_DATA);
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(test.data.chars());
+        let result_set = parser.parse().unwrap();
+        for result in result_set.iter() { 
+            for shape in result.shape_set.iter() {
+                assert!(
+                    ((shape.smoothing_group as usize) > 0) &&
+                    ((shape.smoothing_group as usize) <= result.smoothing_group_set.len())
+                );
+            }
+        }
+    }      
+}
