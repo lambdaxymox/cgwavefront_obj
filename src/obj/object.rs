@@ -552,9 +552,11 @@ impl CompositorInstructions {
         // can determine which groups are missing and fill them in.
         let mut current_entry = &object.shape_set[0];
         let mut min_element_index = 1;
-        for (max_element_index, shape_entry) in object.shape_set.iter().enumerate().map(|(i, s)| (i+1, s)) {
+        let mut max_element_index = 1;
+        for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
+                // We have cross an group or smoothing group boundary.
 
                 // Which groups and smoothing groups are missing? There is ambiguity in 
                 // ordering any possible missing groups and smoothing groups. We choose to 
@@ -594,7 +596,10 @@ impl CompositorInstructions {
                 // Continue with the next interval.
                 current_entry = shape_entry;
                 min_element_index = max_element_index;
-            } 
+            } else {
+                // We are in the same group interval.
+                max_element_index += 1;
+            }
         }
 
         // It is possible that there are missing groups that after before the 
