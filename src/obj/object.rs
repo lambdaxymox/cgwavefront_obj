@@ -603,13 +603,13 @@ impl CompositorInstructions {
         let final_group = object.shape_set[0].groups[0];
         let final_smoothing_group = object.shape_set[0].smoothing_group;
         let mut final_statements = vec![];
-        for group_index in 1..initial_group {
+        for group_index in 1..final_group {
             final_statements.push(GroupingStatement::G(vec![
                 object.group_set[(group_index - 1) as usize].clone()
             ]));
         }
 
-        for smoothing_group_index in 1..initial_smoothing_group {
+        for smoothing_group_index in 1..final_smoothing_group {
             final_statements.push(GroupingStatement::S(
                 object.smoothing_group_set[(smoothing_group_index - 1) as usize]
             ));
@@ -622,6 +622,10 @@ impl CompositorInstructions {
 
     fn generate_found_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
         let mut found_groups = BTreeMap::new();
+
+
+        let initial_statements = vec![];
+        found_groups.insert((1,1), initial_statements);
 
         found_groups
     }
