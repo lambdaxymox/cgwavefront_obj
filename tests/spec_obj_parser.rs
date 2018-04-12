@@ -403,7 +403,7 @@ fn prop_parser_satisfies_specification() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+*/
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
     fn property(machine: Machine) -> bool {
@@ -455,7 +455,7 @@ fn prop_parse_object_set_should_parse_normal_vertices() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-
+/*
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
     fn property(machine: Machine) -> bool {
