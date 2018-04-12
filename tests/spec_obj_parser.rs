@@ -474,6 +474,7 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
     fn property(machine: Machine) -> bool {
         let result_set = machine.actual().parse().unwrap();
         let expected_set = machine.model().parse().unwrap();
+        eprintln!("TEXT GENERATED: \n\n{}\n\n", machine.model());
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             eprintln!("RESULT: \n{:?}\n", result.smoothing_group_set);

@@ -722,7 +722,7 @@ impl Compositor for TextObjectSetCompositor {
             string += &format!("#### END Object {}\n", i);
             string += &"\n";
         }
-        eprintln!("TEXT GENERATED: \n\n{}\n\n", string);
+
         string
     }
 }
