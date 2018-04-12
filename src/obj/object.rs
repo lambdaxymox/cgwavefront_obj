@@ -611,6 +611,8 @@ impl CompositorInstructions {
         }
         eprintln!("EXITING LOOP.");
 
+        // The last interval of empty groups and smoothing groups
+        // lies off the end of the element list.
         min_element_index = max_element_index;
 
         // It is possible that there are missing groups that after before the 
@@ -680,6 +682,8 @@ impl CompositorInstructions {
 
         }
 
+        // The last interval of empty groups and smoothing groups
+        // lies off the end of the element list.
         min_element_index = max_element_index;
 
         let final_statements = vec![];
@@ -792,20 +796,44 @@ impl TextObjectCompositor {
 
         string += &self.compose_object_name(object);
         string += &self.compose_vertex_set(object);
-        string += &format!("# {} vertices\n", object.vertex_set.len());
+
+        if object.vertex_set.len() == 1 { 
+            string += &format!("# {} vertex\n", object.vertex_set.len());
+        } else {
+            string += &format!("# {} vertices\n", object.vertex_set.len());
+        }
+
         string += &format!("\n");
+
         string += &self.compose_texture_vertex_set(object);
-        string += &format!("# {} texture vertices\n", object.texture_vertex_set.len());
+
+        if object.texture_vertex_set.len() == 1 { 
+            string += &format!("# {} texture vertex\n", object.texture_vertex_set.len());
+        } else {
+            string += &format!("# {} texture vertices\n", object.texture_vertex_set.len());
+        }
+
         string += &format!("\n");
+
         string += &self.compose_normal_vertex_set(object);
-        string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
+
+        if object.normal_vertex_set.len() == 1 {
+            string += &format!("# {} normal vertex\n", object.normal_vertex_set.len());
+        } else {
+            string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
+        }
+
         string += &format!("\n");
 
         let group_instructions = self.get_group_instructions(object);
         for (interval, instructions) in group_instructions.iter() {
             string += &self.compose_instructions(&instructions);
             string += &self.compose_elements(object, *interval);
-            string += &format!("# {} elements\n\n", (interval.1 - interval.0));
+            if interval.1 - interval.0 == 1 {
+                string += &format!("# {} element\n\n", (interval.1 - interval.0));
+            } else {
+                string += &format!("# {} elements\n\n", (interval.1 - interval.0));
+            }
         }
 
         string
