@@ -113,7 +113,63 @@ fn test_cases() -> TestSet {
                         vec![ShapeEntry::new(1, &vec![1], 1)],
                     )
                 ])
-            }
+            },
+            Test {
+                data: String::from(r"
+                    # diamond.obj
+
+                    g Object001
+
+                    v 0.000000E+00 0.000000E+00 78.0000
+                    v 45.0000 45.0000 0.000000E+00
+                    v 45.0000 -45.0000 0.000000E+00
+                    v -45.0000 -45.0000 0.000000E+00
+                    v -45.0000 45.0000 0.000000E+00
+                    v 0.000000E+00 0.000000E+00 -78.0000
+
+                    f     1 2 3
+                    f     1 3 4
+                    f     1 4 5
+                    f     1 5 2
+                    f     6 5 4
+                    f     6 4 3
+                    f     6 3 2
+                    f     6 2 1
+                    f     6 1 5
+                "),
+                expected: ObjectSet::new(vec![
+                    Object::new(
+                        String::from(""),
+                        vec![
+                            Vertex::new(  0.0,   0.0, 78.0, 1.0), Vertex::new( 45.0,  45.0,   0.0, 1.0),
+                            Vertex::new( 45.0, -45.0,  0.0, 1.0), Vertex::new(-45.0, -45.0,   0.0, 1.0),
+                            Vertex::new(-45.0,  45.0,  0.0, 1.0), Vertex::new(  0.0,   0.0, -78.0, 1.0),
+                        ],
+                        vec![],
+                        vec![],
+                        vec![Group::new("Object001")],
+                        vec![SmoothingGroup::new(0)],
+                        vec![
+                            Element::Face(VTNIndex::V(1), VTNIndex::V(2), VTNIndex::V(3)),
+                            Element::Face(VTNIndex::V(1), VTNIndex::V(3), VTNIndex::V(4)),
+                            Element::Face(VTNIndex::V(1), VTNIndex::V(4), VTNIndex::V(5)),
+                            Element::Face(VTNIndex::V(1), VTNIndex::V(5), VTNIndex::V(2)),
+                            Element::Face(VTNIndex::V(6), VTNIndex::V(5), VTNIndex::V(4)),
+                            Element::Face(VTNIndex::V(6), VTNIndex::V(4), VTNIndex::V(3)),
+                            Element::Face(VTNIndex::V(6), VTNIndex::V(3), VTNIndex::V(2)),
+                            Element::Face(VTNIndex::V(6), VTNIndex::V(2), VTNIndex::V(1)),
+                            Element::Face(VTNIndex::V(6), VTNIndex::V(1), VTNIndex::V(5)),
+                        ], 
+                        vec![
+                            ShapeEntry::new(1, &vec![1], 1), ShapeEntry::new(2, &vec![1], 1),
+                            ShapeEntry::new(3, &vec![1], 1), ShapeEntry::new(4, &vec![1], 1),
+                            ShapeEntry::new(5, &vec![1], 1), ShapeEntry::new(6, &vec![1], 1),
+                            ShapeEntry::new(7, &vec![1], 1), ShapeEntry::new(8, &vec![1], 1),
+                            ShapeEntry::new(9, &vec![1], 1),
+                        ],
+                    )
+                ])
+            },
         ],
     }
 }
