@@ -19,31 +19,7 @@ struct Test {
     expected: ObjectSet,
 }
 
-struct TestSet { 
-    data: Vec<Test>,
-}
-
-impl TestSet {
-    fn iter(&self) -> TestSetIter {
-        TestSetIter {
-            inner: self.data.iter(),
-        }
-    }
-}
-
-struct TestSetIter<'a> {
-    inner: slice::Iter<'a, Test>,
-}
-
-impl<'a> Iterator for TestSetIter<'a> {
-    type Item = &'a Test;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
-}
-
-fn test_cases(file_path: &str) -> TestSet {
+fn test_case(file_path: &str) -> Test {
     let mut file = File::open(file_path).unwrap();
     let mut data = String::new();
     file.read_to_string(&mut data).unwrap();
@@ -3172,259 +3148,217 @@ fn test_cases(file_path: &str) -> TestSet {
         ]
     );
     let expected = ObjectSet::new(vec![builder.build()]);
-    TestSet {
-        data: vec![
-            Test {
-                data: data,
-                expected: expected,
-            },
-        ],
+    Test {
+        data: data,
+        expected: expected,
     }
 }
 
 #[test]
 fn test_parse_object_set() {
-    let tests = test_cases(SAMPLE_DATA);
-    
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result = parser.parse().unwrap();
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result = parser.parse().unwrap();
 
-        println!("{}", result);
-        assert_eq!(result, test.expected);
-    }
+    assert_eq!(result, test.expected);
 }
 
 #[test]
 fn test_parse_object_set_should_parse_objects() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-            assert_eq!(result.name, expected.name);
-            assert_eq!(result.vertex_set, expected.vertex_set);
-            assert_eq!(result.texture_vertex_set, expected.texture_vertex_set);
-            assert_eq!(result.normal_vertex_set, expected.normal_vertex_set);
-            assert_eq!(result.group_set, expected.group_set);
-            assert_eq!(result.smoothing_group_set, expected.smoothing_group_set);
-            assert_eq!(result.element_set, expected.element_set);
-            assert_eq!(result.shape_set, expected.shape_set);
-        }
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.name, expected.name);
+        assert_eq!(result.vertex_set, expected.vertex_set);
+        assert_eq!(result.texture_vertex_set, expected.texture_vertex_set);
+        assert_eq!(result.normal_vertex_set, expected.normal_vertex_set);
+        assert_eq!(result.group_set, expected.group_set);
+        assert_eq!(result.smoothing_group_set, expected.smoothing_group_set);
+        assert_eq!(result.element_set, expected.element_set);
+        assert_eq!(result.shape_set, expected.shape_set);
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_object_names() {
-    let tests = test_cases(SAMPLE_DATA);
-
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
         
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-            assert_eq!(result.name, expected.name);
-        }
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.name, expected.name);
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_vertices() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-            
-            assert_eq!(result.vertex_set.len(), expected.vertex_set.len(), "Length mismatch.");
-            for (result_v, expected_v) in 
-                result.vertex_set.iter().zip(expected.vertex_set.iter()) {
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {  
+        assert_eq!(result.vertex_set.len(), expected.vertex_set.len(), "Length mismatch.");
+        for (result_v, expected_v) in 
+            result.vertex_set.iter().zip(expected.vertex_set.iter()) {
                 
-                assert_eq!(result_v, expected_v);
-            }
+            assert_eq!(result_v, expected_v);
         }
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_texture_vertices() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-            
-            assert_eq!(result.texture_vertex_set.len(), expected.texture_vertex_set.len(), "Length mismatch.");
-            for (result_tv, expected_tv) in 
-                result.texture_vertex_set.iter().zip(expected.texture_vertex_set.iter()) {
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.texture_vertex_set.len(), expected.texture_vertex_set.len(), "Length mismatch.");
+        for (result_tv, expected_tv) in 
+            result.texture_vertex_set.iter().zip(expected.texture_vertex_set.iter()) {
                 
-                assert_eq!(result_tv, expected_tv);
-            }
+            assert_eq!(result_tv, expected_tv);
         }
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_normal_vertices() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-
-            assert_eq!(result.normal_vertex_set.len(), expected.normal_vertex_set.len(), "Length mismatch.");
-            for (result_nv, expected_nv) in 
-                result.normal_vertex_set.iter().zip(expected.normal_vertex_set.iter()) {
-                
-                assert_eq!(result.vertex_set.len(), expected.vertex_set.len(), "Length mismatch.");
-                assert_eq!(result_nv, expected_nv);
-            }
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.normal_vertex_set.len(), expected.normal_vertex_set.len(), "Length mismatch.");
+        for (result_nv, expected_nv) in 
+            result.normal_vertex_set.iter().zip(expected.normal_vertex_set.iter()) {
+            
+            assert_eq!(result.vertex_set.len(), expected.vertex_set.len(), "Length mismatch.");
+            assert_eq!(result_nv, expected_nv);
         }
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_groups() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-
-            assert_eq!(result.group_set.len(), expected.group_set.len(), "Length mismatch.");
-            for (result_g, expected_g) in 
-                result.group_set.iter().zip(expected.group_set.iter()) {
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.group_set.len(), expected.group_set.len(), "Length mismatch.");
+        for (result_g, expected_g) in 
+            result.group_set.iter().zip(expected.group_set.iter()) {
                 
-                assert_eq!(result_g, expected_g);
-            }
+            assert_eq!(result_g, expected_g);
         }
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_smoothing_groups() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-
-            assert_eq!(result.smoothing_group_set.len(), expected.smoothing_group_set.len(), "Length mismatch.");
-            for (result_sg, expected_sg) in 
-                result.smoothing_group_set.iter().zip(expected.smoothing_group_set.iter()) {
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.smoothing_group_set.len(), expected.smoothing_group_set.len(), "Length mismatch.");
+        for (result_sg, expected_sg) in 
+            result.smoothing_group_set.iter().zip(expected.smoothing_group_set.iter()) {
                 
-                assert_eq!(result_sg, expected_sg);
-            }
+            assert_eq!(result_sg, expected_sg);
         }
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_elements() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-
-            assert_eq!(result.element_set.len(), expected.element_set.len(), "Length mismatch.");
-            for (result_elem, expected_elem) in 
-                result.element_set.iter().zip(expected.element_set.iter()) {
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.element_set.len(), expected.element_set.len(), "Length mismatch.");
+        for (result_elem, expected_elem) in 
+            result.element_set.iter().zip(expected.element_set.iter()) {
                 
-                assert_eq!(result_elem, expected_elem);
-            }
+            assert_eq!(result_elem, expected_elem);
         }
     }
 }
 
 #[test]
 fn test_parse_object_set_should_parse_shape_entries() {
-    let tests = test_cases(SAMPLE_DATA);
-
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for (result, expected) in result_set.iter().zip(test.expected.iter()) {
-            
-            assert_eq!(result.shape_set.len(), expected.shape_set.len(), "Length mismatch.");
-            for (result_sh, expected_sh) in 
-                result.shape_set.iter().zip(expected.shape_set.iter()) {
-                
-                assert_eq!(result_sh, expected_sh);
-            }
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
+    
+    for (result, expected) in result_set.iter().zip(test.expected.iter()) {
+        assert_eq!(result.shape_set.len(), expected.shape_set.len(), "Length mismatch.");
+        for (result_sh, expected_sh) in 
+            result.shape_set.iter().zip(expected.shape_set.iter()) {
+  
+            assert_eq!(result_sh, expected_sh);
         }
     }
 }
 
 #[test]
 fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for result in result_set.iter() { 
-            for (shape, next_shape) in result.shape_set.iter().zip(result.shape_set[1..].iter()) {
-                assert!(shape.element <= next_shape.element);
-            }
+    for result in result_set.iter() { 
+        for (shape, next_shape) in result.shape_set.iter().zip(result.shape_set[1..].iter()) {
+            assert!(shape.element <= next_shape.element);
         }
-    }    
+    }  
 }
 
 #[test]
 fn test_parse_object_every_element_belongs_to_a_group() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for result in result_set.iter() { 
-            for shape in result.shape_set.iter() {
-                assert!(!shape.groups.is_empty());
-            }
+    for result in result_set.iter() { 
+        for shape in result.shape_set.iter() {
+            assert!(!shape.groups.is_empty());
         }
-    }      
+    }
 }
 
 #[test]
 fn test_parse_object_every_element_group_exists() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for result in result_set.iter() { 
-            for shape in result.shape_set.iter() {
-                assert!(shape.groups.iter().all(|&group_index| {
-                    ((group_index  as usize)) > 0 &&
-                    ((group_index  as usize)) <= result.group_set.len()
-                }));
-            }
+    for result in result_set.iter() { 
+        for shape in result.shape_set.iter() {
+            assert!(shape.groups.iter().all(|&group_index| {
+                ((group_index  as usize)) > 0 &&
+                ((group_index  as usize)) <= result.group_set.len()
+            }));
         }
-    }      
+    }
 }
 
 #[test]
 fn test_parse_object_every_element_smoothing_group_exists() {
-    let tests = test_cases(SAMPLE_DATA);
+    let test = test_case(SAMPLE_DATA);
+    let mut parser = Parser::new(test.data.chars());
+    let result_set = parser.parse().unwrap();
 
-    for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
-        let result_set = parser.parse().unwrap();
-        for result in result_set.iter() { 
-            for shape in result.shape_set.iter() {
-                assert!(
-                    ((shape.smoothing_group as usize) > 0) &&
-                    ((shape.smoothing_group as usize) <= result.smoothing_group_set.len())
-                );
-            }
+    for result in result_set.iter() { 
+        for shape in result.shape_set.iter() {
+            assert!(
+                ((shape.smoothing_group as usize) > 0) &&
+                ((shape.smoothing_group as usize) <= result.smoothing_group_set.len())
+            );
         }
-    }      
+    }   
 }
