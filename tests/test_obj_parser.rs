@@ -6,7 +6,6 @@ use wavefront::obj::{
 };
 use wavefront::obj::Parser;
 
-use std::slice;
 use std::fs::File;
 use std::io::Read;
 
