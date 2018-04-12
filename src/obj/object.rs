@@ -555,9 +555,6 @@ impl CompositorInstructions {
         let mut max_element_index = 1;
         eprintln!("\nENTERING LOOP.");
         for shape_entry in object.shape_set.iter() {
-            eprintln!("    BEGIN LOOP STEP.");
-            eprintln!("    (min = {}, max = {})", min_element_index, max_element_index);
-            eprintln!("    missing_groups = {:?}", missing_groups);
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
                 // We have cross an group or smoothing group boundary.
@@ -604,37 +601,39 @@ impl CompositorInstructions {
             
             // We have processed this group element.
             max_element_index += 1;
-
-            eprintln!("    END LOOP STEP.");
-            eprintln!("    (min = {}, max = {})", min_element_index, max_element_index);
-            eprintln!("    missing_groups = {:?}", missing_groups);
         }
         eprintln!("EXITING LOOP.");
+
+        eprintln!("(min = {}, max = {})", min_element_index, max_element_index);
 
         // The last interval of empty groups and smoothing groups
         // lies off the end of the element list.
         min_element_index = max_element_index;
+        eprintln!("(min = {}, max = {})", min_element_index, max_element_index);
 
         // It is possible that there are missing groups that after before the 
         // final groups and smoothing groups that appear in the shape set. We must calculate
         // these last for otherwise we would miss them when filling in the table.
-        let final_group = object.shape_set[0].groups[0];
-        let final_smoothing_group = object.shape_set[0].smoothing_group;
+        let final_shape_entry = &object.shape_set[(min_element_index - 1) - 1];
+        let final_group = final_shape_entry.groups[final_shape_entry.groups.len() - 1];
+        let final_smoothing_group = final_shape_entry.smoothing_group;
         let mut final_statements = vec![];
-        for group_index in 1..final_group {
+        for group_index in (final_group + 1)..((object.group_set.len() + 1) as u32) {
             final_statements.push(GroupingStatement::G(vec![
                 object.group_set[(group_index - 1) as usize].clone()
             ]));
         }
 
-        for smoothing_group_index in 1..final_smoothing_group {
+        for smoothing_group_index 
+            in (final_smoothing_group + 1)..((object.smoothing_group_set.len() + 1) as u32) {
+            
             final_statements.push(GroupingStatement::S(
                 object.smoothing_group_set[(smoothing_group_index - 1) as usize]
             ));
         }
 
         missing_groups.insert((min_element_index as u32, min_element_index as u32), final_statements);
-
+        eprintln!("missing_groups = {:?}", missing_groups);
         missing_groups
     }
 
@@ -688,7 +687,7 @@ impl CompositorInstructions {
 
         let final_statements = vec![];
         found_groups.insert((min_element_index, min_element_index), final_statements);
-
+        eprintln!("found_groups = {:?}", found_groups);
         found_groups
     }
 
@@ -898,7 +897,6 @@ impl Compositor for TextObjectSetCompositor {
 mod compositor_tests {
     use super::CompositorInstructions;
     use super::*;
-    use std::collections::BTreeMap;
     use std::iter::FromIterator;
 
 
