@@ -553,7 +553,11 @@ impl CompositorInstructions {
         let mut current_entry = &object.shape_set[0];
         let mut min_element_index = 1;
         let mut max_element_index = 1;
+        eprintln!("\nENTERING LOOP.");
         for shape_entry in object.shape_set.iter() {
+            eprintln!("    BEGIN LOOP STEP.");
+            eprintln!("    (min = {}, max = {})", min_element_index, max_element_index);
+            eprintln!("    missing_groups = {:?}", missing_groups);
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
                 // We have cross an group or smoothing group boundary.
@@ -596,11 +600,18 @@ impl CompositorInstructions {
                 // Continue with the next interval.
                 current_entry = shape_entry;
                 min_element_index = max_element_index;
-            } else {
-                // We are in the same group interval.
-                max_element_index += 1;
-            }
+            } 
+            
+            // We have processed this group element.
+            max_element_index += 1;
+
+            eprintln!("    END LOOP STEP.");
+            eprintln!("    (min = {}, max = {})", min_element_index, max_element_index);
+            eprintln!("    missing_groups = {:?}", missing_groups);
         }
+        eprintln!("EXITING LOOP.");
+
+        min_element_index = max_element_index;
 
         // It is possible that there are missing groups that after before the 
         // final groups and smoothing groups that appear in the shape set. We must calculate
@@ -662,10 +673,14 @@ impl CompositorInstructions {
 
                 current_entry = shape_entry;
                 min_element_index = max_element_index;
-            } else {
-                max_element_index += 1;
             }
+
+            // We have processed this group element.
+            max_element_index += 1;
+
         }
+
+        min_element_index = max_element_index;
 
         let final_statements = vec![];
         found_groups.insert((min_element_index, min_element_index), final_statements);
@@ -878,6 +893,9 @@ mod compositor_tests {
 
             g  Group0
             g  Group1
+            #### Equivalently,
+            #### g Group2,
+            #### s  0
             s  0
             g  Group2
             s  1
@@ -904,13 +922,15 @@ mod compositor_tests {
                 vec![ShapeEntry::new(1, &vec![4], 2)],
             ),
             expected: CompositorInstructions::new(FromIterator::from_iter(
-                vec![((1, 2), vec![
+                vec![((1, 1), vec![
                         GroupingStatement::G(vec![Group::new("Group0")]),
                         GroupingStatement::G(vec![Group::new("Group1")]),
-                        GroupingStatement::S(SmoothingGroup::new(0)),
                         GroupingStatement::G(vec![Group::new("Group2")]),
-                        GroupingStatement::S(SmoothingGroup::new(1)),
-                        GroupingStatement::G(vec![Group::new("Group3")])
+                        GroupingStatement::S(SmoothingGroup::new(0)),                
+                    ]),
+                    ((1, 2), vec![
+                        GroupingStatement::G(vec![Group::new("Group3")]),
+                        GroupingStatement::S(SmoothingGroup::new(1))
                     ]),
                     ((2, 2), vec![
                         GroupingStatement::G(vec![Group::new("Group4")]),
