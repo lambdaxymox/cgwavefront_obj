@@ -459,9 +459,22 @@ struct DisplayObjectCompositor { }
 impl DisplayObjectCompositor {
     fn new() -> Self { Self {} }
 
+    fn compose_set<T: fmt::Display>(&self, set: &[T], name: &str) -> String {
+        let mut string = String::new();
+        string += &format!("    {} set:\n", name);
+        if set.is_empty() {
+            string += &format!("        data: []\n");
+        } else {
+            let length = set.len();
+            string += &format!("        data: [({}) ... ({})]\n", set[0], set[length-1]);
+        }
+        string += &format!("        length: {}\n", set.len());
+        string           
+    }
+
     fn compose(&self, object: &Object) -> String {
         let mut string = String::from("Object {\n");
-    
+        /*
         macro_rules! compose_set {
             ($set:expr, $out:ident, $name:expr) => {
                 $out += &format!("    {} set:\n", $name);
@@ -475,16 +488,23 @@ impl DisplayObjectCompositor {
                 $out += &format!("        length: {}\n", $set.len());            
             }
         };
-
+        */
         string += &format!("    name: {}\n", object.name);
 
+        string += &self.compose_set(&object.vertex_set, "vertex");
+        string += &self.compose_set(&object.texture_vertex_set, "texture vertex");
+        string += &self.compose_set(&object.normal_vertex_set, "normal vertex");
+        string += &self.compose_set(&object.group_set, "group");
+        string += &self.compose_set(&object.smoothing_group_set, "smoothing group");
+        string += &self.compose_set(&object.element_set, "element");
+        /*
         compose_set!(object.vertex_set, string, "vertex");
         compose_set!(object.texture_vertex_set, string, "texture vertex");
         compose_set!(object.normal_vertex_set, string, "normal vertex");
         compose_set!(object.group_set, string, "group");
         compose_set!(object.smoothing_group_set, string, "smoothing group");
         compose_set!(object.element_set, string, "element");
-
+        */
         string += &format!("}}\n");
 
         string       
