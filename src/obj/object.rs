@@ -623,9 +623,47 @@ impl CompositorInstructions {
     fn generate_found_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
         let mut found_groups = BTreeMap::new();
 
+        let mut min_element_index = 1;
+        let mut max_element_index = 1;
 
         let initial_statements = vec![];
-        found_groups.insert((1,1), initial_statements);
+        found_groups.insert((min_element_index, max_element_index), initial_statements);
+
+        let mut current_entry = &object.shape_set[0];
+        for shape_entry in object.shape_set.iter() {
+            if shape_entry.groups != current_entry.groups || 
+                shape_entry.smoothing_group != current_entry.smoothing_group {
+
+                let mut statements = vec![];
+
+                // Are the groups different?
+                if shape_entry.groups != current_entry.groups {
+                    let mut new_groups = vec![];
+                    for group_index in current_entry.groups.iter() {
+                        new_groups.push(object.group_set[(group_index - 1) as usize].clone());
+                    }
+
+                    statements.push(GroupingStatement::G(new_groups));
+                }
+
+                // Are the smoothing groups different?
+                if shape_entry.smoothing_group != current_entry.smoothing_group {
+                    statements.push(GroupingStatement::S(
+                        object.smoothing_group_set[current_entry.smoothing_group as usize])
+                    );
+                }
+
+                found_groups.insert((min_element_index, max_element_index), statements);
+
+                current_entry = shape_entry;
+                min_element_index = max_element_index;
+            } else {
+                max_element_index += 1;
+            }
+        }
+
+        let final_statements = vec![];
+        found_groups.insert((min_element_index, min_element_index), final_statements);
 
         found_groups
     }
