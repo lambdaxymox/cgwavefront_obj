@@ -493,11 +493,13 @@ impl ObjectCompositor for DisplayObjectCompositor {
     } 
 }
 
+#[derive(Clone, Debug)]
 enum GroupingStatement {
     G(Vec<Group>),
     S(SmoothingGroup),
 }
 
+#[derive(Clone, Debug)]
 struct CompositorInstructions {
     instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>>,
 }
@@ -508,121 +510,58 @@ impl CompositorInstructions {
     }
 
     fn generate(object: &Object) -> CompositorInstructions {
-        let mut group_map = BTreeMap::new();
-        /*
-        if object.shape_set.is_empty() {
-            return Self::new(group_map);
-        }
+        // Initialize the groups and smoothing groups.
+        let mut current_entry = &object.shape_set[0];
+        let mut min_element_index = 1;
+        let mut intervals = vec![];
+        // Find the intervals.
+        for (max_element_index, shape_entry) in object.shape_set.iter().enumerate() {
+            if shape_entry.groups != current_entry.groups || 
+                shape_entry.smoothing_group != current_entry.smoothing_group {
 
-        let mut it = object.shape_set.iter();
-        let mut lower = 1;
-        let mut upper = 1;
-        let first_shape_entry = it.next().unwrap();
-
-        let mut current_group_indices = first_shape_entry.groups.clone();
-        let mut current_groups = vec![];
-        for i in current_group_indices.iter() {
-            current_groups.push(object.group_set[*i as usize].clone());
-        }
-
-        let mut current_smoothing_group_index = first_shape_entry.smoothing_group;
-        let mut current_smoothing_group = object.smoothing_group_set[current_smoothing_group_index as usize];
-
-        // Which groups are missing? There is ambiguity in the ordering any possible missing groups and smoothing groups.
-        // We choose to break ties by finding the missing groups and dropping them in first, followed by the missing 
-        // smoothing groups before proceeding with the groups that have elements.
-        let diff = current_group_indices[0];
-        for i in 1..diff {
-            group_map.insert(
-                (lower, upper),
-                (vec![object.group_set[(i - 1) as usize].clone()], object.smoothing_group_set[0 as usize])
-            );
-        }
-
-        let diff = first_shape_entry.smoothing_group;
-        for i in 1..(diff+1) {
-            group_map.insert(
-                (lower, upper),
-                (current_groups.clone(), object.smoothing_group_set[(i-1) as usize])
-            );
-        }
-        eprintln!("object.name = {:?}", object.name);
-        for shape_entry in it {
-            if (shape_entry.groups != current_group_indices) || 
-                (shape_entry.smoothing_group != current_smoothing_group_index) {
-
-                // Save the current interval.
-                group_map.insert((lower, upper), (current_groups.clone(), current_smoothing_group));
-
-                // Jump to the next interval.
-                lower = upper;
-
-                // We must account for any gaps in the group indices. The shape set is in monotone increasing order
-                // in the element indices. In each entry, the group indices are in monotone increasing order.
-                // This is a consequence of the fact that vertices, elements, and groups are implicitly indexed
-                // in increasing order from the beginning to the end of a Wavefront OBJ file. Consequently,
-                // the missing groups and smoothing groups can be found by calculating the gaps in the indices.
-                
-                // Insert the missing groups.
-                let last_index = current_group_indices[current_group_indices.len()-1];
-                let diff = shape_entry.groups[0] - last_index;
-
-                eprintln!("FILLING IN MISSING GROUPS: ");
-                eprintln!("BEFORE: ");
-                eprintln!("    last_index = {:?}", last_index);
-                eprintln!("    diff = {:?}", diff);
-                eprintln!("    current_group_indices = {:?}", current_group_indices);
-                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
-                eprintln!("    group_map = {:?}", group_map);
-                for i in (last_index+1)..(last_index + 1 + diff) {
-                    group_map.insert(
-                        (lower, upper),
-                        (vec![object.group_set[(i - 1) as usize].clone()], current_smoothing_group)
-                    );
-                }
-                eprintln!("AFTER: ");
-                eprintln!("    current_group_indices = {:?}", current_group_indices);
-                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
-                eprintln!("    group_map = {:?}", group_map);
-
-                // Jump to the new found groups.
-                current_group_indices = shape_entry.groups.clone();
-                current_groups = vec![];
-                for i in current_group_indices.iter() {
-                    current_groups.push(object.group_set[*i as usize].clone());
-                }
-                eprintln!("FILLING IN MISSING SMOOTHING GROUPS: ");
-                eprintln!("BEFORE: ");
-                eprintln!("    last_index = {:?}", last_index);
-                eprintln!("    diff = {:?}", diff);
-                eprintln!("    current_group_indices = {:?}", current_group_indices);
-                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
-                eprintln!("    group_map = {:?}", group_map);
-                eprintln!("    BEGIN LOOP.");
-                // Insert the missing smoothing groups.
-                let diff = shape_entry.smoothing_group - current_smoothing_group_index;
-                for i in current_smoothing_group_index..(current_smoothing_group_index + diff) {
-                    group_map.insert((lower, upper), (current_groups.clone(), object.smoothing_group_set[i as usize]));
-                    eprintln!("        UPDATE: group_map = {:?}", group_map);
-                }
-                eprintln!("    END LOOP.");
-                eprintln!("AFTER: ");
-                eprintln!("    current_group_indices = {:?}", current_group_indices);
-                eprintln!("    current_smoothing_group = {:?}", current_smoothing_group);
-                eprintln!("    group_map = {:?}", group_map);
-
-                // Jump to the next nonempty smoothing group.
-                current_smoothing_group_index = shape_entry.smoothing_group;
-                current_smoothing_group = object.smoothing_group_set[current_smoothing_group_index as usize];
-
-            } else {
-                upper += 1;
+                current_entry = shape_entry;
+                intervals.push((min_element_index as u32, max_element_index as u32));
+                min_element_index = max_element_index;
             }
         }
-        eprintln!("GROUP MAP = {:?}", group_map);
-        group_map.insert((lower, upper), (current_groups, current_smoothing_group));
-        */
-        Self::new(group_map)
+
+        // Precalculate the gaps.
+        let mut instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>> = BTreeMap::new();
+        for i in 0..(intervals.len() - 1) {
+            let mut statements = vec![];
+
+            let gap_start_groups = &object.shape_set[intervals[i].1 as usize].groups;
+            let gap_end_groups = &object.shape_set[intervals[i + 1].0 as usize].groups;
+            if gap_start_groups != gap_end_groups {
+                // The groups change across the partition boundary.
+                let gap_start = *gap_start_groups.last().unwrap();
+                let gap_end = *gap_end_groups.first().unwrap();
+                for group_index in gap_start..gap_end {
+                    statements.push(GroupingStatement::G(
+                        vec![object.group_set[(group_index - 1) as usize].clone()]
+                    ));
+                }
+            }
+
+            let gap_start_sg = object.shape_set[intervals[i].1 as usize].smoothing_group;
+            let gap_end_sg = object.shape_set[intervals[i + 1].0 as usize].smoothing_group;
+            if gap_start_sg != gap_end_sg {
+                // The smoothing groups change across the partition boundary.
+                let gap_start = gap_start_sg;
+                let gap_end = gap_end_sg;
+                for sg_index in gap_start..gap_end {
+                    statements.push(
+                        GroupingStatement::S(object.smoothing_group_set[(sg_index - 1) as usize])
+                    );
+                }
+            }
+
+            instructions.insert(intervals[i], statements);
+        }
+
+        // Calculate the occupied groups and smoothing groups.
+
+        Self::new(instructions)
     }
 }
 
