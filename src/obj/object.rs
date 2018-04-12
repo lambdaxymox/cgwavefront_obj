@@ -524,22 +524,64 @@ impl CompositorInstructions {
         Self { instructions: instructions }
     }
 
+    fn generate_missing_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
+        unimplemented!()
+    }
+
+    fn generate_found_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
+        unimplemented!()
+    }
+
     fn generate(object: &Object) -> CompositorInstructions {
+        let missing_groups = Self::generate_missing_groups(object);
+        let found_groups = Self::generate_found_groups(object);
+        
+        debug_assert!(missing_groups.len() == found_groups.len());
+        debug_assert!(
+            missing_groups.keys().zip(found_groups.keys()).all(
+                |(mg_key, fg_key)| { mg_key == fg_key }
+            )
+        );
+
+        let mut instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>> = BTreeMap::new();
+        for interval in missing_groups.keys() {
+            let mut statements = missing_groups[interval].clone();
+            statements.append(&mut found_groups[interval].clone());
+            instructions.insert(*interval, statements);
+        }
+
+        /*
         // Initialize the groups and smoothing groups.
         let mut current_entry = &object.shape_set[0];
         let mut min_element_index = 1;
-        let mut intervals = vec![];
-        // Find the intervals.
-        for (max_element_index, shape_entry) in object.shape_set.iter().enumerate() {
+        let mut groups_found = BTreeMap::new();
+        
+        // In order to fill in the missing groups and smoothing groups, we need to know
+        // which groups and smoothing groups are occupied in the object. After that, we
+        // can determine which groups are missing and fill them in.
+        for (max_element_index, shape_entry) in object.shape_set.iter().enumerate().map(|(i, s)| (i+1, s)) {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
 
+                groups_found.insert(
+                    (min_element_index as u32, max_element_index as u32), 
+                    (current_entry.groups.clone(), current_entry.smoothing_group)
+                );
                 current_entry = shape_entry;
-                intervals.push((min_element_index as u32, max_element_index as u32));
                 min_element_index = max_element_index;
             }
         }
+        
+        let mut groups_missing = BTreeMap::new();
+        // Initialize the table with the pregap for the first interval.
+        // loop though calculating gaps.
 
+        // Initialize the table with the pregap before the first interval.
+        // for (interval, groups) in table {
+        //      
+        // }    
+        // Terminate by calculating the gap after the last interval.
+        /*
         // Precalculate the gaps.
         let mut instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>> = BTreeMap::new();
         for i in 0..(intervals.len() - 1) {
@@ -574,8 +616,17 @@ impl CompositorInstructions {
             instructions.insert(intervals[i], statements);
         }
 
-        // Calculate the occupied groups and smoothing groups.
-
+        // Calculate the occupied groups and smoothing groups. 
+        */
+        */
+        debug_assert!(
+            instructions.len() == missing_groups.len() && missing_groups.len() == found_groups.len()
+        );
+        debug_assert!(
+            instructions.keys().zip(missing_groups.keys().zip(found_groups.keys())).all(
+                |(instr_key, (mg_key, fg_key))| { instr_key == mg_key && mg_key == fg_key }
+            )
+        );
         Self::new(instructions)
     }
 }
