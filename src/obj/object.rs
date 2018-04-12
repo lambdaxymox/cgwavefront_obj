@@ -597,11 +597,33 @@ impl CompositorInstructions {
             } 
         }
 
+        // It is possible that there are missing groups that after before the 
+        // final groups and smoothing groups that appear in the shape set. We must calculate
+        // these last for otherwise we would miss them when filling in the table.
+        let final_group = object.shape_set[0].groups[0];
+        let final_smoothing_group = object.shape_set[0].smoothing_group;
+        let mut final_statements = vec![];
+        for group_index in 1..initial_group {
+            final_statements.push(GroupingStatement::G(vec![
+                object.group_set[(group_index - 1) as usize].clone()
+            ]));
+        }
+
+        for smoothing_group_index in 1..initial_smoothing_group {
+            final_statements.push(GroupingStatement::S(
+                object.smoothing_group_set[(smoothing_group_index - 1) as usize]
+            ));
+        }
+
+        missing_groups.insert((min_element_index as u32, min_element_index as u32), final_statements);
+
         missing_groups
     }
 
     fn generate_found_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
-        unimplemented!()
+        let mut found_groups = BTreeMap::new();
+
+        found_groups
     }
 
     fn generate(object: &Object) -> CompositorInstructions {
