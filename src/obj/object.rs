@@ -203,7 +203,7 @@ pub enum VTNTriple<'a> {
     VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Object {
     pub name: String,
     pub vertex_set: VertexSet,
@@ -265,6 +265,13 @@ impl Object {
                 Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
             }
         }
+    }
+}
+
+impl fmt::Debug for Object {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        let string = DisplayObjectCompositor::new().compose(self);
+        write!(f, "{}", string)
     }
 }
 
@@ -332,7 +339,7 @@ impl ObjectQuery<ShapeIndex, ShapeEntry> for Object {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct ObjectSet {
     objects: Vec<Object>,
 }
@@ -370,6 +377,13 @@ impl ops::Index<usize> for ObjectSet {
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.objects[index]
+    }
+}
+
+impl fmt::Debug for ObjectSet {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        let string = DisplayObjectSetCompositor::new().compose(self);
+        write!(f, "{}", string)
     }
 }
 
