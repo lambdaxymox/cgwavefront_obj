@@ -457,10 +457,8 @@ trait ObjectCompositor {
 struct DisplayObjectCompositor { }
 
 impl DisplayObjectCompositor {
-    fn new() -> DisplayObjectCompositor { DisplayObjectCompositor {} }
-}
+    fn new() -> Self { Self {} }
 
-impl ObjectCompositor for DisplayObjectCompositor {
     fn compose(&self, object: &Object) -> String {
         let mut string = String::from("Object {\n");
     
@@ -489,7 +487,13 @@ impl ObjectCompositor for DisplayObjectCompositor {
 
         string += &format!("}}\n");
 
-        string
+        string       
+    }
+}
+
+impl ObjectCompositor for DisplayObjectCompositor {
+    fn compose(&self, object: &Object) -> String {
+        self.compose(object)
     } 
 }
 
