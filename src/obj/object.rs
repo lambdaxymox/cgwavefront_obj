@@ -751,7 +751,7 @@ impl TextObjectCompositor {
     fn compose_object_name(&self, object: &Object) -> String {
         match object.name.as_ref() {
             "" => String::from(""),
-            _  => format!("o  {} \n", object.name),
+            _  => format!("o  {}\n", object.name),
         }     
     }
 
@@ -765,14 +765,14 @@ impl TextObjectCompositor {
     }
 
     fn compose_smoothing_group(&self, smoothing_group: SmoothingGroup) -> String {
-        format!("s  {} \n", smoothing_group)
+        format!("s  {}\n", smoothing_group)
     }
 
     fn compose_vertex_set(&self, object: &Object) -> String {
         object.vertex_set.iter().fold(String::new(), |acc, v| {
             match v.w == 1.0 {
-                true  => acc + &format!("v  {}  {}  {} \n", v.x, v.y, v.z),
-                false => acc + &format!("v  {}  {}  {}  {} \n", v.x, v.y, v.z, v.w),
+                true  => acc + &format!("v  {}  {}  {}\n", v.x, v.y, v.z),
+                false => acc + &format!("v  {}  {}  {}  {}\n", v.x, v.y, v.z, v.w),
             }
         })
     }
@@ -810,9 +810,9 @@ impl TextObjectCompositor {
         })
     }
 
-    fn compose_comment<T>(&self, set: &[T], unit: &str, unit_plural: &str) -> String {
+    fn compose_comment<T>(&self, set: &[T], unit_singular: &str, unit_plural: &str) -> String {
         if set.len() == 1 { 
-            format!("# {} {}\n", set.len(), unit)
+            format!("# {} {}\n", set.len(), unit_singular)
         } else {
             format!("# {} {}\n", set.len(), unit_plural)
         }
@@ -894,9 +894,9 @@ impl Compositor for TextObjectSetCompositor {
         
         let mut string = String::new();
         for (i, object_i) in object_set.iter().enumerate().map(|(i, obj)| (i + 1, obj)) {
-            string += &format!("#### BEGIN Object {}\n", i);
+            string += &format!("# ### BEGIN Object {}\n", i);
             string += &compositor.compose(&object_i);
-            string += &format!("#### END Object {}\n", i);
+            string += &format!("# ### END Object {}\n", i);
             string += &"\n";
         }
 
