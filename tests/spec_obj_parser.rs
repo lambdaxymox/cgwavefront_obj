@@ -506,7 +506,7 @@ fn prop_parse_object_set_should_parse_elements() {
     }
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
-/*
+
 #[test]
 fn prop_parse_object_set_should_parse_shape_entries() {
     fn property(oracle: Oracle) -> bool {
@@ -519,8 +519,8 @@ fn prop_parse_object_set_should_parse_shape_entries() {
     }
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
-*/
-/*
+
+
 #[test]
 fn prop_parser_correctly_parses_valid_obj_files() {
     fn property(oracle: Oracle) -> bool {
@@ -531,4 +531,4 @@ fn prop_parser_correctly_parses_valid_obj_files() {
     }
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
-*/
+
