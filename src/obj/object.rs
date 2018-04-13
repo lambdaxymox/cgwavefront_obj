@@ -722,10 +722,8 @@ impl CompositorInstructions {
 
         let mut instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>> = BTreeMap::new();
         for interval in missing_groups.keys() {
-            let mut statements = found_groups[interval].clone();
-            statements.append(&mut missing_groups[interval].clone());
-            //let mut statements = missing_groups[interval].clone();
-            //statements.append(&mut found_groups[interval].clone());
+            let mut statements = missing_groups[interval].clone();
+            statements.append(&mut found_groups[interval].clone());
             instructions.insert(*interval, statements);
         }
 
