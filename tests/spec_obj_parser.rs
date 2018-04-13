@@ -78,7 +78,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
     fn gen_vertex_set(&self, g: &mut G, len: usize) -> VertexSet {
         let mut vertex_set = vec![];
         for _ in 0..len {
-            vertex_set.push(self.gen_vertex(g, true));
+            let use_w = Arbitrary::arbitrary(g);
+            vertex_set.push(self.gen_vertex(g, use_w));
         }
 
         assert_eq!(vertex_set.len(), len);
