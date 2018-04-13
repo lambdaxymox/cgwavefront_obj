@@ -810,38 +810,30 @@ impl TextObjectCompositor {
         })
     }
 
+    fn compose_comment<T>(&self, set: &[T], unit: &str, unit_plural: &str) -> String {
+        if set.len() == 1 { 
+            format!("# {} {}\n", set.len(), unit)
+        } else {
+            format!("# {} {}\n", set.len(), unit_plural)
+        }
+    }
+
     fn compose(&self, object: &Object) -> String {
         let mut string = String::new();
 
         string += &self.compose_object_name(object);
         string += &self.compose_vertex_set(object);
-
-        if object.vertex_set.len() == 1 { 
-            string += &format!("# {} vertex\n", object.vertex_set.len());
-        } else {
-            string += &format!("# {} vertices\n", object.vertex_set.len());
-        }
-
+        string += &self.compose_comment(&object.vertex_set, "vertex", "vertices");
         string += &format!("\n");
 
         string += &self.compose_texture_vertex_set(object);
-
-        if object.texture_vertex_set.len() == 1 { 
-            string += &format!("# {} texture vertex\n", object.texture_vertex_set.len());
-        } else {
-            string += &format!("# {} texture vertices\n", object.texture_vertex_set.len());
-        }
-
+        string += &self.compose_comment(
+            &object.texture_vertex_set, "texture vertex", "texture vertices"
+        );
         string += &format!("\n");
 
         string += &self.compose_normal_vertex_set(object);
-
-        if object.normal_vertex_set.len() == 1 {
-            string += &format!("# {} normal vertex\n", object.normal_vertex_set.len());
-        } else {
-            string += &format!("# {} normal vertices\n", object.normal_vertex_set.len());
-        }
-
+        string += &self.compose_comment(&object.normal_vertex_set, "normal vertex", "normal vertices");
         string += &format!("\n");
 
         let group_instructions = self.get_group_instructions(object);
