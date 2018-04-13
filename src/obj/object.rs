@@ -550,7 +550,7 @@ impl CompositorInstructions {
         }
 
         missing_groups.insert((1, 1), initial_statements);
-        eprintln!("missing_groups = {:?}", missing_groups);
+
         // In order to fill in the missing groups and smoothing groups, we need to know
         // which groups and smoothing groups are occupied in the object. After that, we
         // can determine which groups are missing and fill them in.
@@ -636,7 +636,7 @@ impl CompositorInstructions {
         }
 
         missing_groups.insert((min_element_index as u32, min_element_index as u32), final_statements);
-        eprintln!("missing_groups = {:?}", missing_groups);
+
         missing_groups
     }
 
@@ -648,7 +648,7 @@ impl CompositorInstructions {
 
         let initial_statements = vec![];
         found_groups.insert((min_element_index, max_element_index), initial_statements);
-        eprintln!("found_groups = {:?}", found_groups);
+
         let mut current_entry = &object.shape_set[0];
         for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
@@ -705,7 +705,7 @@ impl CompositorInstructions {
 
         let final_statements = vec![];
         found_groups.insert((min_element_index, min_element_index), final_statements);
-        eprintln!("found_groups = {:?}", found_groups);
+
         found_groups
     }
 
@@ -922,6 +922,8 @@ mod compositor_tests {
 
     struct Test {
         object: Object,
+        expected_missing_groups: BTreeMap<(u32, u32), Vec<GroupingStatement>>, 
+        expected_found_groups: BTreeMap<(u32, u32), Vec<GroupingStatement>>,
         expected: CompositorInstructions,
     }
 
@@ -994,14 +996,40 @@ mod compositor_tests {
                         vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
                         vec![ShapeEntry::new(1, &vec![4], 2)],
                     ),
-                    expected: CompositorInstructions::new(FromIterator::from_iter(
-                        vec![((1, 1), vec![
+                    expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 1), vec![]),
+                            ((1, 2), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::G(vec![Group::new("Group1")]),
                                 GroupingStatement::G(vec![Group::new("Group2")]),
                                 GroupingStatement::S(SmoothingGroup::new(0)),
                             ]),
+                            ((2, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group4")]),
+                                GroupingStatement::S(SmoothingGroup::new(2)),
+                            ]),
+                        ]
+                    )),
+                    expected_found_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 1), vec![]),
                             ((1, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group3")]),
+                                GroupingStatement::S(SmoothingGroup::new(1)),
+                            ]),
+                            ((2, 2), vec![]),
+
+                        ]
+                    )),
+                    expected: CompositorInstructions::new(FromIterator::from_iter(
+                        vec![
+                            ((1, 1), vec![]),
+                            ((1, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::G(vec![Group::new("Group1")]),
+                                GroupingStatement::G(vec![Group::new("Group2")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),
                                 GroupingStatement::G(vec![Group::new("Group3")]),
                                 GroupingStatement::S(SmoothingGroup::new(1))
                             ]),
@@ -1138,8 +1166,37 @@ mod compositor_tests {
                             ShapeEntry::new(7, &vec![3], 1), ShapeEntry::new(8, &vec![4], 2),
                         ],
                     ),
+                    expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 1), vec![]),
+                            ((1, 4), vec![]),
+                            ((4, 8), vec![
+                                GroupingStatement::G(vec![Group::new("Group1")]),
+                            ]),
+                            ((8, 9), vec![]),
+                            ((9, 9), vec![]),
+                        ]                        
+                    )),
+                    expected_found_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 1), vec![]),
+                            ((1, 4), vec![
+                                GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),
+                            ]),
+                            ((4, 8), vec![
+                                GroupingStatement::G(vec![Group::new("Group2")]),
+                            ]),
+                            ((8, 9), vec![
+                                GroupingStatement::G(vec![Group::new("Group3")]),
+                                GroupingStatement::S(SmoothingGroup::new(1)),
+                            ]),
+                            ((9, 9), vec![]),
+                        ]
+                    )),
                     expected: CompositorInstructions::new(FromIterator::from_iter(
-                        vec![((1, 1), vec![]),
+                        vec![
+                            ((1, 1), vec![]),
                             ((1, 4), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::S(SmoothingGroup::new(0)),
@@ -1165,8 +1222,12 @@ mod compositor_tests {
         let tests = test_cases();
 
         for test in tests.iter() {
+            let result_missing_groups = CompositorInstructions::generate_missing_groups(&test.object);
+            let result_found_groups = CompositorInstructions::generate_found_groups(&test.object);
             let result = CompositorInstructions::generate(&test.object);
 
+            assert_eq!(result_missing_groups, test.expected_missing_groups);
+            assert_eq!(result_found_groups, test.expected_found_groups);
             assert_eq!(result, test.expected);
         }
     }
@@ -1176,8 +1237,12 @@ mod compositor_tests {
         let tests = test_cases2();
 
         for test in tests.iter() {
+            let result_missing_groups = CompositorInstructions::generate_missing_groups(&test.object);
+            let result_found_groups = CompositorInstructions::generate_found_groups(&test.object);
             let result = CompositorInstructions::generate(&test.object);
 
+            assert_eq!(result_missing_groups, test.expected_missing_groups);
+            assert_eq!(result_found_groups, test.expected_found_groups);
             assert_eq!(result, test.expected);
         }
     }
