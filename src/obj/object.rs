@@ -553,7 +553,6 @@ impl CompositorInstructions {
         let mut current_entry = &object.shape_set[0];
         let mut min_element_index = 1;
         let mut max_element_index = 1;
-        eprintln!("\nENTERING LOOP.");
         for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
@@ -602,14 +601,14 @@ impl CompositorInstructions {
             // We have processed this group element.
             max_element_index += 1;
         }
-        eprintln!("EXITING LOOP.");
 
-        eprintln!("(min = {}, max = {})", min_element_index, max_element_index);
+        // Process the last existing interval.
+        let statements = vec![];
+        missing_groups.insert((min_element_index as u32, max_element_index as u32), statements);
 
         // The last interval of empty groups and smoothing groups
         // lies off the end of the element list.
         min_element_index = max_element_index;
-        eprintln!("(min = {}, max = {})", min_element_index, max_element_index);
 
         // It is possible that there are missing groups that after before the 
         // final groups and smoothing groups that appear in the shape set. We must calculate
@@ -666,7 +665,7 @@ impl CompositorInstructions {
                 // Are the smoothing groups different?
                 if shape_entry.smoothing_group != current_entry.smoothing_group {
                     statements.push(GroupingStatement::S(
-                        object.smoothing_group_set[current_entry.smoothing_group as usize])
+                        object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])
                     );
                 }
 
@@ -680,6 +679,22 @@ impl CompositorInstructions {
             max_element_index += 1;
 
         }
+        
+        // Are the groups different?
+        let mut statements = vec![];
+        let mut new_groups = vec![];
+        for group_index in current_entry.groups.iter() {
+            new_groups.push(object.group_set[(group_index - 1) as usize].clone());
+        }
+
+        statements.push(GroupingStatement::G(new_groups));
+
+        // Are the smoothing groups different?
+        statements.push(GroupingStatement::S(
+            object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])
+        );
+
+        found_groups.insert((min_element_index, max_element_index), statements);
 
         // The last interval of empty groups and smoothing groups
         // lies off the end of the element list.

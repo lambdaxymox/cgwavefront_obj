@@ -403,7 +403,7 @@ fn prop_parser_satisfies_specification() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-*/
+
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
     fn property(machine: Machine) -> bool {
@@ -455,7 +455,7 @@ fn prop_parse_object_set_should_parse_normal_vertices() {
     }
     quickcheck::quickcheck(property as fn(Machine) -> bool);
 }
-/*
+
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
     fn property(machine: Machine) -> bool {
@@ -474,7 +474,7 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
     fn property(machine: Machine) -> bool {
         let result_set = machine.actual().parse().unwrap();
         let expected_set = machine.model().parse().unwrap();
-        eprintln!("TEXT GENERATED: \n\n{}\n\n", machine.model());
+        eprintln!("TEXT GENERATED: \n\n{:?}\n\n", machine.model());
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             eprintln!("RESULT: \n{:?}\n", result.smoothing_group_set);
