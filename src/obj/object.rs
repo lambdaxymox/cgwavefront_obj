@@ -1065,8 +1065,8 @@ mod compositor_tests {
                         f  8/2/7  8/1/1  7/8/4
                         # 2 elements
 
-                        g  Group1  
-                        g  Group2  
+                        g  Group1
+                        g  Group2
                         f  8/5/2  7/1/1  5/6/3
                         f  4/7/8  7/7/7  6/8/5
                         f  5/8/2  6/7/2  3/2/5
