@@ -651,7 +651,8 @@ impl CompositorInstructions {
                 shape_entry.smoothing_group != current_entry.smoothing_group {
 
                 let mut statements = vec![];
-
+                eprintln!("current_entry.groups = {:?}", current_entry.groups);
+                eprintln!("object.group_set = {:?}", object.group_set);
                 // Are the groups different?
                 if shape_entry.groups != current_entry.groups {
                     let mut new_groups = vec![];
@@ -662,6 +663,8 @@ impl CompositorInstructions {
                     statements.push(GroupingStatement::G(new_groups));
                 }
 
+                eprintln!("current_entry.smoothing_group = {:?}", current_entry.smoothing_group);
+                eprintln!("object.smoothing_group_set = {:?}", object.smoothing_group_set);
                 // Are the smoothing groups different?
                 if shape_entry.smoothing_group != current_entry.smoothing_group {
                     statements.push(GroupingStatement::S(
@@ -689,6 +692,8 @@ impl CompositorInstructions {
 
         statements.push(GroupingStatement::G(new_groups));
 
+        eprintln!("current_entry.smoothing_group = {}", current_entry.smoothing_group);
+        eprintln!("object.smoothing_group_set = {:?}", object.smoothing_group_set);
         // Are the smoothing groups different?
         statements.push(GroupingStatement::S(
             object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])

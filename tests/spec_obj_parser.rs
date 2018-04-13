@@ -209,6 +209,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
         assert!(smoothing_group_slices.len() > 0);
         assert!(smoothing_group_set.len() > 0);
         assert_eq!(smoothing_group_slices.len(), smoothing_group_set.len());
+        assert!(group_set.iter().all(|&index| index > 0));
+        assert!(smoothing_group_set.iter().all(|&index| index > 0));
 
         let mut shape_set = vec![];
         for i in 0..group_slices.len() {
@@ -231,6 +233,10 @@ impl<G> ObjectSetGen<G> where G: Gen {
         // The smoothing group iteration should not change the length
         // of the shape set.
         assert_eq!(shape_set.len(), element_set.len());
+        assert!(shape_set.iter().all(|shape_entry| {
+            shape_entry.groups.iter().all(|&group_index| group_index > 0) &&
+            shape_entry.smoothing_group > 0
+        }));
         shape_set
     }
 
