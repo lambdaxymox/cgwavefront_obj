@@ -532,24 +532,24 @@ impl CompositorInstructions {
         let mut missing_groups = BTreeMap::new();
         
         // It is possible that there are missing groups that appear before the 
-        // first groups and smoothing groups that appear in the shape set. We must calculate
-        // there first for otherwise we would miss them when filling in the table.
+        // first interval of elements in the shape set. We must calculate
+        // these first for otherwise we would miss them when filling in the table.
         let initial_group = object.shape_set[0].groups[0];
         let initial_smoothing_group = object.shape_set[0].smoothing_group;
-        let mut initial_statements = vec![];
+        let mut current_statements = vec![];
         for group_index in 1..initial_group {
-            initial_statements.push(GroupingStatement::G(vec![
+            current_statements.push(GroupingStatement::G(vec![
                 object.group_set[(group_index - 1) as usize].clone()
             ]));
         }
 
         for smoothing_group_index in 1..initial_smoothing_group {
-            initial_statements.push(GroupingStatement::S(
+            current_statements.push(GroupingStatement::S(
                 object.smoothing_group_set[(smoothing_group_index - 1) as usize]
             ));
         }
 
-        missing_groups.insert((1, 1), initial_statements);
+        //missing_groups.insert((1, 1), initial_statements);
 
         // In order to fill in the missing groups and smoothing groups, we need to know
         // which groups and smoothing groups are occupied in the object. After that, we
@@ -560,14 +560,16 @@ impl CompositorInstructions {
         for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
-                // We have cross an group or smoothing group boundary.
+                // We have crossed a group or smoothing group boundary. Here we have found the 
+                // end of the interval of elements with the same groups and smoothing groups.
+                missing_groups.insert((min_element_index as u32, max_element_index as u32), current_statements);
 
                 // Which groups and smoothing groups are missing? There is ambiguity in 
                 // ordering any possible missing groups and smoothing groups. We choose to 
                 // disambiguate this by finding the missing groups and dropping them 
                 // in first, followed by dropping in the missing smoothing groups 
                 // before proceeding with the groups and smoothing groups that have elements.
-                let mut statements = vec![];
+                current_statements = vec![];
 
                 // Are the groups different?
                 if shape_entry.groups != current_entry.groups {
@@ -575,7 +577,7 @@ impl CompositorInstructions {
                     let gap_start = 1 + current_entry.groups[current_entry.groups.len() - 1];
                     let gap_end = shape_entry.groups[0];
                     for group_index in gap_start..gap_end {
-                        statements.push(GroupingStatement::G(vec![
+                        current_statements.push(GroupingStatement::G(vec![
                             object.group_set[(group_index - 1) as usize].clone()
                         ]));
                     }
@@ -588,14 +590,14 @@ impl CompositorInstructions {
                     let gap_start = 1 + current_entry.smoothing_group;
                     let gap_end = shape_entry.smoothing_group;
                     for smoothing_group_index in gap_start..gap_end {
-                        statements.push(GroupingStatement::S(
+                        current_statements.push(GroupingStatement::S(
                             object.smoothing_group_set[(smoothing_group_index - 1) as usize]
                         ));
                     }
                 }
 
                 // Place the missing groups into the table.
-                missing_groups.insert((min_element_index as u32, max_element_index as u32), statements);
+                //missing_groups.insert((min_element_index as u32, max_element_index as u32), statements);
 
                 // Continue with the next interval.
                 current_entry = shape_entry;
@@ -607,8 +609,7 @@ impl CompositorInstructions {
         }
 
         // Process the last existing interval.
-        let statements = vec![];
-        missing_groups.insert((min_element_index as u32, max_element_index as u32), statements);
+        missing_groups.insert((min_element_index as u32, max_element_index as u32), current_statements);
 
         // The last interval of empty groups and smoothing groups
         // lies off the end of the element list.
