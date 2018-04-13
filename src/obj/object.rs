@@ -950,32 +950,32 @@ mod compositor_tests {
             data: vec![ 
                 Test {
                     /* 
-                    #### Original object file text.
-                    o  Object1
-                    v  -36.84435  -31.289864  -23.619797  -8.21862 
-                    # 1 vertex
+                        #### Original object file text.
+                        o  Object1
+                        v  -36.84435  -31.289864  -23.619797  -8.21862 
+                        # 1 vertex
 
-                    vt  -44.275238  28.583176  -23.780418
-                    # 1 texture vertex
+                        vt  -44.275238  28.583176  -23.780418
+                        # 1 texture vertex
 
-                    vn  93.94331  -61.460472  -32.00753 
-                    # 1 normal vertex
+                        vn  93.94331  -61.460472  -32.00753 
+                        # 1 normal vertex
 
-                    g  Group0
-                    g  Group1
-                    # ### Equivalently,
-                    # ### g Group2,
-                    # ### s  0
-                    s  0
-                    g  Group2
-                    s  1
-                    g  Group3
-                    f 1/1/1 1/1/1 1/1/1
-                    # 1 element
+                        g  Group0
+                        g  Group1
+                        # ### Equivalently,
+                        # ### g Group2,
+                        # ### s  0
+                        s  0
+                        g  Group2
+                        s  1
+                        g  Group3
+                        f 1/1/1 1/1/1 1/1/1
+                        # 1 element
 
-                    g  Group4                    
-                    s  2 
-                    # ### End Object 1
+                        g  Group4                    
+                        s  2 
+                        # ### End Object 1
                     */
                     object: Object::new(
                         String::from("Object0"),
