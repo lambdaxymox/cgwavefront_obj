@@ -724,8 +724,10 @@ impl CompositorInstructions {
 
         let mut instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>> = BTreeMap::new();
         for interval in missing_groups.keys() {
-            let mut statements = missing_groups[interval].clone();
-            statements.append(&mut found_groups[interval].clone());
+            let mut statements = found_groups[interval].clone();
+            statements.append(&mut missing_groups[interval].clone());
+            //let mut statements = missing_groups[interval].clone();
+            //statements.append(&mut found_groups[interval].clone());
             instructions.insert(*interval, statements);
         }
 
@@ -791,7 +793,7 @@ impl TextObjectCompositor {
 
     fn compose_elements(&self, object: &Object, interval: (u32, u32)) -> String {
         let string = (interval.0..interval.1).fold(String::new(), |acc, i| {
-            acc + &format!("{}\n", object.element_set[i as usize])
+            acc + &format!("{}\n", object.element_set[(i - 1) as usize])
         });
         format!("{}", string)
     }
