@@ -921,74 +921,106 @@ mod compositor_tests {
         expected: CompositorInstructions,
     }
 
-    fn test_case() -> Test {
-        /* #### Original object file text.
-            o  Object0
-            v  -36.84435  -31.289864  -23.619797  -8.21862 
-            # 1 vertices
+    struct TestSet { 
+        data: Vec<Test>,
+    }
 
-            vt  -44.275238  28.583176  -23.780418
-            # 1 texture vertices
+    impl TestSet {
+        fn iter(&self) -> TestSetIter {
+            TestSetIter {
+                inner: self.data.iter(),
+            }
+        }
+    }
 
-            vn  93.94331  -61.460472  -32.00753 
-            # 1 normal vertices
+    struct TestSetIter<'a> {
+        inner: slice::Iter<'a, Test>,
+    }
 
-            g  Group0
-            g  Group1
-            #### Equivalently,
-            #### g Group2,
-            #### s  0
-            s  0
-            g  Group2
-            s  1
-            g  Group3
-            f 1/1/1 1/1/1 1/1/1
-            # 1 elements
+    impl<'a> Iterator for TestSetIter<'a> {
+        type Item = &'a Test;
 
-            g  Group4                    
-            s  2 
-            #### End Object 0
-        */
-        Test {
-            object: Object::new(
-                String::from("Object0"),
-                vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
-                vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
-                vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
-                vec![
-                    Group::new("Group0"), Group::new("Group1"), 
-                    Group::new("Group2"), Group::new("Group3"), Group::new("Group4")
-                ],
-                vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
-                vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
-                vec![ShapeEntry::new(1, &vec![4], 2)],
-            ),
-            expected: CompositorInstructions::new(FromIterator::from_iter(
-                vec![((1, 1), vec![
-                        GroupingStatement::G(vec![Group::new("Group0")]),
-                        GroupingStatement::G(vec![Group::new("Group1")]),
-                        GroupingStatement::G(vec![Group::new("Group2")]),
-                        GroupingStatement::S(SmoothingGroup::new(0)),                
-                    ]),
-                    ((1, 2), vec![
-                        GroupingStatement::G(vec![Group::new("Group3")]),
-                        GroupingStatement::S(SmoothingGroup::new(1))
-                    ]),
-                    ((2, 2), vec![
-                        GroupingStatement::G(vec![Group::new("Group4")]),
-                        GroupingStatement::S(SmoothingGroup::new(2))
-                    ]),
-                ]    
-            )),
+        fn next(&mut self) -> Option<Self::Item> {
+            self.inner.next()
+        }
+    }
+
+    fn test_cases() -> TestSet {
+        TestSet { 
+            data: vec![ 
+                Test {
+                    /* 
+                    #### Original object file text.
+                    o  Object1
+                    v  -36.84435  -31.289864  -23.619797  -8.21862 
+                    # 1 vertex
+
+                    vt  -44.275238  28.583176  -23.780418
+                    # 1 texture vertex
+
+                    vn  93.94331  -61.460472  -32.00753 
+                    # 1 normal vertex
+
+                    g  Group0
+                    g  Group1
+                    # ### Equivalently,
+                    # ### g Group2,
+                    # ### s  0
+                    s  0
+                    g  Group2
+                    s  1
+                    g  Group3
+                    f 1/1/1 1/1/1 1/1/1
+                    # 1 element
+
+                    g  Group4                    
+                    s  2 
+                    # ### End Object 1
+                    */
+                    object: Object::new(
+                        String::from("Object0"),
+                        vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
+                        vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
+                        vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
+                        vec![
+                            Group::new("Group0"), Group::new("Group1"), 
+                            Group::new("Group2"), Group::new("Group3"), Group::new("Group4")
+                        ],
+                        vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
+                        vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
+                        vec![ShapeEntry::new(1, &vec![4], 2)],
+                    ),
+                    expected: CompositorInstructions::new(FromIterator::from_iter(
+                        vec![((1, 1), vec![
+                                GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::G(vec![Group::new("Group1")]),
+                                GroupingStatement::G(vec![Group::new("Group2")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),                
+                            ]),
+                            ((1, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group3")]),
+                                GroupingStatement::S(SmoothingGroup::new(1))
+                            ]),
+                            ((2, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group4")]),
+                                GroupingStatement::S(SmoothingGroup::new(2))
+                            ]),
+                        ]    
+                    )),
+                },
+            ]
         }
     }
 
     #[test]
     fn test_compositor_instructions() {
-        let test = test_case();
-        let result = CompositorInstructions::generate(&test.object);
+        let tests = test_cases();
 
-        assert_eq!(result, test.expected);
+        for test in tests.iter() {
+            let result = CompositorInstructions::generate(&test.object);
+
+            assert_eq!(result, test.expected);
+        }
     }
 }
 
