@@ -977,7 +977,7 @@ mod compositor_tests {
                         f 1/1/1 1/1/1 1/1/1
                         # 1 element
 
-                        g  Group4                    
+                        g  Group4
                         s  2 
                         # ### End Object 1
                     */
@@ -999,7 +999,7 @@ mod compositor_tests {
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::G(vec![Group::new("Group1")]),
                                 GroupingStatement::G(vec![Group::new("Group2")]),
-                                GroupingStatement::S(SmoothingGroup::new(0)),                
+                                GroupingStatement::S(SmoothingGroup::new(0)),
                             ]),
                             ((1, 2), vec![
                                 GroupingStatement::G(vec![Group::new("Group3")]),
@@ -1055,11 +1055,12 @@ mod compositor_tests {
 
                         # 0 elements
 
-                        g  Group0  
+                        g  Group0
+                        s  off
                         f  7/1/4  2/7/1  4/1/7
                         # 1 element
 
-                        s  0 
+                        s  off
                         f  7/5/7  5/8/5  2/7/4
                         f  8/2/7  8/1/1  7/8/4
                         # 2 elements
@@ -1084,14 +1085,14 @@ mod compositor_tests {
                     object: Object::new(
                         String::from("Object1"),
                         vec![
-                            Vertex::new(-81.75473,    49.89659,   50.217773, -0.21859932), 
-                            Vertex::new( 58.582382,   40.18698,   20.389153, -0.8563268 ), 
-                            Vertex::new( 20.67199,   -32.264946, -43.075634, -0.8146236 ), 
-                            Vertex::new(-0.51555634, -61.86371,  -63.40442,  -0.816622  ), 
-                            Vertex::new( 64.52879,    5.6848984,  82.95958,  -0.8919699 ), 
-                            Vertex::new(-22.82035,    26.620651,  98.339966,  0.47607088), 
-                            Vertex::new( 74.063614,  -72.82653,   16.68911,   0.57268834), 
-                            Vertex::new( 36.223984,   40.50911,  -46.372032, -0.27578998), 
+                            Vertex::new(-81.75473,    49.89659,   50.217773, -0.21859932),
+                            Vertex::new( 58.582382,   40.18698,   20.389153, -0.8563268 ),
+                            Vertex::new( 20.67199,   -32.264946, -43.075634, -0.8146236 ),
+                            Vertex::new(-0.51555634, -61.86371,  -63.40442,  -0.816622  ),
+                            Vertex::new( 64.52879,    5.6848984,  82.95958,  -0.8919699 ),
+                            Vertex::new(-22.82035,    26.620651,  98.339966,  0.47607088),
+                            Vertex::new( 74.063614,  -72.82653,   16.68911,   0.57268834),
+                            Vertex::new( 36.223984,   40.50911,  -46.372032, -0.27578998),
                         ],
                         vec![
                             TextureVertex::new(-31.56221,  -66.285965,  85.67    ),
@@ -1107,11 +1108,11 @@ mod compositor_tests {
                             NormalVertex::new( 37.12401,   65.5159,   -67.49673 ),
                             NormalVertex::new(-27.513626,  68.86371,  -40.72206 ),
                             NormalVertex::new(-2.038643,  -48.640347,  65.63937 ),
-                            NormalVertex::new( 93.694565,  63.53665,   52.100876), 
-                            NormalVertex::new( 40.664124,  55.000015, -45.83249 ), 
-                            NormalVertex::new( 30.624634,  31.461197, -93.17193 ), 
-                            NormalVertex::new( 25.595596,  30.777481,  79.21614 ), 
-                            NormalVertex::new(-36.078453,  1.8164139,  21.209381), 
+                            NormalVertex::new( 93.694565,  63.53665,   52.100876),
+                            NormalVertex::new( 40.664124,  55.000015, -45.83249 ),
+                            NormalVertex::new( 30.624634,  31.461197, -93.17193 ),
+                            NormalVertex::new( 25.595596,  30.777481,  79.21614 ),
+                            NormalVertex::new(-36.078453,  1.8164139,  21.209381),
                         ],
                         vec![
                             Group::new("Group0"), Group::new("Group1"), 
@@ -1141,6 +1142,7 @@ mod compositor_tests {
                         vec![((1, 1), vec![]),
                             ((1, 4), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),
                             ]),
                             ((4, 8), vec![
                                 GroupingStatement::G(vec![Group::new("Group1")]),
@@ -1148,10 +1150,10 @@ mod compositor_tests {
                             ]),
                             ((8, 9), vec![
                                 GroupingStatement::G(vec![Group::new("Group3")]),
-                                GroupingStatement::S(SmoothingGroup::new(2)),
+                                GroupingStatement::S(SmoothingGroup::new(1)),
                             ]),
                             ((9, 9), vec![]),
-                        ]    
+                        ]
                     )),
                 },
             ]
