@@ -149,9 +149,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
         }
     }
 
-    fn gen_element_set(
-        &self, g: &mut G, element_count: u32,
-        v_count: u32, vt_count: u32, vn_count: u32) -> ElementSet {
+    fn gen_element_set(&self, g: &mut G, 
+        element_count: u32, v_count: u32, vt_count: u32, vn_count: u32) -> ElementSet {
 
         let mut element_set = vec![];
         for _ in 0..element_count {
@@ -205,10 +204,10 @@ impl<G> ObjectSetGen<G> where G: Gen {
         
         assert!(group_slices.len() > 0);
         assert!(group_set.len() > 0);
-        assert_eq!(group_slices.len(), group_set.len());
+        assert!(group_slices.len() == group_set.len());
         assert!(smoothing_group_slices.len() > 0);
         assert!(smoothing_group_set.len() > 0);
-        assert_eq!(smoothing_group_slices.len(), smoothing_group_set.len());
+        assert!(smoothing_group_slices.len() == smoothing_group_set.len());
         assert!(group_set.iter().all(|&index| index > 0));
         assert!(smoothing_group_set.iter().all(|&index| index > 0));
 
@@ -233,10 +232,12 @@ impl<G> ObjectSetGen<G> where G: Gen {
         // The smoothing group iteration should not change the length
         // of the shape set.
         assert_eq!(shape_set.len(), element_set.len());
+        // Wavefront OBJ files are one-indexed in element, vertices, groups, etc.
         assert!(shape_set.iter().all(|shape_entry| {
             shape_entry.groups.iter().all(|&group_index| group_index > 0) &&
             shape_entry.smoothing_group > 0
         }));
+
         shape_set
     }
 
@@ -281,9 +282,9 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let shape_set = self.gen_shape_set(
             &element_set, 
             &group_slices,
-            &(0..(group_set.len() as u32)).collect::<Vec<u32>>(), 
+            &(1..((group_set.len() + 1) as u32)).collect::<Vec<u32>>(), 
             &smoothing_group_slices, 
-            &(0..(smoothing_group_set.len() as u32)).collect::<Vec<u32>>(), 
+            &(1..((smoothing_group_set.len() + 1) as u32)).collect::<Vec<u32>>(), 
         );
 
         let mut builder = ObjectBuilder::new(vertex_set, element_set);
