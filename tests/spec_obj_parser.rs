@@ -54,7 +54,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let x = Arbitrary::arbitrary(g);
         let y = Arbitrary::arbitrary(g);
         let z = Arbitrary::arbitrary(g);
-        let w = if use_w { Arbitrary::arbitrary(g) } else { 1.0 };
+        let w = if use_w { g.gen_range(-1.0, 1.0) } else { 1.0 };
 
         Vertex::new(x, y, z, w)
     }
@@ -214,7 +214,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let mut shape_set = vec![];
         for i in 0..group_slices.len() {
             for j in group_slices[i].0..group_slices[i].1 {
-                let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i+1)], 1);
+                let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i + 1)], 1);
                 shape_set.push(shape_entry);
             }
         }
@@ -245,7 +245,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         if use_default { 
             1 
         } else { 
-            g.gen_range(2, 6)
+            g.gen_range(2, 10)
         }
     }
 
@@ -273,7 +273,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
         let group_set = self.gen_group_set(use_g_default, group_count);
 
-        let smoothing_group_count = g.gen_range(1, 6);
+        let smoothing_group_count = g.gen_range(1, 10);
         let smoothing_group_slices = self.gen_slices(
             g, (0, element_set.len()), smoothing_group_count
         );
