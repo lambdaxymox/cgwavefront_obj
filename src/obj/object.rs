@@ -546,7 +546,7 @@ impl CompositorInstructions {
         }
 
         missing_groups.insert((1, 1), initial_statements);
-
+        eprintln!("missing_groups = {:?}", missing_groups);
         // In order to fill in the missing groups and smoothing groups, we need to know
         // which groups and smoothing groups are occupied in the object. After that, we
         // can determine which groups are missing and fill them in.
@@ -644,15 +644,13 @@ impl CompositorInstructions {
 
         let initial_statements = vec![];
         found_groups.insert((min_element_index, max_element_index), initial_statements);
-
+        eprintln!("found_groups = {:?}", found_groups);
         let mut current_entry = &object.shape_set[0];
         for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
 
                 let mut statements = vec![];
-                eprintln!("current_entry.groups = {:?}", current_entry.groups);
-                eprintln!("object.group_set = {:?}", object.group_set);
                 // Are the groups different?
                 if shape_entry.groups != current_entry.groups {
                     let mut new_groups = vec![];
@@ -663,8 +661,6 @@ impl CompositorInstructions {
                     statements.push(GroupingStatement::G(new_groups));
                 }
 
-                eprintln!("current_entry.smoothing_group = {:?}", current_entry.smoothing_group);
-                eprintln!("object.smoothing_group_set = {:?}", object.smoothing_group_set);
                 // Are the smoothing groups different?
                 if shape_entry.smoothing_group != current_entry.smoothing_group {
                     statements.push(GroupingStatement::S(
@@ -692,8 +688,6 @@ impl CompositorInstructions {
 
         statements.push(GroupingStatement::G(new_groups));
 
-        eprintln!("current_entry.smoothing_group = {}", current_entry.smoothing_group);
-        eprintln!("object.smoothing_group_set = {:?}", object.smoothing_group_set);
         // Are the smoothing groups different?
         statements.push(GroupingStatement::S(
             object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])
@@ -903,7 +897,7 @@ impl Compositor for TextObjectSetCompositor {
         let compositor = TextObjectCompositor::new();
         
         let mut string = String::new();
-        for (i, object_i) in object_set.iter().enumerate() {
+        for (i, object_i) in object_set.iter().enumerate().map(|(i, obj)| (i + 1, obj)) {
             string += &format!("#### BEGIN Object {}\n", i);
             string += &compositor.compose(&object_i);
             string += &format!("#### END Object {}\n", i);

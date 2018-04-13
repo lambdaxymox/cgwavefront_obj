@@ -307,7 +307,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         let object_count = 1;
 
         let mut objects = vec![];
-        for index in 0..object_count {
+        for index in 1..(object_count + 1) {
             let object = self.gen_object(g, index);
             objects.push(object);
         }
@@ -324,14 +324,14 @@ impl Arbitrary for ParserModel {
 }
 
 #[derive(Clone, Debug)]
-struct Machine { 
+struct Oracle { 
     model: ParserModel, 
     text: String,
 }
 
-impl Machine {
-    fn new(model: ParserModel, text: String) -> Machine {
-        Machine { model: model, text: text }
+impl Oracle {
+    fn new(model: ParserModel, text: String) -> Oracle {
+        Oracle { model: model, text: text }
     }
 
     fn actual(&self) -> Parser<str::Chars> {
@@ -344,15 +344,15 @@ impl Machine {
     }
 }
 
-impl Arbitrary for Machine {
-    fn arbitrary<G: Gen>(g: &mut G) -> Machine {
+impl Arbitrary for Oracle {
+    fn arbitrary<G: Gen>(g: &mut G) -> Oracle {
         let model: ParserModel = Arbitrary::arbitrary(g);
         let text = TextObjectSetCompositor::new().compose(&model.data);
-        Machine::new(model, text)
+        Oracle::new(model, text)
     }
 }
 /*
-type PropertyFunc = Box<Fn(&Machine) -> bool>;
+type PropertyFunc = Box<Fn(&Oracle) -> bool>;
 
 struct Property {
     description: String,
@@ -368,7 +368,7 @@ impl Property {
         &self.description 
     }
 
-    fn property(&self, machine: &Machine) -> bool { 
+    fn property(&self, oracle: &Oracle) -> bool { 
         (self.prop)(machine)
     }
 }
@@ -382,7 +382,7 @@ impl Spec {
         Spec { props: props }
     }
 
-    fn satisfied_by(&self, machine: &Machine) -> bool {
+    fn satisfied_by(&self, oracle: &Oracle) -> bool {
         for prop in self.props {
 
         }
@@ -405,83 +405,83 @@ macro_rules! spec {
 
 #[test]
 fn prop_parser_satisfies_specification() {
-    fn property(spec: Spec, machine: Machine) -> bool {
+    fn property(spec: Spec, oracle: Oracle) -> bool {
         spec.satisfied_by(machine)
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 */
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             result.name == expected.name
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_vertices() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             result.vertex_set == expected.vertex_set
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_texture_vertices() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             result.texture_vertex_set == expected.texture_vertex_set
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_normal_vertices() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             result.normal_vertex_set == expected.normal_vertex_set
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             result.group_set == expected.group_set
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
 #[test]
 fn prop_parse_object_set_should_parse_smoothing_groups() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
-        eprintln!("TEXT GENERATED: \n\n{}\n\n", machine.model());
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
+        eprintln!("TEXT GENERATED: \n\n{}\n\n", oracle.model());
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             eprintln!("RESULT: \n{:?}\n", result.smoothing_group_set);
@@ -489,45 +489,45 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
             result.smoothing_group_set == expected.smoothing_group_set
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
 
 #[test]
 fn prop_parse_object_set_should_parse_elements() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             result.element_set == expected.element_set
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 /*
 #[test]
 fn prop_parse_object_set_should_parse_shape_entries() {
-    fn property(machine: Machine) -> bool {
-        let result_set = machine.actual().parse().unwrap();
-        let expected_set = machine.model().parse().unwrap();
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+        let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             result.shape_set == expected.shape_set
         })
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 */
 /*
 #[test]
 fn prop_parser_correctly_parses_valid_obj_files() {
-    fn property(machine: Machine) -> bool {
-        let result = machine.actual().parse();
-        let expected = machine.model().parse();
+    fn property(oracle: Oracle) -> bool {
+        let result = oracle.actual().parse();
+        let expected = oracle.model().parse();
 
         result == expected
     }
-    quickcheck::quickcheck(property as fn(Machine) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 */
