@@ -355,66 +355,8 @@ impl Arbitrary for Oracle {
         Oracle::new(model, text)
     }
 }
-/*
-type PropertyFunc = Box<Fn(&Oracle) -> bool>;
 
-struct Property {
-    description: String,
-    prop: PropertyFunc,
-}
 
-impl Property {
-    fn new(description: String, prop: PropertyFunc) -> Property {
-        Property { description: description, prop: prop }
-    }
-
-    fn description(&self) -> &str { 
-        &self.description 
-    }
-
-    fn property(&self, oracle: &Oracle) -> bool { 
-        (self.prop)(machine)
-    }
-}
-
-struct Spec {
-    props: Vec<Property>,
-}
-
-impl Spec {
-    fn new(props: Vec<Property>) -> Spec {
-        Spec { props: props }
-    }
-
-    fn satisfied_by(&self, oracle: &Oracle) -> bool {
-        for prop in self.props {
-
-        }
-
-        true
-    }
-}
-
-macro_rules! describe {
-    ($desc:expr, $prop:expr) => {
-        Property::new($desc, $prop)
-    }
-}
-
-macro_rules! spec {
-    ($ ( $prop:expr ), *) => {
-
-    }
-}
-
-#[test]
-fn prop_parser_satisfies_specification() {
-    fn property(spec: Spec, oracle: Oracle) -> bool {
-        spec.satisfied_by(machine)
-    }
-    quickcheck::quickcheck(property as fn(Oracle) -> bool);
-}
-*/
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
     fn property(oracle: Oracle) -> bool {
