@@ -39,15 +39,13 @@ impl fmt::Display for ParserModel {
     }
 }
 
-struct ObjectSetGen<G> { 
+struct ObjectGenerator<G> {
     _marker: marker::PhantomData<G>,
 }
 
-impl<G> ObjectSetGen<G> where G: Gen {
+impl<G> ObjectGenerator<G> where G: Gen {
     fn new() -> Self { 
-        ObjectSetGen { 
-            _marker: marker::PhantomData 
-        } 
+        Self { _marker: marker::PhantomData } 
     }
 
     fn gen_vertex(&self, g: &mut G, use_w: bool) -> Vertex {
@@ -303,16 +301,30 @@ impl<G> ObjectSetGen<G> where G: Gen {
         builder.build()
     }
 
+    fn generate(&self, g: &mut G, index: usize) -> Object {
+        self.gen_object(g, index)
+    }
+}
+
+struct ObjectSetGen<G> { 
+    _marker: marker::PhantomData<G>,
+}
+
+impl<G> ObjectSetGen<G> where G: Gen {
+    fn new() -> Self { 
+        Self { _marker: marker::PhantomData } 
+    }
+
     fn generate(&self, g: &mut G) -> ObjectSet {
         // We want one object sets to appear frequently since that is the most
         // commonly encountered case in the wild.
+        let object_gen = ObjectGenerator::new();
         let one_obj: bool = Arbitrary::arbitrary(g);
         let object_count = if one_obj { 1 } else { g.gen_range(2, 6) };
-        //let object_count = 1;
 
         let mut objects = vec![];
         for index in 1..(object_count + 1) {
-            let object = self.gen_object(g, index);
+            let object = object_gen.generate(g, index);
             objects.push(object);
         }
 
