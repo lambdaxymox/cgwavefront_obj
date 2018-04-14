@@ -598,6 +598,40 @@ fn prop_every_element_belongs_to_a_group() {
 }
 
 #[test]
+fn prop_every_smoothing_group_exists() {
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+
+        result_set.iter().all(|result| {
+            result.shape_set.iter().all(|shape_entry| {
+                result.smoothing_group_set.get((shape_entry.smoothing_group - 1) as usize).is_some()
+            })
+        })
+    }
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
+}
+
+#[test]
+fn prop_every_smoothing_group_has_at_least_one_element() {
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+
+        result_set.iter().all(|result| !result.smoothing_group_set.is_empty())
+    }
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
+}
+
+#[test]
+fn prop_every_group_has_at_least_one_element() {
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+
+        result_set.iter().all(|result| !result.group_set.is_empty())
+    }
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);
+}
+
+#[test]
 fn prop_every_shape_entry_element_exists() {
     fn property(oracle: Oracle) -> bool {
         let result_set = oracle.actual().parse().unwrap();
@@ -612,16 +646,44 @@ fn prop_every_shape_entry_element_exists() {
 }
 
 #[test]
-fn prop_every_smoothing_group_exists() {
+fn prop_every_shape_entry_element_index_is_nonzero() {
     fn property(oracle: Oracle) -> bool {
         let result_set = oracle.actual().parse().unwrap();
 
         result_set.iter().all(|result| {
             result.shape_set.iter().all(|shape_entry| {
-                result.smoothing_group_set.get((shape_entry.smoothing_group - 1) as usize).is_some()
+                shape_entry.smoothing_group > 0
             })
         })
     }
-    quickcheck::quickcheck(property as fn(Oracle) -> bool);
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);   
+}
+
+#[test]
+fn prop_every_shape_entry_group_index_is_nonzero() {
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+
+        result_set.iter().all(|result| {
+            result.shape_set.iter().all(|shape_entry| {
+                shape_entry.groups.iter().all(|&group_index| group_index > 0)
+            })
+        })
+    }
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);   
+}
+
+#[test]
+fn prop_every_shape_entry_smoothing_group_index_is_nonzero() {
+    fn property(oracle: Oracle) -> bool {
+        let result_set = oracle.actual().parse().unwrap();
+
+        result_set.iter().all(|result| {
+            result.shape_set.iter().all(|shape_entry| {
+                shape_entry.smoothing_group > 0
+            })
+        })
+    }
+    quickcheck::quickcheck(property as fn(Oracle) -> bool);   
 }
 
