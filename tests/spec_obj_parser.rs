@@ -568,7 +568,7 @@ fn prop_parser_correctly_parses_valid_obj_files() {
 }
 
 #[test]
-fn prop_parse_object_set_every_shape_set_should_be_monotone_increasing() {
+fn prop_every_shape_set_should_be_monotone_increasing() {
     fn is_monotone(set: &[ShapeEntry]) -> bool {
         set[0..set.len()-1].iter().zip(set[1..set.len()].iter()).all(
             |(shape_entry, next_shape_entry)| { shape_entry.element <= next_shape_entry.element }
@@ -584,7 +584,7 @@ fn prop_parse_object_set_every_shape_set_should_be_monotone_increasing() {
 }
 
 #[test]
-fn prop_parse_object_every_element_belongs_to_a_group() {
+fn prop_every_element_belongs_to_a_group() {
     fn property(oracle: Oracle) -> bool {
         let result_set = oracle.actual().parse().unwrap();
 
@@ -598,7 +598,7 @@ fn prop_parse_object_every_element_belongs_to_a_group() {
 }
 
 #[test]
-fn prop_parse_object_every_shape_entry_element_exists() {
+fn prop_every_shape_entry_element_exists() {
     fn property(oracle: Oracle) -> bool {
         let result_set = oracle.actual().parse().unwrap();
 
@@ -612,7 +612,7 @@ fn prop_parse_object_every_shape_entry_element_exists() {
 }
 
 #[test]
-fn prop_parse_object_every_element_smoothing_group_exists() {
+fn prop_every_smoothing_group_exists() {
     fn property(oracle: Oracle) -> bool {
         let result_set = oracle.actual().parse().unwrap();
 
