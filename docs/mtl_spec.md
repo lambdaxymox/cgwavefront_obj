@@ -5,10 +5,8 @@ Documentation created by: Diane Ramey, Linda Rose, and Lisa Tyerman
 Copyright 1995 Alias|Wavefront, Inc.
 All rights reserved
 
-
  
 ### 5.  Material Library File (.mtl)
- 
 Material library files contain one or more material definitions, each 
 of which includes the color, texture, and reflection map of individual 
 materials.  These are applied to the surfaces and vertices of objects.  
@@ -18,74 +16,70 @@ An .mtl file differs from other Alias|Wavefront property files, such as
 light and atmosphere files, in that it can contain more than one 
 material definition (other files contain the definition of only one 
 item).
- 
+
 An .mtl file is typically organized as shown below.
+```
+newmtl my_red
+    Material color
+    & illumination
+    statements
  
+    texture map
+    statements
  
-    newmtl my_red
-        Material color
-        & illumination
-        statements
+    reflection map
+    statement
  
-        texture map
-        statements
+newmtl my_blue
+    Material color
+    & illumination
+    statements
  
-        reflection map
-        statement
+    texture map
+    statements
  
-    newmtl my_blue
-        Material color
-        & illumination
-        statements
+    reflection map
+    statement
  
-        texture map
-        statements
+newmtl my_green
+    Material color
+    & illumination
+    statements
  
-        reflection map
-        statement
+    texture map
+    statements
  
-    newmtl my_green
-        Material color
-        & illumination
-        statements
+    reflection map
+    statement
  
-        texture map
-        statements
- 
-        reflection map
-        statement
- 
-    Figure 5-1.  Typical organization of .mtl file
- 
- 
+Figure 5-1.  Typical organization of .mtl file
+```
 Each material description in an .mtl file consists of the newmtl 
 statement, which assigns a name to the material and designates the start 
 of a material description.  This statement is followed by the material 
 color, texture map, and reflection map statements that describe the 
 material.  An .mtl file map contain many different material 
 descriptions.
- 
-After you specify a new material with the "newmtl" statement, you can 
+
+After you specify a new material with the `newmtl` statement, you can 
 enter the statements that describe the materials in any order.  However, 
 when the Property Editor writes an .mtl file, it puts the statements in 
 a system-assigned order.  In this chapter, the statements are described 
 in the system-assigned order.
  
- 
 ### Format
- 
 The following is a sample format for a material definition in an .mtl 
 file:
+```
+Material
+name
+statement:
+       newmtl my_mtl
  
- Material
- name
- statement:
-        newmtl my_mtl
- 
- Material
- color and
- illumination
- statements:
+Material
+color and
+illumination
+statements:
         Ka 0.0435 0.0435 0.0435
         Kd 0.1086 0.1086 0.1086
         Ks 0.0000 0.0000 0.0000
@@ -96,9 +90,9 @@ file:
         sharpness 60
         Ni 1.19713
  
- Texture
- map
- statements:
+Texture
+map
+statements:
         map_Ka -s 1 1 1 -o 0 0 0 -mm 0 1 chrome.mpc
         map_Kd -s 1 1 1 -o 0 0 0 -mm 0 1 chrome.mpc
         map_Ks -s 1 1 1 -o 0 0 0 -mm 0 1 chrome.mpc
@@ -108,223 +102,215 @@ file:
         decal -s 1 1 1 -o 0 0 0 -mm 0 1 sand.mps
         bump -s 1 1 1 -o 0 0 0 -bm 1 sand.mpb
  
- Reflection
- map
- statement:
+Reflection
+map
+statement:
         refl -type sphere -mm 0 1 clouds.mpc
+
+```
+#### Material Name
+The material name statement assigns a name to the material description.
  
- 
- Material Name
- 
- The material name statement assigns a name to the material description.
- 
-### Syntax
- The folowing syntax describes the material name statement.
- 
+#### Syntax
+The folowing syntax describes the material name statement.
+```
     newmtl name
- 
+```
 Specifies the start of a material description and assigns a name to the 
-material.  An .mtl file must have one newmtl statement at the start of 
+material.  An .mtl file must have one `newmtl` statement at the start of 
 each material description.
  
-    "name" is the name of the material.  Names may be any length but 
+`name` is the name of the material.  Names may be any length but 
 cannot include blanks.  Underscores may be used in material names.
  
- 
- Material color and illumination
- 
+### Material Color and Illumination
 The statements in this section specify color, transparency, and 
 reflectivity values.
  
- Syntax
+#### Syntax
 The following syntax describes the material color and illumination 
 statements that apply to all .mtl files.
- 
- 
-    Ka r g b
-    Ka spectral file.rfl factor
-    Ka xyz x y z
- 
+```
+Ka r g b
+Ka spectral file.rfl factor
+Ka xyz x y z
+```
 To specify the ambient reflectivity of the current material, you can 
-use the "Ka" statement, the "Ka spectral" statement, or the "Ka xyz" 
+use the `Ka` statement, the `Ka spectral` statement, or the `Ka xyz` 
 statement.
  
- Tip    These statements are mutually exclusive.  They cannot be used 
+**Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
+```
+Ka r g b
+```
+The `Ka` statement specifies the ambient reflectivity using RGB values.
  
- Ka r g b
- 
-The Ka statement specifies the ambient reflectivity using RGB values.
- 
-"r g b" are the values for the red, green, and blue components of the 
-color.  The g and b arguments are optional.  If only r is specified, 
-then g, and b are assumed to be equal to r.  The r g b values are 
+`r g b` are the values for the red, green, and blue components of the 
+color.  The `g` and `b` arguments are optional.  If only `r` is specified, 
+then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values are 
 normally in the range of 0.0 to 1.0.  Values outside this range increase 
 or decrease the relectivity accordingly.
- 
- Ka spectral file.rfl factor
- 
-The "Ka spectral" statement specifies the ambient reflectivity using a 
+```
+Ka spectral file.rfl factor
+```
+The `Ka spectral` statement specifies the ambient reflectivity using a 
 spectral curve.
- 
- "file.rfl" is the name of the .rfl file.
- "factor" is an optional argument.
- "factor" is a multiplier for the values in the .rfl file and defaults 
+
+`file.rfl` is the name of the .rfl file.
+`factor` is an optional argument.
+`factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
- 
- Ka xyz x y z
- 
-The "Ka xyz" statement specifies the ambient reflectivity using CIEXYZ 
+```
+Ka xyz x y z
+```
+The `Ka xyz` statement specifies the ambient reflectivity using CIEXYZ 
 values.
  
-"x y z" are the values of the CIEXYZ color space.  The y and z 
-arguments are optional.  If only x is specified, then y and z are 
-assumed to be equal to x.  The x y z values are normally in the range of 
+`x y z` are the values of the CIEXYZ color space.  The `y` and `z` 
+arguments are optional.  If only `x` is specified, then `y` and `z` are 
+assumed to be equal to `x`.  The `x y z` values are normally in the range of 
 0 to 1.  Values outside this range increase or decrease the reflectivity 
 accordingly.
- 
- 
-    Kd r g b
-    Kd spectral file.rfl factor
-    Kd xyz x y z
- 
+```
+Kd r g b
+Kd spectral file.rfl factor
+Kd xyz x y z
+```
 To specify the diffuse reflectivity of the current material, you can 
-use the "Kd" statement, the "Kd spectral" statement, or the "Kd xyz" 
+use the `Kd` statement, the `Kd spectral` statement, or the `Kd xyz` 
 statement.
  
-Tip    These statements are mutually exclusive.  They cannot be used 
+**Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
+```
+Kd r g b
+```
+The `Kd` statement specifies the diffuse reflectivity using RGB values.
  
- Kd r g b
- 
-The Kd statement specifies the diffuse reflectivity using RGB values.
- 
-"r g b" are the values for the red, green, and blue components of the 
-atmosphere.  The g and b arguments are optional.  If only r is 
-specified, then g, and b are assumed to be equal to r.  The r g b values 
+`r g b` are the values for the red, green, and blue components of the 
+atmosphere.  The `g` and `b` arguments are optional.  If only `r` is 
+specified, then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values 
 are normally in the range of 0.0 to 1.0.  Values outside this range 
 increase or decrease the relectivity accordingly.
- 
+```
  Kd spectral file.rfl factor
- 
-The "Kd spectral" statement specifies the diffuse reflectivity using a 
+```
+The `Kd spectral` statement specifies the diffuse reflectivity using a 
 spectral curve.
  
- "file.rfl" is the name of the .rfl file.
- "factor" is an optional argument.
- "factor" is a multiplier for the values in the .rfl file and defaults 
+`file.rfl` is the name of the .rfl file.
+`factor` is an optional argument.
+`factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
- 
- Kd xyz x y z
- 
-The "Kd xyz" statement specifies the diffuse reflectivity using CIEXYZ 
+```
+Kd xyz x y z
+```
+The `Kd xyz` statement specifies the diffuse reflectivity using CIEXYZ 
 values.
  
-"x y z" are the values of the CIEXYZ color space.  The y and z 
-arguments are optional.  If only x is specified, then y and z are 
-assumed to be equal to x.  The x y z values are normally in the range of 
+`x y z` are the values of the CIEXYZ color space.  The `y` and `z` 
+arguments are optional.  If only `x` is specified, then `y` and `z` are 
+assumed to be equal to `x`.  The `x y z` values are normally in the range of 
 0 to 1.  Values outside this range increase or decrease the reflectivity 
 accordingly.
- 
- 
-    Ks r g b
-    Ks spectral file.rfl factor
-    Ks xyz x y z
- 
+```
+Ks r g b
+Ks spectral file.rfl factor
+Ks xyz x y z
+```
 To specify the specular reflectivity of the current material, you can 
-use the "Ks" statement, the "Ks spectral" statement, or the "Ks xyz" 
+use the `Ks` statement, the `Ks spectral` statement, or the `Ks xyz` 
 statement.
  
-Tip    These statements are mutually exclusive.  They cannot be used 
+**Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
- 
- Ks r g b
- 
-The Ks statement specifies the specular reflectivity using RGB values.
- 
-"r g b" are the values for the red, green, and blue components of the 
-atmosphere.  The g and b arguments are optional.  If only r is 
-specified, then g, and b are assumed to be equal to r.  The r g b values 
+```
+Ks r g b
+```
+The `Ks` statement specifies the specular reflectivity using RGB values.
+
+`r g b` are the values for the red, green, and blue components of the 
+atmosphere.  The `g` and `b` arguments are optional.  If only `r` is 
+specified, then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values 
 are normally in the range of 0.0 to 1.0.  Values outside this range 
 increase or decrease the relectivity accordingly.
- 
- Ks spectral file.rfl factor
- 
-The "Ks spectral" statement specifies the specular reflectivity using a 
+```
+Ks spectral file.rfl factor
+```
+The `Ks spectral` statement specifies the specular reflectivity using a 
 spectral curve.
- 
- "file.rfl" is the name of the .rfl file.
- "factor" is an optional argument.
- "factor" is a multiplier for the values in the .rfl file and defaults 
+
+`file.rfl` is the name of the .rfl file.
+`factor` is an optional argument.
+`factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
- 
- Ks xyz x y z
- 
-The "Ks xyz" statement specifies the specular reflectivity using CIEXYZ 
+``` 
+Ks xyz x y z
+```
+The `Ks xyz` statement specifies the specular reflectivity using CIEXYZ 
 values.
- 
-"x y z" are the values of the CIEXYZ color space.  The y and z 
-arguments are optional.  If only x is specified, then y and z are 
-assumed to be equal to x.  The x y z values are normally in the range of 
+
+`x y z` are the values of the CIEXYZ color space.  The `y` and `z` 
+arguments are optional.  If only `x` is specified, then `y` and `z` are 
+assumed to be equal to `x`.  The `x y z` values are normally in the range of 
 0 to 1.  Values outside this range increase or decrease the reflectivity 
 accordingly.
- 
- 
-    Tf r g b
-    Tf spectral file.rfl factor
-    Tf xyz x y z
- 
+```
+Tf r g b
+Tf spectral file.rfl factor
+Tf xyz x y z
+```
 To specify the transmission filter of the current material, you can use 
-the "Tf" statement, the "Tf spectral" statement, or the "Tf xyz" 
+the `Tf` statement, the `Tf spectral` statement, or the `Tf xyz` 
 statement.
  
 Any light passing through the object is filtered by the transmission 
 filter, which only allows the specifiec colors to pass through.  For 
-example, Tf 0 1 0 allows all the green to pass through and filters out 
+example, `Tf 0 1 0` allows all the green to pass through and filters out 
 all the red and blue.
  
-Tip    These statements are mutually exclusive.  They cannot be used 
+**Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
+```
+Tf r g b
+```
+The `Tf` statement specifies the transmission filter using RGB values.
  
- Tf r g b
- 
-The Tf statement specifies the transmission filter using RGB values.
- 
- "r g b" are the values for the red, green, and blue components of the 
-atmosphere.  The g and b arguments are optional.  If only r is 
-specified, then g, and b are assumed to be equal to r.  The r g b values 
+`r g b` are the values for the red, green, and blue components of the 
+atmosphere.  The `g` and `b` arguments are optional.  If only `r` is 
+specified, then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values 
 are normally in the range of 0.0 to 1.0.  Values outside this range 
 increase or decrease the relectivity accordingly.
- 
+```
 Tf spectral file.rfl factor
- 
-The "Tf spectral" statement specifies the transmission filterusing a 
+```
+The `Tf spectral` statement specifies the transmission filterusing a 
 spectral curve.
- 
- "file.rfl" is the name of the .rfl file.
- "factor" is an optional argument.
- "factor" is a multiplier for the values in the .rfl file and defaults 
+
+`file.rfl` is the name of the .rfl file.
+`factor` is an optional argument.
+`factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
- 
- Tf xyz x y z
- 
-The "Ks xyz" statement specifies the specular reflectivity using CIEXYZ 
+``` 
+Tf xyz x y z
+```
+The `Ks xyz` statement specifies the specular reflectivity using CIEXYZ 
 values.
  
-"x y z" are the values of the CIEXYZ color space.  The y and z 
-arguments are optional.  If only x is specified, then y and z are 
-assumed to be equal to x.  The x y z values are normally in the range of 
+`x y z` are the values of the CIEXYZ color space.  The `y` and `z` 
+arguments are optional.  If only `x` is specified, then `y` and `z` are 
+assumed to be equal to `x`.  The `x y z` values are normally in the range of 
 0 to 1.  Values outside this range will increase or decrease the 
 intensity of the light transmission accordingly.
- 
- 
- illum illum_#
- 
-The "illum" statement specifies the illumination model to use in the 
+```
+illum illum_#
+```
+The `illum` statement specifies the illumination model to use in the 
 material.  Illumination models are mathematical equations that represent 
 various material lighting and shading effects.
  
-"illum_#"can be a number from 0 to 10.  The illumination models are 
+`illum_#` can be a number from 0 to 10.  The illumination models are 
 summarized below; for complete descriptions see "Illumination models" on 
 page 5-30.
  
