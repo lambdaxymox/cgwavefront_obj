@@ -1,12 +1,12 @@
 # MTL Material Format (Lightwave, OBJ)
-Excerpt from FILE FORMATS, Version 4.2
-October 1995
-Documentation created by: Diane Ramey, Linda Rose, and Lisa Tyerman
-Copyright 1995 Alias|Wavefront, Inc.
-All rights reserved
+> Excerpt from FILE FORMATS, Version 4.2
+> October 1995
+> Documentation created by: Diane Ramey, Linda Rose, and Lisa Tyerman
+> Copyright 1995 Alias|Wavefront, Inc.
+> All rights reserved
 
  
-### 5.  Material Library File (.mtl)
+## 5.  Material Library File (.mtl)
 Material library files contain one or more material definitions, each 
 of which includes the color, texture, and reflection map of individual 
 materials.  These are applied to the surfaces and vertices of objects.  
@@ -67,7 +67,7 @@ when the Property Editor writes an .mtl file, it puts the statements in
 a system-assigned order.  In this chapter, the statements are described 
 in the system-assigned order.
  
-### Format
+## Format
 The following is a sample format for a material definition in an .mtl 
 file:
 ```
@@ -108,10 +108,10 @@ statement:
         refl -type sphere -mm 0 1 clouds.mpc
 
 ```
-#### Material Name
+### Material Name
 The material name statement assigns a name to the material description.
  
-#### Syntax
+### Syntax
 The folowing syntax describes the material name statement.
 ```
     newmtl name
@@ -123,11 +123,11 @@ each material description.
 `name` is the name of the material.  Names may be any length but 
 cannot include blanks.  Underscores may be used in material names.
  
-### Material Color and Illumination
+## Material Color and Illumination
 The statements in this section specify color, transparency, and 
 reflectivity values.
  
-#### Syntax
+### Syntax
 The following syntax describes the material color and illumination 
 statements that apply to all .mtl files.
 ```
@@ -313,28 +313,28 @@ various material lighting and shading effects.
 `illum_#` can be a number from 0 to 10.  The illumination models are 
 summarized below; for complete descriptions see "Illumination models" on 
 page 5-30.
+```
+Illumination    Properties that are turned on in the 
+model           Property Editor
  
- Illumination    Properties that are turned on in the 
- model           Property Editor
+0      Color on and Ambient off
+1      Color on and Ambient on
+2      Highlight on
+3      Reflection on and Ray trace on
+4      Transparency: Glass on
+       Reflection: Ray trace on
+5      Reflection: Fresnel on and Ray trace on
+6      Transparency: Refraction on
+       Reflection: Fresnel off and Ray trace on
+7      Transparency: Refraction on
+       Reflection: Fresnel on and Ray trace on
+8      Reflection on and Ray trace off
+9      Transparency: Glass on
+       Reflection: Ray trace off
+10     Casts shadows onto invisible surfaces
+```
  
- 0      Color on and Ambient off
- 1      Color on and Ambient on
- 2      Highlight on
- 3      Reflection on and Ray trace on
- 4      Transparency: Glass on
-        Reflection: Ray trace on
- 5      Reflection: Fresnel on and Ray trace on
- 6      Transparency: Refraction on
-        Reflection: Fresnel off and Ray trace on
- 7      Transparency: Refraction on
-        Reflection: Fresnel on and Ray trace on
- 8      Reflection on and Ray trace off
- 9      Transparency: Glass on
-        Reflection: Ray trace off
- 10     Casts shadows onto invisible surfaces
- 
- 
- d factor
+#### d factor
  
 Specifies the dissolve for the current material.
  
