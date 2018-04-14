@@ -307,8 +307,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
         // We want one object sets to appear frequently since that is the most
         // commonly encountered case in the wild.
         let one_obj: bool = Arbitrary::arbitrary(g);
-        //let object_count = if one_obj { 1 } else { g.gen_range(2, 10) };
-        let object_count = 1;
+        let object_count = if one_obj { 1 } else { g.gen_range(2, 4) };
+        //let object_count = 1;
 
         let mut objects = vec![];
         for index in 1..(object_count + 1) {
