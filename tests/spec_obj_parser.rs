@@ -109,6 +109,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
     fn gen_slices(&self, g: &mut G, 
         range: (usize, usize), count: usize) -> Vec<(usize, usize)> {
 
+        assert!(range.0 > 0);
         assert!(range.0 < range.1);
 
         let mut indices = vec![range.0];
@@ -124,6 +125,8 @@ impl<G> ObjectSetGen<G> where G: Gen {
         }
 
         assert_eq!(slices.len(), count);
+        assert!(slices.iter().all(|slice| slice.0 > 0));
+        assert!(slices.iter().all(|slice| slice.0 <= slice.1));
         slices
     }
 
@@ -175,12 +178,13 @@ impl<G> ObjectSetGen<G> where G: Gen {
             return group_set;
         }
 
+        assert!(count > 1);
+
         for i in 0..count {
             let group_i = Group::new(&format!("Group{}", i));
             group_set.push(group_i);
         }
 
-        assert!(count > 1);
         assert_eq!(group_set.len(), count);
         group_set
     }
@@ -204,29 +208,30 @@ impl<G> ObjectSetGen<G> where G: Gen {
         smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]) -> ShapeSet {
         
         assert!(group_slices.len() > 0);
-        assert!(group_set.len() > 0);
         assert!(group_slices.len() == group_set.len());
-        assert!(smoothing_group_slices.len() > 0);
-        assert!(smoothing_group_set.len() > 0);
-        assert!(smoothing_group_slices.len() == smoothing_group_set.len());
+        assert!(group_set.len() > 0);
         assert!(group_set.iter().all(|&index| index > 0));
+        assert!(smoothing_group_slices.len() > 0);
+        assert!(smoothing_group_slices.len() == smoothing_group_set.len());
+        assert!(smoothing_group_set.len() > 0);
         assert!(smoothing_group_set.iter().all(|&index| index > 0));
 
         let mut shape_set = vec![];
-        for i in 0..group_slices.len() {
-            for j in group_slices[i].0..group_slices[i].1 {
-                let shape_entry = ShapeEntry::new(j as u32, &group_set[i..(i + 1)], 1);
+        for i in 1..(group_slices.len() + 1) {
+            for j in group_slices[i - 1].0..group_slices[i - 1].1 {
+                let shape_entry = ShapeEntry::new(j as u32, &group_set[(i - 1)..i], 1);
                 shape_set.push(shape_entry);
             }
         }
 
         // The group slices should contain the entire range of elements
         // in the element set, and no more.
+        assert!(shape_set.iter().all(|shape_entry| shape_entry.element > 0));
         assert_eq!(shape_set.len(), element_set.len());
 
-        for i in 0..smoothing_group_slices.len() {
-            for j in smoothing_group_slices[i].0..smoothing_group_slices[i].1 {
-                shape_set[j].smoothing_group = smoothing_group_set[i];
+        for i in 1..(smoothing_group_slices.len() + 1) {
+            for j in smoothing_group_slices[i - 1].0..smoothing_group_slices[i - 1].1 {
+                shape_set[j - 1].smoothing_group = smoothing_group_set[i - 1];
             }
         }
 
@@ -234,11 +239,9 @@ impl<G> ObjectSetGen<G> where G: Gen {
         // of the shape set.
         assert_eq!(shape_set.len(), element_set.len());
         // Wavefront OBJ files are one-indexed in element, vertices, groups, etc.
-        assert!(shape_set.iter().all(|shape_entry| {
-            shape_entry.groups.iter().all(|&group_index| group_index > 0) &&
-            shape_entry.smoothing_group > 0
-        }));
-
+        assert!(shape_set.iter().all(|shape_entry| shape_entry.element > 0));
+        assert!(shape_set.iter().all(|shape_entry| shape_entry.groups.iter().all(|&group_index| group_index > 0)));
+        assert!(shape_set.iter().all(|shape_entry| shape_entry.smoothing_group > 0));
         shape_set
     }
 
@@ -271,12 +274,12 @@ impl<G> ObjectSetGen<G> where G: Gen {
 
         let use_g_default: bool = Arbitrary::arbitrary(g);
         let group_count = self.gen_group_count(g, use_g_default);
-        let group_slices = self.gen_slices(g, (0, element_set.len()), group_count);
+        let group_slices = self.gen_slices(g, (1, element_set.len() + 1), group_count);
         let group_set = self.gen_group_set(use_g_default, group_count);
 
         let smoothing_group_count = g.gen_range(1, 10);
         let smoothing_group_slices = self.gen_slices(
-            g, (0, element_set.len()), smoothing_group_count
+            g, (1, element_set.len() + 1), smoothing_group_count
         );
         let smoothing_group_set = self.gen_smoothing_group_set(smoothing_group_count);
 
