@@ -114,7 +114,7 @@ The material name statement assigns a name to the material description.
 ### Syntax
 The folowing syntax describes the material name statement.
 ```
-    newmtl name
+newmtl name
 ```
 Specifies the start of a material description and assigns a name to the 
 material.  An .mtl file must have one `newmtl` statement at the start of 
@@ -141,9 +141,8 @@ statement.
  
 **Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
-```
-Ka r g b
-```
+
+#### Ka r g b
 The `Ka` statement specifies the ambient reflectivity using RGB values.
  
 `r g b` are the values for the red, green, and blue components of the 
@@ -151,9 +150,8 @@ color.  The `g` and `b` arguments are optional.  If only `r` is specified,
 then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values are 
 normally in the range of 0.0 to 1.0.  Values outside this range increase 
 or decrease the relectivity accordingly.
-```
-Ka spectral file.rfl factor
-```
+
+#### Ka spectral file.rfl factor
 The `Ka spectral` statement specifies the ambient reflectivity using a 
 spectral curve.
 
