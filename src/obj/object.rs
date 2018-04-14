@@ -718,9 +718,8 @@ impl CompositorInstructions {
             instructions.insert(*interval, statements);
         }
 
-        debug_assert!(
-            instructions.len() == missing_groups.len() && missing_groups.len() == found_groups.len()
-        );
+        debug_assert!(instructions.len() == missing_groups.len());
+        debug_assert!(missing_groups.len() == found_groups.len());
         debug_assert!(
             instructions.keys().zip(missing_groups.keys().zip(found_groups.keys())).all(
                 |(instr_key, (mg_key, fg_key))| { instr_key == mg_key && mg_key == fg_key }
