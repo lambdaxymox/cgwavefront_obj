@@ -482,11 +482,8 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
     fn property(oracle: Oracle) -> bool {
         let result_set = oracle.actual().parse().unwrap();
         let expected_set = oracle.model().parse().unwrap();
-        eprintln!("TEXT GENERATED: \n\n{}\n\n", oracle.model());
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
-            eprintln!("RESULT: \n{:?}\n", result.smoothing_group_set);
-            eprintln!("EXPECTED: \n{:?}\n", expected.smoothing_group_set);
             result.smoothing_group_set == expected.smoothing_group_set
         })
     }
@@ -512,8 +509,11 @@ fn prop_parse_object_set_should_parse_shape_entries() {
     fn property(oracle: Oracle) -> bool {
         let result_set = oracle.actual().parse().unwrap();
         let expected_set = oracle.model().parse().unwrap();
+        eprintln!("TEXT GENERATED: \n\n{}\n\n", oracle.model());
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            eprintln!("RESULT: \n{:?}\n", result.shape_set);
+            eprintln!("EXPECTED: \n{:?}\n", expected.shape_set);
             result.shape_set == expected.shape_set
         })
     }

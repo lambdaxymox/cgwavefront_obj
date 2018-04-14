@@ -549,8 +549,6 @@ impl CompositorInstructions {
             ));
         }
 
-        //missing_groups.insert((1, 1), initial_statements);
-
         // In order to fill in the missing groups and smoothing groups, we need to know
         // which groups and smoothing groups are occupied in the object. After that, we
         // can determine which groups are missing and fill them in.
@@ -643,37 +641,43 @@ impl CompositorInstructions {
 
     fn generate_found_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
         let mut found_groups = BTreeMap::new();
-
         let mut min_element_index = 1;
         let mut max_element_index = 1;
-
-        let initial_statements = vec![];
-        found_groups.insert((min_element_index, max_element_index), initial_statements);
-
+        let mut current_statements = vec![];
         let mut current_entry = &object.shape_set[0];
+
+        let new_groups = current_entry.groups.iter().fold(vec![], |mut acc, group_index| {
+            acc.push(object.group_set[(group_index - 1) as usize].clone());
+            acc
+        });
+        current_statements.push(GroupingStatement::G(new_groups));
+        current_statements.push(GroupingStatement::S(
+            object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])
+        );
+
         for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
 
-                let mut statements = vec![];
+                found_groups.insert((min_element_index, max_element_index), current_statements);
+
+                current_statements = vec![];
+
                 // Are the groups different?
                 if shape_entry.groups != current_entry.groups {
-                    let mut new_groups = vec![];
-                    for group_index in current_entry.groups.iter() {
-                        new_groups.push(object.group_set[(group_index - 1) as usize].clone());
-                    }
-
-                    statements.push(GroupingStatement::G(new_groups));
+                    let new_groups = shape_entry.groups.iter().fold(vec![], |mut acc, group_index| {
+                        acc.push(object.group_set[(group_index - 1) as usize].clone());
+                        acc
+                    });
+                    current_statements.push(GroupingStatement::G(new_groups));
                 }
-
+                
                 // Are the smoothing groups different?
                 if shape_entry.smoothing_group != current_entry.smoothing_group {
-                    statements.push(GroupingStatement::S(
-                        object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])
+                    current_statements.push(GroupingStatement::S(
+                        object.smoothing_group_set[(shape_entry.smoothing_group - 1) as usize])
                     );
                 }
-
-                found_groups.insert((min_element_index, max_element_index), statements);
 
                 current_entry = shape_entry;
                 min_element_index = max_element_index;
@@ -681,27 +685,13 @@ impl CompositorInstructions {
 
             // We have processed this group element.
             max_element_index += 1;
-
         }
         
-        // Are the groups different?
-        let mut statements = vec![];
-        let mut new_groups = vec![];
-        for group_index in current_entry.groups.iter() {
-            new_groups.push(object.group_set[(group_index - 1) as usize].clone());
-        }
-
-        statements.push(GroupingStatement::G(new_groups));
-
-        // Are the smoothing groups different?
-        statements.push(GroupingStatement::S(
-            object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])
-        );
-
-        found_groups.insert((min_element_index, max_element_index), statements);
+        found_groups.insert((min_element_index, max_element_index), current_statements);
 
         // The last interval of empty groups and smoothing groups
-        // lies off the end of the element list.
+        // lies off the end of the element list. In the case of the found
+        // groups, there are none off the end of the element list.
         min_element_index = max_element_index;
 
         let final_statements = vec![];
@@ -989,7 +979,6 @@ mod compositor_tests {
                     ),
                     expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 1), vec![]),
                             ((1, 2), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::G(vec![Group::new("Group1")]),
@@ -1004,7 +993,6 @@ mod compositor_tests {
                     )),
                     expected_found_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 1), vec![]),
                             ((1, 2), vec![
                                 GroupingStatement::G(vec![Group::new("Group3")]),
                                 GroupingStatement::S(SmoothingGroup::new(1)),
@@ -1015,7 +1003,6 @@ mod compositor_tests {
                     )),
                     expected: CompositorInstructions::new(FromIterator::from_iter(
                         vec![
-                            ((1, 1), vec![]),
                             ((1, 2), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::G(vec![Group::new("Group1")]),
@@ -1159,7 +1146,6 @@ mod compositor_tests {
                     ),
                     expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 1), vec![]),
                             ((1, 4), vec![]),
                             ((4, 8), vec![
                                 GroupingStatement::G(vec![Group::new("Group1")]),
@@ -1170,7 +1156,6 @@ mod compositor_tests {
                     )),
                     expected_found_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 1), vec![]),
                             ((1, 4), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::S(SmoothingGroup::new(0)),
@@ -1187,7 +1172,6 @@ mod compositor_tests {
                     )),
                     expected: CompositorInstructions::new(FromIterator::from_iter(
                         vec![
-                            ((1, 1), vec![]),
                             ((1, 4), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::S(SmoothingGroup::new(0)),
