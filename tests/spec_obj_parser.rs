@@ -419,6 +419,7 @@ fn prop_parse_object_set_should_parse_object_names() {
         let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            assert_eq!(result.name, expected.name);
             result.name == expected.name
         })
     }
@@ -432,6 +433,7 @@ fn prop_parse_object_set_should_parse_vertices() {
         let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            assert_eq!(result.vertex_set, expected.vertex_set);
             result.vertex_set == expected.vertex_set
         })
     }
@@ -445,6 +447,7 @@ fn prop_parse_object_set_should_parse_texture_vertices() {
         let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            assert_eq!(result.texture_vertex_set, expected.texture_vertex_set);
             result.texture_vertex_set == expected.texture_vertex_set
         })
     }
@@ -458,6 +461,7 @@ fn prop_parse_object_set_should_parse_normal_vertices() {
         let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            assert_eq!(result.normal_vertex_set, expected.normal_vertex_set);
             result.normal_vertex_set == expected.normal_vertex_set
         })
     }
@@ -471,6 +475,7 @@ fn prop_parse_object_set_should_parse_groups() {
         let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            assert_eq!(result.group_set, expected.group_set);
             result.group_set == expected.group_set
         })
     }
@@ -484,6 +489,7 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
         let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            assert_eq!(result.smoothing_group_set, expected.smoothing_group_set);
             result.smoothing_group_set == expected.smoothing_group_set
         })
     }
@@ -498,6 +504,7 @@ fn prop_parse_object_set_should_parse_elements() {
         let expected_set = oracle.model().parse().unwrap();
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
+            assert_eq!(result.element_set, expected.element_set);
             result.element_set == expected.element_set
         })
     }
@@ -512,8 +519,7 @@ fn prop_parse_object_set_should_parse_shape_entries() {
         eprintln!("TEXT GENERATED: \n\n{}\n\n", oracle.model());
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
-            eprintln!("RESULT: \n{:?}\n", result.shape_set);
-            eprintln!("EXPECTED: \n{:?}\n", expected.shape_set);
+            assert_eq!(result.shape_set, expected.shape_set);
             result.shape_set == expected.shape_set
         })
     }
@@ -527,6 +533,7 @@ fn prop_parser_correctly_parses_valid_obj_files() {
         let result = oracle.actual().parse();
         let expected = oracle.model().parse();
 
+        assert_eq!(result, expected);
         result == expected
     }
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
