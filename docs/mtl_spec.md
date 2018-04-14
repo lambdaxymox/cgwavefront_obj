@@ -159,9 +159,8 @@ spectral curve.
 `factor` is an optional argument.
 `factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
-```
-Ka xyz x y z
-```
+
+#### Ka xyz x y z
 The `Ka xyz` statement specifies the ambient reflectivity using CIEXYZ 
 values.
  
@@ -181,9 +180,8 @@ statement.
  
 **Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
-```
-Kd r g b
-```
+
+#### Kd r g b
 The `Kd` statement specifies the diffuse reflectivity using RGB values.
  
 `r g b` are the values for the red, green, and blue components of the 
@@ -191,9 +189,8 @@ atmosphere.  The `g` and `b` arguments are optional.  If only `r` is
 specified, then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values 
 are normally in the range of 0.0 to 1.0.  Values outside this range 
 increase or decrease the relectivity accordingly.
-```
- Kd spectral file.rfl factor
-```
+
+#### Kd spectral file.rfl factor
 The `Kd spectral` statement specifies the diffuse reflectivity using a 
 spectral curve.
  
@@ -201,9 +198,8 @@ spectral curve.
 `factor` is an optional argument.
 `factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
-```
-Kd xyz x y z
-```
+
+#### Kd xyz x y z
 The `Kd xyz` statement specifies the diffuse reflectivity using CIEXYZ 
 values.
  
@@ -223,9 +219,8 @@ statement.
  
 **Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
-```
-Ks r g b
-```
+
+#### Ks r g b
 The `Ks` statement specifies the specular reflectivity using RGB values.
 
 `r g b` are the values for the red, green, and blue components of the 
@@ -233,9 +228,8 @@ atmosphere.  The `g` and `b` arguments are optional.  If only `r` is
 specified, then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values 
 are normally in the range of 0.0 to 1.0.  Values outside this range 
 increase or decrease the relectivity accordingly.
-```
-Ks spectral file.rfl factor
-```
+
+#### Ks spectral file.rfl factor
 The `Ks spectral` statement specifies the specular reflectivity using a 
 spectral curve.
 
@@ -243,9 +237,8 @@ spectral curve.
 `factor` is an optional argument.
 `factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
-``` 
-Ks xyz x y z
-```
+
+#### Ks xyz x y z
 The `Ks xyz` statement specifies the specular reflectivity using CIEXYZ 
 values.
 
@@ -270,9 +263,8 @@ all the red and blue.
  
 **Tip**    These statements are mutually exclusive.  They cannot be used 
 concurrently in the same material.
-```
-Tf r g b
-```
+
+#### Tf r g b
 The `Tf` statement specifies the transmission filter using RGB values.
  
 `r g b` are the values for the red, green, and blue components of the 
@@ -280,9 +272,8 @@ atmosphere.  The `g` and `b` arguments are optional.  If only `r` is
 specified, then `g`, and `b` are assumed to be equal to `r`.  The `r g b` values 
 are normally in the range of 0.0 to 1.0.  Values outside this range 
 increase or decrease the relectivity accordingly.
-```
-Tf spectral file.rfl factor
-```
+
+#### Tf spectral file.rfl factor
 The `Tf spectral` statement specifies the transmission filterusing a 
 spectral curve.
 
@@ -290,9 +281,8 @@ spectral curve.
 `factor` is an optional argument.
 `factor` is a multiplier for the values in the .rfl file and defaults 
 to 1.0, if not specified.
-``` 
-Tf xyz x y z
-```
+
+#### Tf xyz x y z
 The `Ks xyz` statement specifies the specular reflectivity using CIEXYZ 
 values.
  
@@ -301,9 +291,8 @@ arguments are optional.  If only `x` is specified, then `y` and `z` are
 assumed to be equal to `x`.  The `x y z` values are normally in the range of 
 0 to 1.  Values outside this range will increase or decrease the 
 intensity of the light transmission accordingly.
-```
-illum illum_#
-```
+
+#### illum illum_#
 The `illum` statement specifies the illumination model to use in the 
 material.  Illumination models are mathematical equations that represent 
 various material lighting and shading effects.
@@ -333,10 +322,9 @@ model           Property Editor
 ```
  
 #### d factor
- 
 Specifies the dissolve for the current material.
  
-"factor" is the amount this material dissolves into the background.  A 
+`factor` is the amount this material dissolves into the background.  A 
 factor of 1.0 is fully opaque.  This is the default when a new material 
 is created.  A factor of 0.0 is fully dissolved (completely 
 transparent).
@@ -344,62 +332,53 @@ transparent).
 Unlike a real transparent material, the dissolve does not depend upon 
 material thickness nor does it have any spectral character.  Dissolve 
 works on all illumination models.
- 
- d -halo factor
- 
+
+#### d -halo factor
 Specifies that a dissolve is dependent on the surface orientation 
 relative to the viewer.  For example, a sphere with the following 
-dissolve, d -halo 0.0, will be fully dissolved at its center and will 
+dissolve, `d -halo 0.0`, will be fully dissolved at its center and will 
 appear gradually more opaque toward its edge.
  
-"factor" is the minimum amount of dissolve applied to the material.  
+`factor` is the minimum amount of dissolve applied to the material.  
 The amount of dissolve will vary between 1.0 (fully opaque) and the 
-specified "factor".  The formula is:
+specified `factor`.  The formula is:
+```
+dissolve = 1.0 - (N*v)(1.0-factor)
+```
+For a definition of terms, see "Illumination models" on page 5-30.
  
- dissolve = 1.0 - (N*v)(1.0-factor)
- 
- For a definition of terms, see "Illumination models" on page 5-30.
- 
- 
- Ns exponent
- 
+#### Ns exponent
 Specifies the specular exponent for the current material.  This defines 
 the focus of the specular highlight.
  
-"exponent" is the value for the specular exponent.  A high exponent 
+`exponent` is the value for the specular exponent.  A high exponent 
 results in a tight, concentrated highlight.  Ns values normally range 
 from 0 to 1000.
- 
- 
- sharpness value
- 
+
+#### sharpness value
 Specifies the sharpness of the reflections from the local reflection 
 map.  If a material does not have a local reflection map defined in its 
 material definition, sharpness will apply to the global reflection map 
 defined in PreView.
  
-"value" can be a number from 0 to 1000.  The default is 60.  A high 
+`value` can be a number from 0 to 1000.  The default is 60.  A high 
 value results in a clear reflection of objects in the reflection map.
  
-Tip    Sharpness values greater than 100 map introduce aliasing effects 
+**Tip**    Sharpness values greater than 100 map introduce aliasing effects 
 in flat surfaces that are viewed at a sharp angle
  
- 
- Ni optical_density
- 
+#### Ni optical_density
 Specifies the optical density for the surface.  This is also known as 
 index of refraction.
  
-"optical_density" is the value for the optical density.  The values can 
+`optical_density` is the value for the optical density.  The values can 
 range from 0.001 to 10.  A value of 1.0 means that light does not bend 
 as it passes through an object.  Increasing the optical_density 
 increases the amount of bending.  Glass has an index of refraction of 
 about 1.5.  Values of less than 1.0 produce bizarre results and are not 
 recommended.
- 
- 
- Material texture map
- 
+
+### Material texture map
 Texture map statements modify the material parameters of a surface by 
 associating an image or texture file with material parameters that can 
 be mapped.  By modifying existing parameters instead of replacing them, 
@@ -410,82 +389,71 @@ Image files and texture files can be used interchangeably.  If you use
 an image file, that file is converted to a texture in memory and is 
 discarded after rendering.
  
-Tip Using images instead of textures saves disk space and setup time, 
+**Tip** Using images instead of textures saves disk space and setup time, 
 however, it introduces a small computational cost at the beginning of a 
 render.
- 
+
 The material parameters that can be modified by a texture map are:
- 
- - Ka (color)
- - Kd (color)
- - Ks (color)
- - Ns (scalar)
- - d (scalar)
- 
+* Ka (color)
+* Kd (color)
+* Ks (color)
+* Ns (scalar)
+* d (scalar)
+
 In addition to the material parameters, the surface normal can be 
 modified.
- 
- 
- Image file types
- 
+
+## Image file types
 You can link any image file type that is currently supported.  
 Supported image file types are listed in the chapter "About Image" in 
 the "Advanced Visualizer User's Guide".  You can also use the "im_info -
 a" command to list Image file types, among other things.
  
+## Texture file types
+The texture file types you can use are:
+* mip-mapped texture files (.mpc, .mps, .mpb)
+* compiled procedural texture files (.cxc, .cxs, .cxb)
  
- Texture file types
- 
- The texture file types you can use are:
- 
- - mip-mapped texture files (.mpc, .mps, .mpb)
- - compiled procedural texture files (.cxc, .cxs, .cxb)
- 
- 
- Mip-mapped texture files
- 
+### Mip-mapped texture files
 Mip-mapped texture files are created from images using the Create 
 Textures panel in the Director or the "texture2D" program.  There are 
 three types of texture files:
  
- - color texture files (.mpc)
- - scalar texture files (.mps)
- - bump texture files (.mpb)
+* color texture files (.mpc)
+* scalar texture files (.mps)
+* bump texture files (.mpb)
  
-Color textures.  Color texture files are designated by an extension of 
+**Color textures.**  Color texture files are designated by an extension of 
 ".mpc" in the filename, such as "chrome.mpc".  Color textures modify the 
 material color as follows:
  
- - Ka - material ambient is multiplied by the texture value
- - Kd - material diffuse is multiplied by the texture value
- - Ks - material specular is multiplied by the texture value
+* Ka - material ambient is multiplied by the texture value
+* Kd - material diffuse is multiplied by the texture value
+* Ks - material specular is multiplied by the texture value
  
-Scalar textures.  Scalar texture files are designated by an extension 
+**Scalar textures.**  Scalar texture files are designated by an extension 
 of ".mps" in the filename, such as "wisp.mps".  Scalar textures modify 
 the material scalar values as follows:
  
- - Ns - material specular exponent is multiplied by the texture value
- - d - material dissolve is multiplied by the texture value
- - decal - uses a scalar value to deform the surface of an object to 
+* Ns - material specular exponent is multiplied by the texture value
+* d - material dissolve is multiplied by the texture value
+* decal - uses a scalar value to deform the surface of an object to 
 create surface roughness
  
-Bump textures.  Bump texture files are designated by an extension of 
+**Bump textures.**  Bump texture files are designated by an extension of 
 ".mpb" in the filename, such as "sand.mpb".  Bump textures modify 
 surface normals.  The image used for a bump texture represents the 
 topology or height of the surface relative to the average surface.  Dark 
 areas are depressions and light areas are high points.  The effect is 
 like embossing the surface with the texture.
- 
- 
- Procedural texture files
- 
+
+## Procedural texture files
 Procedural texture files use mathematical formulas to calculate sample 
 values of the texture.  The procedural texture file is compiled, stored, 
 and accessed by the Image program when rendering.  for more information 
 see chapter 9, "Procedural Texture Files (.cxc, .cxb. and .cxs)".
  
- Syntax
- 
+### Syntax
 The following syntax describes the texture map statements that apply to 
 .mtl files.  These statements can be used alone or with any combination 
 of options.  The options and their arguments are inserted between the 
