@@ -1,10 +1,10 @@
 # Wavefront OBJ Parser Grammar
 
 ### Introduction
-This document contains the grammar extracted from the Wavefront OBJ file format specification used to implement the parser and lexer. See the docs subdirectory of the source tree for details. At this time the grammar centers mainly on parsing polygonal geometry, not free-form geometry. The grammar will not parse free-form geometry data.
+This document contains the grammar for the Wavefront OBJ file format. The grammar was extracted from the Wavefront OBJ file format specification. The parser and lexer implement the grammar contained here. See the docs in the source tree for more specific details on the file format. The grammar specifies polygonal geometry only. It does not recognize free-form geometry. 
 
 ### Grammar
-The grammar is written in Backus-Naur form. An `ObjectSet` is the collection of meshes that are extracted from a *.obj file. Typically there is only one object in an object set, but there can be more than one if the `o` tag is used to split them up.
+The grammar is written in Backus-Naur form. An `ObjectSet` is a collection of meshes that are extracted from a *.obj file. A mesh is composed of vertices, texture vertices, normal vertices, and geometry elements. Typically there is only one object in an object file, but there can be more than one. A wavefront obj file declares additional object in the same file by using an `o` statement for each object beyond the first one. The `o` statements are optional: it does not need to be stated in a file with only one element. The grammar is written bottom up; one infers the recursive descent structure of the parser by reading from the bottom to the top.
 ```
 Empty           ::= ''
 Digit           ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
@@ -47,7 +47,7 @@ ObjectSet       ::= [Object | ObjectBody] [Object]*
 ```
 
 ### Notation
-The following notation describes the extragrammatical symbols used in the grammar.
+There are several extragrammatical symbols used in the grammar.
 * A `[...]` without a `*` or `+` suffix denotes an optional field (zero or one instances).
 * A `[...]*` means zero or more symbols of that form.
 * A `[...]+` means one or more symbols of that form.
