@@ -2,6 +2,10 @@ pub mod object;
 pub mod parser;
 
 
+pub use obj::parser::parse;
+pub use obj::parser::parse_str;
+
+
 pub use obj::object::Vertex;
 pub use obj::object::TextureVertex;
 pub use obj::object::NormalVertex;

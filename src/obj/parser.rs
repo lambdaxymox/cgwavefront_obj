@@ -7,6 +7,23 @@ use lexer::Lexer;
 use std::iter;
 use std::error;
 use std::fmt;
+use std::io::{BufReader, Read};
+
+
+pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ParseError> {
+    let mut st = String::new();
+    let mut reader = BufReader::new(file);
+    let mut string = String::new();
+    reader.read_to_string(&mut string).unwrap();
+
+    let mut parser = Parser::new(string.chars());
+    parser.parse()
+}
+
+pub fn parse_str(st: &str) -> Result<ObjectSet, ParseError> {
+    let mut parser = Parser::new(st.chars());
+    parser.parse()
+}
 
 
 #[inline]
