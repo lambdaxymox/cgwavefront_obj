@@ -21,9 +21,9 @@ in your main file. This is all you need to use the it. The library loads all the
 
 ### License
 The `wavefront-obj` source code has two licenses you can choose from.
- * Apache License (Version 2.0) ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License (Version 2.0) ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+* MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 ### Notes
-* The Wavefront OBJ format does not contain information about how the mesh should be tesselated. It is up to the modeler to communicate with the end users on this.
+* The Wavefront OBJ format does not contain information about how polygons of vertex count larger than three should be be tesselated. It is up to the modeler to communicate this information to the end users.
 * All quadrilateral and higher vertex count faces must be either coplanar and convex, or coplanar and concave; either condition is necessary to get a correct rendering. Otherwise, the results of rendering will be unpredictable.
