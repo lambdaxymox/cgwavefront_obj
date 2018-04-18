@@ -3153,6 +3153,9 @@ fn test_case(file_path: &str) -> Test {
     }
 }
 
+///
+/// The parser should correctly parse a Wavefront OBJ file.
+///
 #[test]
 fn test_parse_object_set() {
     let test = test_case(SAMPLE_DATA);
@@ -3162,6 +3165,10 @@ fn test_parse_object_set() {
     assert_eq!(result, test.expected);
 }
 
+///
+/// The parser should identify individual objects in a given 
+/// object set parser.
+///
 #[test]
 fn test_parse_object_set_should_parse_objects() {
     let test = test_case(SAMPLE_DATA);
@@ -3180,6 +3187,9 @@ fn test_parse_object_set_should_parse_objects() {
     }
 }
 
+///
+/// The parser should correctly read object names.
+///
 #[test]
 fn test_parse_object_set_should_parse_object_names() {
     let test = test_case(SAMPLE_DATA);
@@ -3191,6 +3201,9 @@ fn test_parse_object_set_should_parse_object_names() {
     }
 }
 
+///
+/// The parser should correctly parse vertex statements.
+///
 #[test]
 fn test_parse_object_set_should_parse_vertices() {
     let test = test_case(SAMPLE_DATA);
@@ -3207,6 +3220,9 @@ fn test_parse_object_set_should_parse_vertices() {
     }
 }
 
+///
+/// The parser should correctly parse texture vertex statements.
+///
 #[test]
 fn test_parse_object_set_should_parse_texture_vertices() {
     let test = test_case(SAMPLE_DATA);
@@ -3223,6 +3239,9 @@ fn test_parse_object_set_should_parse_texture_vertices() {
     }
 }
 
+///
+/// The parser should correctly parse normal vertex statements.
+///
 #[test]
 fn test_parse_object_set_should_parse_normal_vertices() {
     let test = test_case(SAMPLE_DATA);
@@ -3240,6 +3259,9 @@ fn test_parse_object_set_should_parse_normal_vertices() {
     }
 }
 
+///
+/// The parser should correctly group statements.
+///
 #[test]
 fn test_parse_object_set_should_parse_groups() {
     let test = test_case(SAMPLE_DATA);
@@ -3256,6 +3278,9 @@ fn test_parse_object_set_should_parse_groups() {
     }
 }
 
+///
+/// The parser should correctly smoothing group statements.
+///
 #[test]
 fn test_parse_object_set_should_parse_smoothing_groups() {
     let test = test_case(SAMPLE_DATA);
@@ -3272,6 +3297,9 @@ fn test_parse_object_set_should_parse_smoothing_groups() {
     }
 }
 
+///
+/// The parser should correctly parse element statements.
+///
 #[test]
 fn test_parse_object_set_should_parse_elements() {
     let test = test_case(SAMPLE_DATA);
@@ -3288,6 +3316,10 @@ fn test_parse_object_set_should_parse_elements() {
     }
 }
 
+///
+/// The parser should correctly derive shape entries from the contents of a
+/// *.obj file.
+///
 #[test]
 fn test_parse_object_set_should_parse_shape_entries() {
     let test = test_case(SAMPLE_DATA);
@@ -3304,6 +3336,12 @@ fn test_parse_object_set_should_parse_shape_entries() {
     }
 }
 
+///
+/// In a Wavefront OBJ file, vertices, elements, and grouping statements are
+/// implicitly indexed in monotone increasing order. The resulting object set
+/// should place the elements in monotone increasing order exactly as
+/// they are found in the original file.
+///
 #[test]
 fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
     let test = test_case(SAMPLE_DATA);
@@ -3317,6 +3355,11 @@ fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
     }  
 }
 
+///
+/// Every element in a Wavefront OBJ belongs to at least one group. If no grouping
+/// statements are used, it should belong to the default group `default`. Consequently,
+/// every shape entry should have a nonempty group set.
+///
 #[test]
 fn test_parse_object_every_element_belongs_to_a_group() {
     let test = test_case(SAMPLE_DATA);
@@ -3330,6 +3373,11 @@ fn test_parse_object_every_element_belongs_to_a_group() {
     }
 }
 
+///
+/// Every element in a Wavefront OBJ belongs to at least one group. The parser
+/// should correctly identify every group in the file; no nonexistent groups should
+/// appear in the shape entry table. 
+///
 #[test]
 fn test_parse_object_every_element_group_exists() {
     let test = test_case(SAMPLE_DATA);
@@ -3346,6 +3394,11 @@ fn test_parse_object_every_element_group_exists() {
     }
 }
 
+///
+/// Every element in a Wavefront OBJ belongs to at least one smoothing group. The 
+/// parser should correctly identify every group in the file; no nonexistent 
+/// smoothing groups should appear in the shape entry table. 
+///
 #[test]
 fn test_parse_object_every_element_smoothing_group_exists() {
     let test = test_case(SAMPLE_DATA);
@@ -3361,3 +3414,4 @@ fn test_parse_object_every_element_smoothing_group_exists() {
         }
     }   
 }
+
