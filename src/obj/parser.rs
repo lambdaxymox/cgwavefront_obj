@@ -10,8 +10,10 @@ use std::fmt;
 use std::io::{BufReader, Read};
 
 
+///
+/// Parse a wavefront object file from a file buffer or other `Read` instance.
+///
 pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ParseError> {
-    let mut st = String::new();
     let mut reader = BufReader::new(file);
     let mut string = String::new();
     reader.read_to_string(&mut string).unwrap();
@@ -20,6 +22,9 @@ pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ParseError> {
     parser.parse()
 }
 
+///
+/// Parse a wavefront object file from a string.
+///
 pub fn parse_str(st: &str) -> Result<ObjectSet, ParseError> {
     let mut parser = Parser::new(st.chars());
     parser.parse()
