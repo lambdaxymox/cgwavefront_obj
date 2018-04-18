@@ -41,6 +41,10 @@ fn slice_res<'a>(st: &'a Result<String, ParseError>) -> Result<&'a str, &'a Pars
     st.as_ref().map(|s| &s[..])
 }
 
+///
+/// An error that is returned from parsing an invalid *.obj file, or
+/// another kind of error.
+///
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
     line_number: usize,
@@ -48,6 +52,7 @@ pub struct ParseError {
 }
 
 impl ParseError {
+    /// Generate a new parse error.
     fn new(line_number: usize, message: String) -> ParseError {
         ParseError {
             line_number: line_number,
@@ -68,6 +73,9 @@ impl error::Error for ParseError {
     }
 }
 
+///
+/// A Wavefront OBJ file parser.
+///
 pub struct Parser<Stream> where Stream: Iterator<Item=char> {
     line_number: usize,
     lexer: iter::Peekable<Lexer<Stream>>,
