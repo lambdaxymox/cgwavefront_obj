@@ -239,7 +239,7 @@ impl<G> ObjectGenerator<G> where G: Gen {
         // The smoothing group iteration should not change the length
         // of the shape set.
         assert_eq!(shape_set.len(), element_set.len());
-        // Wavefront OBJ files are one-indexed in element, vertices, groups, etc.
+        // Wavefront OBJ files are one-indexed in elements, vertices, groups, etc.
         assert!(shape_set.iter().all(|shape_entry| shape_entry.element > 0));
         assert!(shape_set.iter().all(|shape_entry| shape_entry.groups.iter().all(|&group_index| group_index > 0)));
         assert!(shape_set.iter().all(|shape_entry| shape_entry.smoothing_group > 0));
@@ -319,7 +319,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
     }
 
     fn generate(&self, g: &mut G) -> ObjectSet {
-        // We want one object sets to appear frequently since that is the most
+        // We want one-object sets to appear frequently since that is the most
         // commonly encountered case in the wild.
         let object_gen = ObjectGenerator::new();
         let one_obj: bool = Arbitrary::arbitrary(g);
@@ -539,7 +539,7 @@ fn prop_parse_object_set_should_parse_shape_entries() {
 }
 
 ///
-/// The parser should correctly parse a valid wavefront ovj file.
+/// The parser should correctly parse a valid wavefront obj file.
 ///
 #[test]
 fn prop_parser_correctly_parses_valid_obj_files() {
@@ -645,8 +645,8 @@ fn prop_every_group_has_at_least_one_element() {
 }
 
 ///
-/// Every element belongs to a group. If not group entry is specified in
-/// a wavefront onj file, a default value of `default` is used for groups, and
+/// Every element belongs to a group. If no group entry is specified in
+/// a wavefront obj file, a default value of `default` is used for groups, and
 /// a default value of `off`, or `0` is used for smoothing groups.
 ///
 #[test]
@@ -684,7 +684,7 @@ fn prop_every_shape_entry_element_index_is_nonzero() {
 
 ///
 /// Every vertex, element, and grouping statement is implicitly indexed
-/// in a Wavefront OBJ file starting from one rather than zero. Every index
+/// in a Wavefront OBJ file starting from 1 rather than 0. Every index
 /// in a shape entry should be nonzero.
 ///
 #[test]
