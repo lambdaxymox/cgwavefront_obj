@@ -297,51 +297,6 @@ impl Default for Object {
     }
 }
 
-trait ObjectQuery<K, V> {
-    fn query(&self, key: K) -> Option<V>;
-}
-
-impl ObjectQuery<VertexIndex, Vertex> for Object {
-    fn query(&self, key: VertexIndex) -> Option<Vertex> {
-        self.vertex_set.get(key as usize).map(|&x| x)
-    }
-}
-
-impl ObjectQuery<TextureVertexIndex, TextureVertex> for Object {
-    fn query(&self, key: TextureVertexIndex) -> Option<TextureVertex> {
-        self.texture_vertex_set.get(key as usize).map(|&x| x)
-    }
-}
-
-impl ObjectQuery<NormalVertexIndex, NormalVertex> for Object {
-    fn query(&self, key: NormalVertexIndex) -> Option<NormalVertex> {
-        self.normal_vertex_set.get(key as usize).map(|&x| x)
-    }
-}
-
-impl ObjectQuery<ElementIndex, Element> for Object {
-    fn query(&self, key: ElementIndex) -> Option<Element> {
-        self.element_set.get(key as usize).map(|x| x.clone())
-    }
-}
-
-impl ObjectQuery<GroupIndex, Group> for Object {
-    fn query(&self, key: GroupIndex) -> Option<Group> {
-        self.group_set.get(key as usize).map(|x| x.clone())
-    }
-}
-
-impl ObjectQuery<SmoothingGroupIndex, SmoothingGroup> for Object {
-    fn query(&self, key: SmoothingGroupIndex) -> Option<SmoothingGroup> {
-        self.smoothing_group_set.get(key as usize).map(|x| x.clone())
-    }
-}
-
-impl ObjectQuery<ShapeIndex, ShapeEntry> for Object {
-    fn query(&self, key: ShapeIndex) -> Option<ShapeEntry> {
-        self.shape_set.get(key as usize).map(|x| x.clone())
-    }
-}
 
 #[derive(Clone, PartialEq)]
 pub struct ObjectSet {
