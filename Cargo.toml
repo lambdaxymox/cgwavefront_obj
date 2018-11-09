@@ -1,6 +1,6 @@
 [package]
 name = "wavefront_obj"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Stallmanifold <stallmanifold@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/stallmanifold/wavefront-obj"
