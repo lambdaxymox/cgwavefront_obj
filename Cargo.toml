@@ -10,11 +10,11 @@ keywords = ["wavefront", "obj", "geometry processing", "shading", "graphics", "m
 name = "wavefront"
 
 [dependencies]
-quickcheck = "0.6.2"
-rand = "0.4.2"
+quickcheck = "0.7.2"
+rand = "0.5.5"
 
 [dev-dependencies]
-criterion = "0.2.2"
+criterion = "0.2.5"
 
 [profile.bench]
 opt-level = 2
