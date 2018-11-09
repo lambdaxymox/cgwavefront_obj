@@ -1,6 +1,4 @@
 # TODO
-* Define grammar for free-form geometry.
-* Implement grammar for free-form geometry.
 * Define material library grammar.
 * Implement material library parsing.
 * Integrate material library into OBJ parser.
