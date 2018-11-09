@@ -242,7 +242,7 @@ impl Object {
         &self.name
     }
 
-    fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
+    pub fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
                 let vertex = self.vertex_set.get(v_index as usize)?;
