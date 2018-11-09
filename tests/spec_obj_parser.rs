@@ -1,4 +1,5 @@
 extern crate quickcheck;
+extern crate rand;
 extern crate wavefront;
 
 use quickcheck::{Arbitrary, Gen};
@@ -11,6 +12,8 @@ use wavefront::obj::{
     GroupSet, SmoothingGroupSet,
 };
 use wavefront::obj::{Parser, ParseError};
+use rand::Rng;
+
 
 use std::marker;
 use std::fmt;
@@ -46,7 +49,7 @@ struct ObjectGenerator<G> {
     _marker: marker::PhantomData<G>,
 }
 
-impl<G> ObjectGenerator<G> where G: Gen {
+impl<G> ObjectGenerator<G> where G: Gen + Rng {
     fn new() -> Self { 
         Self { _marker: marker::PhantomData } 
     }

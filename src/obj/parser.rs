@@ -843,6 +843,7 @@ mod texture_vertex_tests {
     use quickcheck;
     use std::fmt;
     use std::cmp;
+    use rand::Rng;
 
 
     #[derive(Clone, Debug)]
@@ -885,7 +886,7 @@ mod texture_vertex_tests {
     }
 
     impl quickcheck::Arbitrary for QcTextureVertex {
-        fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        fn arbitrary<G: quickcheck::Gen + Rng>(g: &mut G) -> Self {
             let tv_type = g.gen_range(0, 3);
             let u = quickcheck::Arbitrary::arbitrary(g);
             match tv_type {
@@ -1169,6 +1170,7 @@ mod vtn_index_tests {
     use obj::object::VTNIndex;
     use super::{Parser, ParseError};
     use quickcheck;
+    use rand::Rng;
 
 
     #[derive(Clone, Debug)]
@@ -1185,7 +1187,7 @@ mod vtn_index_tests {
     }
 
     impl quickcheck::Arbitrary for VTNIndexParserModel {
-        fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
+        fn arbitrary<G: quickcheck::Gen + Rng>(g: &mut G) -> Self {
             use quickcheck::Arbitrary;
 
             let vtn_index_type = g.gen_range(0, 4);
