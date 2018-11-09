@@ -245,26 +245,26 @@ impl Object {
     pub fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
-                let vertex = self.vertex_set.get(v_index as usize)?;
+                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
 
                 Some(VTNTriple::V(vertex))
             }
             VTNIndex::VT(v_index, vt_index) => { 
-                let vertex = self.vertex_set.get(v_index as usize)?;
-                let texture_vertex = self.texture_vertex_set.get(vt_index as usize)?;
+                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
+                let texture_vertex = self.texture_vertex_set.get((vt_index - 1) as usize)?;
 
                 Some(VTNTriple::VT(vertex, texture_vertex))
             }
             VTNIndex::VN(v_index, vn_index) => {
-                let vertex = self.vertex_set.get(v_index as usize)?;
-                let normal_vertex = self.normal_vertex_set.get(vn_index as usize)?;
+                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
+                let normal_vertex = self.normal_vertex_set.get((vn_index - 1) as usize)?;
 
                 Some(VTNTriple::VN(vertex, normal_vertex))
             }
             VTNIndex::VTN(v_index, vt_index, vn_index) => {
-                let vertex = self.vertex_set.get(v_index as usize)?;
-                let texture_vertex = self.texture_vertex_set.get(vt_index as usize)?;
-                let normal_vertex = self.normal_vertex_set.get(vn_index as usize)?;
+                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
+                let texture_vertex = self.texture_vertex_set.get((vt_index - 1) as usize)?;
+                let normal_vertex = self.normal_vertex_set.get((vn_index - 1) as usize)?;
 
                 Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
             }
