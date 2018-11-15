@@ -3,6 +3,7 @@ pub mod parser;
 
 
 pub use obj::parser::parse;
+pub use obj::parser::parse_file;
 pub use obj::parser::parse_str;
 
 
