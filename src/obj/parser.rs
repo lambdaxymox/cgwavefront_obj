@@ -13,15 +13,16 @@ use std::path::Path;
 
 
 #[derive(Debug)]
-pub enum Error {
-    SourceError,
-    ParseError(ParseError),
+pub enum ObjError {
+    Source,
+    SourceDoesNotExist(String),
+    Parse(ParseError),
 }
 
 ///
 /// Parse a wavefront object file from a file buffer or other `Read` instance.
 ///
-pub fn parse<F: Read>(file: F) -> Result<ObjectSet, Error> {
+pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ObjError> {
     let mut reader = BufReader::new(file);
     let mut string = String::new();
     reader.read_to_string(&mut string).unwrap();
@@ -30,28 +31,29 @@ pub fn parse<F: Read>(file: F) -> Result<ObjectSet, Error> {
 
     match parser.parse() {
         Ok(obj_set) => Ok(obj_set),
-        Err(e) => Err(Error::ParseError(e)),
+        Err(e) => Err(ObjError::Parse(e)),
     }
 }
 
-/*
+
 ///
 /// Parse a wavefront object file from a file path.
 ///
-pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, Error> {
+pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, ObjError> {
     if !path.as_ref().exists() {
-        Err(_)
+        let disp = path.as_ref().display();
+
+        return Err(ObjError::SourceDoesNotExist(format!("{}", disp)));
     }
 
-    let file = File::open(path).unwrap();
-    let obj_set = match parse(file) {
+    let file = match File::open(path) {
         Ok(val) => val,
-        Err(e)  => return Err(_),
+        Err(e) => return Err(ObjError::Source)
     };
 
-    Ok(obj_set)
+    parse(file)
 }
-*/
+
 
 ///
 /// Parse a wavefront object file from a string.
