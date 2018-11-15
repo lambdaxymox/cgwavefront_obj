@@ -73,7 +73,7 @@ pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, ObjError> {
 
     let file = match File::open(path) {
         Ok(val) => val,
-        Err(e) => return Err(ObjError::Source)
+        Err(_) => return Err(ObjError::Source)
     };
 
     parse(file)
