@@ -8,19 +8,50 @@ use std::iter;
 use std::error;
 use std::fmt;
 use std::io::{BufReader, Read};
+use std::fs::File;
+use std::path::Path;
 
+
+#[derive(Debug)]
+pub enum Error {
+    SourceError,
+    ParseError(ParseError),
+}
 
 ///
 /// Parse a wavefront object file from a file buffer or other `Read` instance.
 ///
-pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ParseError> {
+pub fn parse<F: Read>(file: F) -> Result<ObjectSet, Error> {
     let mut reader = BufReader::new(file);
     let mut string = String::new();
     reader.read_to_string(&mut string).unwrap();
 
     let mut parser = Parser::new(string.chars());
-    parser.parse()
+
+    match parser.parse() {
+        Ok(obj_set) => Ok(obj_set),
+        Err(e) => Err(Error::ParseError(e)),
+    }
 }
+
+/*
+///
+/// Parse a wavefront object file from a file path.
+///
+pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, Error> {
+    if !path.as_ref().exists() {
+        Err(_)
+    }
+
+    let file = File::open(path).unwrap();
+    let obj_set = match parse(file) {
+        Ok(val) => val,
+        Err(e)  => return Err(_),
+    };
+
+    Ok(obj_set)
+}
+*/
 
 ///
 /// Parse a wavefront object file from a string.
