@@ -12,11 +12,27 @@ use std::fs::File;
 use std::path::Path;
 
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum ObjError {
     Source,
     SourceDoesNotExist(String),
     Parse(ParseError),
+}
+
+impl fmt::Display for ObjError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ObjError::Source => {
+                write!(f, "An error occurred in the OBJ source.")
+            }
+            ObjError::SourceDoesNotExist(source) => {
+                write!(f, "Source could not be found: {}.", source)
+            }
+            ObjError::Parse(parse_error) => {
+                write!(f, "{}", parse_error)
+            }
+        }
+    }
 }
 
 ///
