@@ -1,9 +1,9 @@
-use obj::object::{
+use crate::obj::object::{
     ObjectSet, Object, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex,
     Group, SmoothingGroup, Element, VTNIndex, ShapeEntry,
 };
-use lexer::Lexer;
+use crate::lexer::Lexer;
 use std::iter;
 use std::error;
 use std::fmt;
@@ -178,7 +178,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn expect(&mut self, tag: &str) -> Result<String, ParseError> {
-        let st = try!(self.next_string());
+        let st = self.next_string()?;
         match st == tag {
             true => Ok(st),
             false => self.error(format!("Expected `{}` statement but got: `{}`.", tag, st))
@@ -186,7 +186,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_f32(&mut self) -> Result<f32, ParseError> {
-        let st = try!(self.next_string());
+        let st = self.next_string()?;
         match st.parse::<f32>() {
             Ok(val) => Ok(val),
             Err(_) => self.error(format!("Expected `f32` but got `{}`.", st)),
@@ -194,7 +194,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_u32(&mut self) -> Result<u32, ParseError> {
-        let st = try!(self.next_string());
+        let st = self.next_string()?;
         match st.parse::<u32>() {
             Ok(val) => Ok(val),
             Err(_) => self.error(format!("Expected integer but got `{}`.", st)),
@@ -209,11 +209,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
-        try!(self.expect("v"));
+        self.expect("v")?;
  
-        let x = try!(self.parse_f32());
-        let y = try!(self.parse_f32());
-        let z = try!(self.parse_f32());
+        let x = self.parse_f32()?;
+        let y = self.parse_f32()?;
+        let z = self.parse_f32()?;
         let mw = self.try_once(|st| st.parse::<f32>().ok());
         let w = mw.unwrap_or(1.0);
 
@@ -221,9 +221,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
-        try!(self.expect("vt"));
+        self.expect("vt")?;
 
-        let u = try!(self.parse_f32());
+        let u = self.parse_f32()?;
         let mv = self.try_once(|st| st.parse::<f32>().ok());
         let v = mv.unwrap_or(0.0);
         let mw = self.try_once(|st| st.parse::<f32>().ok());
@@ -233,11 +233,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
-        try!(self.expect("vn"));
+        self.expect("vn")?;
 
-        let i = try!(self.parse_f32());
-        let j = try!(self.parse_f32());
-        let k = try!(self.parse_f32());
+        let i = self.parse_f32()?;
+        let j = self.parse_f32()?;
+        let k = self.parse_f32()?;
 
         Ok(NormalVertex { i: i, j: j, k: k })
     }
@@ -252,7 +252,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn skip_one_or_more_newlines(&mut self) -> Result<(), ParseError> {
-        try!(self.expect("\n"));
+        self.expect("\n")?;
         self.skip_zero_or_more_newlines();
         Ok(())
     }
@@ -260,9 +260,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_object_name(&mut self) -> Result<String, ParseError> {
         match slice(&self.peek()) {
             Some("o") => {
-                try!(self.expect("o"));
+                self.expect("o")?;
                 let object_name = self.next_string();
-                try!(self.skip_one_or_more_newlines());
+                self.skip_one_or_more_newlines()?;
                 
                 object_name
             }
@@ -337,7 +337,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
-        let st = try!(self.next_string());
+        let st = self.next_string()?;
         match self.parse_vn(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
@@ -369,9 +369,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
-        try!(self.expect("p"));
+        self.expect("p");
 
-        let v_index = try!(self.parse_u32());
+        let v_index = self.parse_u32()?;
         elements.push(Element::Point(VTNIndex::V(v_index)));
         let mut elements_parsed = 1;
         loop {
@@ -393,11 +393,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
-        try!(self.expect("l"));
+        self.expect("l")?;
 
         let mut vtn_indices = vec![];
-        vtn_indices.push(try!(self.parse_vtn_index()));
-        vtn_indices.push(try!(self.parse_vtn_index()));
+        vtn_indices.push(self.parse_vtn_index()?);
+        vtn_indices.push(self.parse_vtn_index()?);
         self.parse_vtn_indices(&mut vtn_indices)?;
 
         // Verify that each VTN index has the same type and if of a valid form.
@@ -418,7 +418,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
-        try!(self.expect("f"));
+        self.expect("f")?;
         
         let mut vtn_indices = vec![];
         self.parse_vtn_indices(&mut vtn_indices)?;
@@ -460,7 +460,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_groups(&mut self, groups: &mut Vec<Group>) -> Result<u32, ParseError> {
-        try!(self.expect("g"));
+        self.expect("g")?;
         let mut groups_parsed = 0;
         loop {
             match slice_res(&self.next_string()) {
@@ -478,7 +478,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     fn parse_smoothing_group(&mut self, 
         smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<u32, ParseError> {
 
-        try!(self.expect("s"));
+        self.expect("s")?;
         if let Ok(name) = self.next_string() {
             if name == "off" {
                 smoothing_groups.push(SmoothingGroup::new(0));
@@ -527,9 +527,9 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         min_texture_index: &mut usize,  max_texture_index: &mut usize,
         min_normal_index:  &mut usize,  max_normal_index:  &mut usize) -> Result<Object, ParseError> {
         
-        let object_name = try!(self.parse_object_name());
+        let object_name = self.parse_object_name()?;
 
-        let mut vertices = vec![];
+        let mut vertices: Vec<Vertex> = vec![];
         let mut texture_vertices = vec![];
         let mut normal_vertices = vec![];        
         let mut elements = vec![];
@@ -556,7 +556,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     max_group_index = 1;
 
                     // Fetch the new groups.
-                    let amount_parsed = try!(self.parse_groups(&mut groups));
+                    let amount_parsed = self.parse_groups(&mut groups)?;
                     // Update range of group indices.
                     max_group_index += amount_parsed;
                 }
@@ -568,7 +568,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     ));
 
                     // Fetch the new groups.
-                    let amount_parsed = try!(self.parse_groups(&mut groups));
+                    let amount_parsed = self.parse_groups(&mut groups)?;
                     // Update range of group indices.
                     min_group_index = max_group_index;
                     max_group_index += amount_parsed;
@@ -580,7 +580,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     max_element_smoothing_group_index = 1;
 
                     // Fetch the next smoothing group.
-                    try!(self.parse_smoothing_group(&mut smoothing_groups));
+                    self.parse_smoothing_group(&mut smoothing_groups)?;
                     // Update the smoothing group index.
                     smoothing_group_index = 1;
                 }
@@ -592,22 +592,22 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                     ));
 
                     // Fetch the next smoothing group.
-                    try!(self.parse_smoothing_group(&mut smoothing_groups));
+                    self.parse_smoothing_group(&mut smoothing_groups)?;
                     // Update the smoothing group index.
                     smoothing_group_index += 1;
                     //Update the element indices.
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
                 }
                 Some("v")  => {
-                    let vertex = try!(self.parse_vertex());
+                    let vertex = self.parse_vertex()?;
                     vertices.push(vertex);
                 }
                 Some("vt") => {
-                    let texture_vertex = try!(self.parse_texture_vertex());
+                    let texture_vertex = self.parse_texture_vertex()?;
                     texture_vertices.push(texture_vertex);
                 }
                 Some("vn") => {
-                    let normal_vertex = try!(self.parse_normal_vertex());
+                    let normal_vertex = self.parse_normal_vertex()?;
                     normal_vertices.push(normal_vertex);
                 }
                 Some("p") | Some("l") | Some("f") => {
@@ -626,12 +626,12 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
                         smoothing_group_index = 1;
                     }
 
-                    let amount_parsed = try!(self.parse_elements(&mut elements));
+                    let amount_parsed = self.parse_elements(&mut elements)?;
                     max_element_group_index += amount_parsed;
                     max_element_smoothing_group_index += amount_parsed;
                 }
                 Some("\n") => {
-                    try!(self.skip_one_or_more_newlines());
+                    self.skip_one_or_more_newlines()?;
                 }
                 Some("o") | None => {
                     // At the end of file or object, collect any remaining shapes.
@@ -694,11 +694,11 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
 
         self.skip_zero_or_more_newlines();
         while let Some(_) = slice(&self.peek()) {
-            result.push(try!(self.parse_object(
+            result.push(self.parse_object(
                 &mut min_vertex_index, &mut max_vertex_index,
                 &mut min_tex_index,    &mut max_tex_index,
                 &mut min_normal_index, &mut max_normal_index
-            )));
+            )?);
             self.skip_zero_or_more_newlines();
         }
 
@@ -727,7 +727,7 @@ mod primitive_tests {
 
 #[cfg(test)]
 mod vertex_tests {
-    use obj::object::Vertex;
+    use crate::obj::object::Vertex;
     use super::{Parser, ParseError};
     use quickcheck;
     use std::fmt;
@@ -896,7 +896,7 @@ mod vertex_tests {
 
 #[cfg(test)]
 mod texture_vertex_tests {
-    use obj::object::TextureVertex;
+    use crate::obj::object::TextureVertex;
     use super::{Parser, ParseError};
     use quickcheck;
     use std::fmt;
@@ -1081,7 +1081,7 @@ mod texture_vertex_tests {
 
 #[cfg(test)]
 mod normal_vertex_tests {
-    use obj::object::NormalVertex;
+    use crate::obj::object::NormalVertex;
     use super::{Parser, ParseError};
     use quickcheck;
     use std::fmt;
@@ -1225,7 +1225,7 @@ mod object_tests {
 
 #[cfg(test)]
 mod vtn_index_tests {
-    use obj::object::VTNIndex;
+    use crate::obj::object::VTNIndex;
     use super::{Parser, ParseError};
     use quickcheck;
     use rand::Rng;
@@ -1317,7 +1317,7 @@ mod vtn_index_tests {
 
 #[cfg(test)]
 mod element_tests {
-    use obj::object::{Element, VTNIndex};
+    use crate::obj::object::{Element, VTNIndex};
 
     #[test]
     fn test_parse_point1() {
@@ -1450,7 +1450,7 @@ mod element_tests {
 
 #[cfg(test)]
 mod group_tests {
-    use obj::object::Group;
+    use crate::obj::object::Group;
 
     #[test]
     fn parse_group_name1() {
@@ -1479,7 +1479,7 @@ mod group_tests {
 
 #[cfg(test)]
 mod smoothing_group_tests {
-    use obj::object::SmoothingGroup;
+    use crate::obj::object::SmoothingGroup;
 
     #[test]
     fn test_smoothing_group_name1() {
@@ -1517,7 +1517,7 @@ mod smoothing_group_tests {
 
 #[cfg(test)]
 mod objectset_tests {
-    use obj::object::{
+    use crate::obj::object::{
         ObjectSet, ObjectBuilder,
         Vertex, NormalVertex, Element, VTNIndex, 
         Group, SmoothingGroup, ShapeEntry,

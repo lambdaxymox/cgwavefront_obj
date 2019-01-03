@@ -2,6 +2,7 @@
 name = "wavefront_obj"
 version = "0.3.1"
 authors = ["Stallmanifold <stallmanifold@gmail.com>"]
+edition = "2018"
 readme = "README.md"
 repository = "https://github.com/stallmanifold/wavefront-obj"
 keywords = ["wavefront", "obj", "geometry processing", "shading", "graphics", "mtl"]
