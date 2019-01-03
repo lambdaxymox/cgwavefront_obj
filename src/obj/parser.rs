@@ -369,7 +369,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
     }
 
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
-        self.expect("p");
+        self.expect("p")?;
 
         let v_index = self.parse_u32()?;
         elements.push(Element::Point(VTNIndex::V(v_index)));
@@ -505,7 +505,7 @@ impl<Stream> Parser<Stream> where Stream: Iterator<Item=char> {
         for &((min_element_index, max_element_index), 
               (min_group_index, max_group_index)) in group_entry_table { 
             
-            let mut groups: Vec<u32> = (min_group_index..max_group_index).collect();
+            let groups: Vec<u32> = (min_group_index..max_group_index).collect();
             for i in min_element_index..max_element_index {
                 shape_entry_table.push(ShapeEntry::new(i, &groups, 1));
             }
