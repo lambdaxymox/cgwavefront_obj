@@ -90,12 +90,12 @@ pub fn parse_str(st: &str) -> Result<ObjectSet, ParseError> {
 
 
 #[inline]
-fn slice<'a>(st: &'a Option<String>) -> Option<&'a str> {
+fn slice(st: &Option<String>) -> Option<&str> {
     st.as_ref().map(|st| &st[..])
 }
 
 #[inline]
-fn slice_res<'a>(st: &'a Result<String, ParseError>) -> Result<&'a str, &'a ParseError> {
+fn slice_res(st: &Result<String, ParseError>) -> Result<&str, &ParseError> {
     st.as_ref().map(|s| &s[..])
 }
 
