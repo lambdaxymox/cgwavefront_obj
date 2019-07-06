@@ -863,7 +863,7 @@ mod vtn_index_tests {
     use quickcheck;
     use rand::{Rng, RngCore};
 
-/*
+
     #[derive(Clone, Debug)]
     struct VTNIndexParserModel(VTNIndex, String);
 
@@ -881,7 +881,8 @@ mod vtn_index_tests {
         fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
             use quickcheck::Arbitrary;
 
-            let vtn_index_type = g.gen_range(0, 4);
+            let mut rng = rand::thread_rng();
+            let vtn_index_type = rng.gen_range(0, 4);
             let vtn_index = match vtn_index_type {
                 0 => VTNIndex::V(Arbitrary::arbitrary(g)),
                 1 => VTNIndex::VT(Arbitrary::arbitrary(g), Arbitrary::arbitrary(g)),
@@ -946,7 +947,7 @@ mod vtn_index_tests {
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
-*/
+
 }
 
 #[cfg(test)]
