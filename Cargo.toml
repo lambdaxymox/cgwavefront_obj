@@ -8,7 +8,7 @@ repository = "https://github.com/stallmanifold/wavefront-obj"
 keywords = ["wavefront", "obj", "geometry processing", "shading", "graphics", "mtl"]
 
 [lib]
-name = "wavefront"
+name = "wavefront_obj"
 
 [dependencies]
 quickcheck = "0.7.2"

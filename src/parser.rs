@@ -1,4 +1,4 @@
-use crate::obj::object::{
+use crate::object::{
     ObjectSet, Object, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex,
     Group, SmoothingGroup, Element, VTNIndex, ShapeEntry,
@@ -727,7 +727,7 @@ mod primitive_tests {
 
 #[cfg(test)]
 mod vertex_tests {
-    use crate::obj::object::Vertex;
+    use crate::object::Vertex;
     use super::{Parser, ParseError};
     use quickcheck;
     use std::fmt;
@@ -896,7 +896,7 @@ mod vertex_tests {
 
 #[cfg(test)]
 mod texture_vertex_tests {
-    use crate::obj::object::TextureVertex;
+    use crate::object::TextureVertex;
     use super::{Parser, ParseError};
     use quickcheck;
     use std::fmt;
@@ -1081,7 +1081,7 @@ mod texture_vertex_tests {
 
 #[cfg(test)]
 mod normal_vertex_tests {
-    use crate::obj::object::NormalVertex;
+    use crate::object::NormalVertex;
     use super::{Parser, ParseError};
     use quickcheck;
     use std::fmt;
@@ -1225,7 +1225,7 @@ mod object_tests {
 
 #[cfg(test)]
 mod vtn_index_tests {
-    use crate::obj::object::VTNIndex;
+    use crate::object::VTNIndex;
     use super::{Parser, ParseError};
     use quickcheck;
     use rand::Rng;
@@ -1317,7 +1317,7 @@ mod vtn_index_tests {
 
 #[cfg(test)]
 mod element_tests {
-    use crate::obj::object::{Element, VTNIndex};
+    use crate::object::{Element, VTNIndex};
 
     #[test]
     fn test_parse_point1() {
@@ -1450,7 +1450,7 @@ mod element_tests {
 
 #[cfg(test)]
 mod group_tests {
-    use crate::obj::object::Group;
+    use crate::object::Group;
 
     #[test]
     fn parse_group_name1() {
@@ -1479,7 +1479,7 @@ mod group_tests {
 
 #[cfg(test)]
 mod smoothing_group_tests {
-    use crate::obj::object::SmoothingGroup;
+    use crate::object::SmoothingGroup;
 
     #[test]
     fn test_smoothing_group_name1() {
@@ -1517,7 +1517,7 @@ mod smoothing_group_tests {
 
 #[cfg(test)]
 mod objectset_tests {
-    use crate::obj::object::{
+    use crate::object::{
         ObjectSet, ObjectBuilder,
         Vertex, NormalVertex, Element, VTNIndex, 
         Group, SmoothingGroup, ShapeEntry,

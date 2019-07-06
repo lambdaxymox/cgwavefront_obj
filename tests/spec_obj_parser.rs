@@ -1,9 +1,9 @@
 extern crate quickcheck;
 extern crate rand;
-extern crate wavefront;
+extern crate wavefront_obj;
 
 use quickcheck::{Arbitrary, Gen};
-use wavefront::obj::{
+use wavefront_obj::{
     Object, ObjectSet, ObjectBuilder,
     Vertex, TextureVertex, NormalVertex, Element, VTNIndex,
     Group, SmoothingGroup, ShapeEntry,
@@ -11,7 +11,7 @@ use wavefront::obj::{
     VertexSet, TextureVertexSet, NormalVertexSet, ElementSet, ShapeSet,
     GroupSet, SmoothingGroupSet,
 };
-use wavefront::obj::{Parser, ParseError};
+use wavefront_obj::{Parser, ParseError};
 use rand::Rng;
 
 

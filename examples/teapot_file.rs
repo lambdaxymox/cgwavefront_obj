@@ -1,6 +1,6 @@
-extern crate wavefront;
+extern crate wavefront_obj;
 
-use wavefront::obj;
+use wavefront_obj as obj;
 
 const SAMPLE_DATA: &str = "sample_data/teapot.obj";
 
