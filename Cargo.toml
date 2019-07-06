@@ -12,7 +12,7 @@ name = "wavefront_obj"
 
 [dependencies]
 quickcheck = "0.7.2"
-rand = "0.5.5"
+rand = "0.7.0"
 
 [profile.bench]
 opt-level = 2

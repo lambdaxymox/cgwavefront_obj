@@ -12,7 +12,7 @@ use wavefront_obj::{
     GroupSet, SmoothingGroupSet,
 };
 use wavefront_obj::{Parser, ParseError};
-use rand::Rng;
+use rand::{Rng, RngCore};
 
 
 use std::marker;
@@ -49,32 +49,32 @@ struct ObjectGenerator<G> {
     _marker: marker::PhantomData<G>,
 }
 
-impl<G> ObjectGenerator<G> where G: Gen + Rng {
+impl<G> ObjectGenerator<G> where G: RngCore {
     fn new() -> Self { 
         Self { _marker: marker::PhantomData } 
     }
 
     fn gen_vertex(&self, g: &mut G, use_w: bool) -> Vertex {
-        let x = Arbitrary::arbitrary(g);
-        let y = Arbitrary::arbitrary(g);
-        let z = Arbitrary::arbitrary(g);
+        let x = g.gen::<f32>();
+        let y = g.gen::<f32>();
+        let z = g.gen::<f32>();
         let w = if use_w { g.gen_range(-1.0, 1.0) } else { 1.0 };
 
         Vertex::new(x, y, z, w)
     }
 
     fn gen_texture_vertex(&self, g: &mut G) -> TextureVertex {
-        let u = Arbitrary::arbitrary(g);
-        let v = Arbitrary::arbitrary(g);
-        let w = Arbitrary::arbitrary(g);
+        let u = g.gen::<f32>();
+        let v = g.gen::<f32>();
+        let w = g.gen::<f32>();
 
         TextureVertex::new(u, v, w)
     }
 
     fn gen_normal_vertex(&self, g: &mut G) -> NormalVertex {
-        let i = Arbitrary::arbitrary(g);
-        let j = Arbitrary::arbitrary(g);
-        let k = Arbitrary::arbitrary(g);
+        let i = g.gen::<f32>();
+        let j = g.gen::<f32>();
+        let k = g.gen::<f32>();
 
         NormalVertex::new(i, j, k)
     }
@@ -82,7 +82,7 @@ impl<G> ObjectGenerator<G> where G: Gen + Rng {
     fn gen_vertex_set(&self, g: &mut G, len: usize) -> VertexSet {
         let mut vertex_set = vec![];
         for _ in 0..len {
-            let use_w = Arbitrary::arbitrary(g);
+            let use_w = g.gen::<bool>();
             vertex_set.push(self.gen_vertex(g, use_w));
         }
 
@@ -276,7 +276,7 @@ impl<G> ObjectGenerator<G> where G: Gen + Rng {
             normal_vertex_set.len() as u32,
         );
 
-        let use_g_default: bool = Arbitrary::arbitrary(g);
+        let use_g_default: bool = g.gen::<bool>();
         let group_count = self.gen_group_count(g, use_g_default);
         let group_slices = self.gen_slices(g, (1, element_set.len() + 1), group_count);
         let group_set = self.gen_group_set(use_g_default, group_count);
@@ -316,7 +316,7 @@ struct ObjectSetGen<G> {
     _marker: marker::PhantomData<G>,
 }
 
-impl<G> ObjectSetGen<G> where G: Gen {
+impl<G> ObjectSetGen<G> where G: RngCore {
     fn new() -> Self { 
         Self { _marker: marker::PhantomData } 
     }
@@ -325,7 +325,7 @@ impl<G> ObjectSetGen<G> where G: Gen {
         // We want one-object sets to appear frequently since that is the most
         // commonly encountered case in the wild.
         let object_gen = ObjectGenerator::new();
-        let one_obj: bool = Arbitrary::arbitrary(g);
+        let one_obj = g.gen::<bool>();
         let object_count = if one_obj { 1 } else { g.gen_range(2, 6) };
 
         let mut objects = vec![];
@@ -340,8 +340,9 @@ impl<G> ObjectSetGen<G> where G: Gen {
 }
 
 impl Arbitrary for ParserModel {
-    fn arbitrary<G: Gen>(g: &mut G) -> Self {
-        ParserModel::new(ObjectSetGen::new().generate(g))
+    fn arbitrary<G: Gen>(_g: &mut G) -> Self {
+        let mut rng = rand::thread_rng();
+        ParserModel::new(ObjectSetGen::new().generate(&mut rng))
     }
 }
 
@@ -354,7 +355,7 @@ impl Arbitrary for ParserModel {
 ///
 #[derive(Clone, Debug)]
 struct Oracle { 
-    model: ParserModel, 
+    model: ParserModel,
     text: String,
 }
 
@@ -373,7 +374,7 @@ impl Oracle {
     }
 }
 
-impl Arbitrary for Oracle {
+impl Arbitrary for Oracle  {
     fn arbitrary<G: Gen>(g: &mut G) -> Oracle {
         let model: ParserModel = Arbitrary::arbitrary(g);
         let text = TextObjectSetCompositor::new().compose(&model.data);
