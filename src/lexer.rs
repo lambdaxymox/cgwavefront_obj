@@ -16,7 +16,9 @@ fn is_whitespace_or_newline(ch: char) -> bool {
     is_whitespace(ch) || is_newline(ch)
 }
 
+///
 /// The return type from the lexer.
+///
 #[derive(Clone, Debug)]
 pub struct Token {
     pub line_number: usize,
@@ -55,6 +57,7 @@ impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
     ///
     /// The function `peek_u8` looks at the character at the current position
     /// in the byte stream without advancing the stream.
+    /// 
     #[inline]
     fn peek_char(&mut self) -> Option<char> {
         self.stream.peek().map(|&x| x)
