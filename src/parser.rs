@@ -850,7 +850,7 @@ mod vtn_index_tests {
     use crate::object::VTNIndex;
     use super::{Parser, ParseError};
     use quickcheck;
-    use rand::{Rng, RngCore};
+    use rand::Rng;
 
 
     #[derive(Clone, Debug)]
