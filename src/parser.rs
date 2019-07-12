@@ -35,14 +35,7 @@ impl fmt::Display for ObjError {
     }
 }
 
-impl error::Error for ObjError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        match self {
-            ObjError::Parse(parse_error) => Some(parse_error),
-            _ => None,
-        }
-    }
-}
+impl error::Error for ObjError {}
 
 ///
 /// Parse a wavefront object file from a file buffer or other `Read` instance.
@@ -125,11 +118,7 @@ impl fmt::Display for ParseError {
     }
 }
 
-impl error::Error for ParseError {
-    fn description(&self) -> &str {
-        &self.message
-    }
-}
+impl error::Error for ParseError {}
 
 ///
 /// A Wavefront OBJ file parser.
