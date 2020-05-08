@@ -6,11 +6,13 @@ use criterion::{
 };
 use wavefront_obj as obj;
 
-const SAMPLE_DATA: &str = "../assets/teapot.obj";
+const SAMPLE_DATA: &str = "assets/teapot.obj";
 
 
 fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("parse teapot.obj", |b| b.iter(|| obj::parse_file(black_box(SAMPLE_DATA))));
+    c.bench_function("parse teapot.obj", |b| b.iter(|| {
+        obj::parse_file(black_box(SAMPLE_DATA)).unwrap()
+    }));
 }
 
 criterion_group!(benches, criterion_benchmark);
