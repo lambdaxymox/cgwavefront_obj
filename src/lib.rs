@@ -1,4 +1,3 @@
-#![crate_type = "lib"]
 extern crate quickcheck;
 extern crate rand;
 
@@ -37,4 +36,4 @@ pub use object::Compositor;
 
 pub use parser::Parser;
 pub use parser::ParseError;
-
+pub use parser::ObjError;

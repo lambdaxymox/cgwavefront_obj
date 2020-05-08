@@ -14,6 +14,9 @@ name = "wavefront_obj"
 quickcheck = "0.7.2"
 rand = "0.7.0"
 
+[dev-dependencies]
+criterion = "0.3.2"
+
 [profile.bench]
 opt-level = 2
 debug = false
@@ -22,3 +25,11 @@ lto = false
 debug-assertions = false
 codegen-units = 1
 panic = 'unwind'
+
+[[bench]]
+name = "benchmark_teapot"
+harness = false
+
+[[bench]]
+name = "benchmark_al"
+harness = false
