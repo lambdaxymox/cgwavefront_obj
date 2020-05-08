@@ -15,10 +15,7 @@ fn is_newline(ch: char) -> bool {
 fn is_whitespace_or_newline(ch: char) -> bool {
     is_whitespace(ch) || is_newline(ch)
 }
-
-///
 /// The return type from the lexer.
-///
 #[derive(Clone, Debug)]
 pub struct Token {
     pub line_number: usize,
@@ -34,9 +31,7 @@ impl Token {
     }
 }
 
-///
 /// A OBJ file lexer tokenizes an input character stream.
-///
 #[derive(Clone)]
 pub struct Lexer<Stream> where Stream: Iterator<Item=char> {
     /// The current line position in the token stream.
@@ -54,19 +49,15 @@ impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    ///
     /// The function `peek_u8` looks at the character at the current position
     /// in the byte stream without advancing the stream.
-    /// 
     #[inline]
     fn peek_char(&mut self) -> Option<char> {
         self.stream.peek().map(|&x| x)
     }
 
-    ///
     /// the function `advance` advances the lexer by one
     /// character in the byte stream.
-    ///
     fn advance(&mut self) {
         match self.stream.next() {
             Some(ch) if is_newline(ch) => {
@@ -76,10 +67,8 @@ impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
         }
     }
 
-    ///
     /// The function `skip_comment` consumes a comment line
     /// without returning it.
-    ///
     fn skip_comment(&mut self) -> usize {
         let mut skipped = 0;
         loop {
@@ -95,10 +84,8 @@ impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
         skipped
     }
 
-    ///
     /// The function `skip_whitespace` consumes a string of whitespace
     /// characters without returning them.
-    ///
     fn skip_whitespace(&mut self) -> usize {
         let mut skipped = 0;
         loop {
@@ -116,9 +103,7 @@ impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
         skipped
     }
 
-    ///
     /// The method `next_token` fetches the next token from the input stream.
-    ///
     fn next_token(&mut self) -> Option<Token> {
         // The lexer has processed each token it has seen so far. 
         // We must fetch and then buffer another token from the stream.

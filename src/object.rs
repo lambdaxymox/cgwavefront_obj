@@ -473,11 +473,9 @@ enum GroupingStatement {
     S(SmoothingGroup),
 }
 
-///
 /// The compositor instructions to pass to an object compositor. The instructions
 /// describe to the compositor where to place grouping statements in a Wavefront OBJ file
 /// derived from an object set.
-///
 #[derive(Clone, Debug, PartialEq)]
 struct CompositorInstructions {
     instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>>,
@@ -488,13 +486,11 @@ impl CompositorInstructions {
         Self { instructions: instructions }
     }
 
-    ///
     /// Find any missing groups and smoothing groups that contain no elements. We can find the 
     /// missing groups in the object set because per the specification, grouping statements are
     /// indexed in monotone increasing order. So any gaps in the grouping indices in the index
     /// buffer indicates which groups are missing, and we can fill there in when generating a 
     /// *.obj file from an object set.
-    /// 
     fn generate_missing_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
         let mut missing_groups = BTreeMap::new();
         
@@ -607,9 +603,7 @@ impl CompositorInstructions {
         missing_groups
     }
 
-    ///
     /// Place the grouping statements for the groups that contain elements.
-    ///
     fn generate_found_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
         let mut found_groups = BTreeMap::new();
         let mut min_element_index = 1;
@@ -671,9 +665,7 @@ impl CompositorInstructions {
         found_groups
     }
 
-    /// 
     /// Generate the grouping statements for an object set.
-    /// 
     fn generate(object: &Object) -> CompositorInstructions {
         let missing_groups = Self::generate_missing_groups(object);
         let found_groups = Self::generate_found_groups(object);
@@ -707,10 +699,8 @@ impl CompositorInstructions {
     }
 }
 
-///
 /// A `TextObjectCompositor` generates a Wavefront OBJ text block from an Object.
 /// One can use it to automatically generate OBJ files.
-/// 
 struct TextObjectCompositor { }
 
 impl TextObjectCompositor {
@@ -831,10 +821,8 @@ pub trait Compositor {
     fn compose(&self, object_set: &ObjectSet) -> String;
 }
 
-///
 /// The `DisplayObjectCompositor` type is the default compositor
 /// for presenting object set information to the end user.
-/// 
 pub struct DisplayObjectSetCompositor { }
 
 impl DisplayObjectSetCompositor {
@@ -856,10 +844,8 @@ impl Compositor for DisplayObjectSetCompositor {
     }
 }
 
-///
 /// A `TextObjectSetCompositor` generates a Wavefront OBJ file from an ObjectSet.
 /// One can use it to automatically generate OBJ files from object sets.
-/// 
 pub struct TextObjectSetCompositor { }
 
 impl TextObjectSetCompositor {

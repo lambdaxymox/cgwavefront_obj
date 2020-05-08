@@ -20,9 +20,7 @@ use std::fmt;
 use std::str;
 
 
-///
 /// The model of the Wavefront OBJ format parser for model based testing.
-///
 #[derive(Clone, Debug)]
 struct ParserModel {
     data: ObjectSet,
@@ -346,13 +344,11 @@ impl Arbitrary for ParserModel {
     }
 }
 
-///
 /// The testing oracle defines an environment against which to assess the 
 /// correctness of the parser. The oracle consists of a parser model and an 
 /// object text. Given a generated object set, the model produces an equivalent 
 /// object text string and passes it to the parser. The parser satisfies the 
 /// model if the parsed object set matches the one produced by the model.
-///
 #[derive(Clone, Debug)]
 struct Oracle { 
     model: ParserModel,
@@ -382,9 +378,8 @@ impl Arbitrary for Oracle  {
     }
 }
 
-/// 
+
 /// The parser should correctly parse object statements.
-///
 #[test]
 fn prop_parse_object_set_should_parse_object_names() {
     fn property(oracle: Oracle) -> bool {
@@ -402,9 +397,7 @@ fn prop_parse_object_set_should_parse_object_names() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-/// 
 /// The parser should correctly parse vertex statements.
-///
 #[test]
 fn prop_parse_object_set_should_parse_vertices() {
     fn property(oracle: Oracle) -> bool {
@@ -422,9 +415,7 @@ fn prop_parse_object_set_should_parse_vertices() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-/// 
 /// The parser should correctly parse texture vertex statements.
-///
 #[test]
 fn prop_parse_object_set_should_parse_texture_vertices() {
     fn property(oracle: Oracle) -> bool {
@@ -442,9 +433,7 @@ fn prop_parse_object_set_should_parse_texture_vertices() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-/// 
 /// The parser should correctly parse normal vertex statements.
-///
 #[test]
 fn prop_parse_object_set_should_parse_normal_vertices() {
     fn property(oracle: Oracle) -> bool {
@@ -462,9 +451,7 @@ fn prop_parse_object_set_should_parse_normal_vertices() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// The parser should correctly parse group statements.
-///
 #[test]
 fn prop_parse_object_set_should_parse_groups() {
     fn property(oracle: Oracle) -> bool {
@@ -482,9 +469,7 @@ fn prop_parse_object_set_should_parse_groups() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// The parser should correctly parse smoothing group statements.
-///
 #[test]
 fn prop_parse_object_set_should_parse_smoothing_groups() {
     fn property(oracle: Oracle) -> bool {
@@ -502,9 +487,7 @@ fn prop_parse_object_set_should_parse_smoothing_groups() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// The parser should correctly parse elements from the file.
-///
 #[test]
 fn prop_parse_object_set_should_parse_elements() {
     fn property(oracle: Oracle) -> bool {
@@ -522,9 +505,7 @@ fn prop_parse_object_set_should_parse_elements() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// The parser should correctly parse shape entries.
-///
 #[test]
 fn prop_parse_object_set_should_parse_shape_entries() {
     fn property(oracle: Oracle) -> bool {
@@ -542,9 +523,7 @@ fn prop_parse_object_set_should_parse_shape_entries() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// The parser should correctly parse a valid wavefront obj file.
-///
 #[test]
 fn prop_parser_correctly_parses_valid_obj_files() {
     fn property(oracle: Oracle) -> bool {
@@ -560,11 +539,9 @@ fn prop_parser_correctly_parses_valid_obj_files() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// Wavefront OBJ files implicitly index the elements in a file in monotone
 /// increasing order. The shape set element indices should appear in the same order
 /// in the set as the elements appear in the original file.
-///
 #[test]
 fn prop_every_shape_set_should_be_monotone_increasing() {
     fn is_monotone(set: &[ShapeEntry]) -> bool {
@@ -581,11 +558,9 @@ fn prop_every_shape_set_should_be_monotone_increasing() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// Every element belongs to a group. If no grouping statements are specified,
 /// the elements default to a value of `default` for the group and `off`, or `0`
 /// for the smoothing group.
-///
 #[test]
 fn prop_every_element_belongs_to_a_group() {
     fn property(oracle: Oracle) -> bool {
@@ -600,10 +575,8 @@ fn prop_every_element_belongs_to_a_group() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// Every shape entry's smoothing group exists in the object file. It is possible
 /// for groups and smoothing groups to be empty, but they cannot be bogus.
-///
 #[test]
 fn prop_every_smoothing_group_exists() {
     fn property(oracle: Oracle) -> bool {
@@ -618,11 +591,9 @@ fn prop_every_smoothing_group_exists() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// Every element belongs to a smoothing group. If no grouping statements are specified,
 /// the elements default to a value of `default` for the group and `off`, or `0`
 /// for the smoothing group.
-///
 #[test]
 fn prop_every_smoothing_group_has_at_least_one_element() {
     fn property(oracle: Oracle) -> bool {
@@ -633,11 +604,9 @@ fn prop_every_smoothing_group_has_at_least_one_element() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// Every element belongs to a group. If no grouping statements are specified,
 /// the elements default to a value of `default` for the group and `off`, or `0`
 /// for the smoothing group.
-///
 #[test]
 fn prop_every_group_has_at_least_one_element() {
     fn property(oracle: Oracle) -> bool {
@@ -648,11 +617,9 @@ fn prop_every_group_has_at_least_one_element() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// Every element belongs to a group. If no group entry is specified in
 /// a wavefront obj file, a default value of `default` is used for groups, and
 /// a default value of `off`, or `0` is used for smoothing groups.
-///
 #[test]
 fn prop_every_shape_entry_element_exists() {
     fn property(oracle: Oracle) -> bool {
@@ -667,10 +634,8 @@ fn prop_every_shape_entry_element_exists() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-///
 /// Every element in a Wavefront OBJ file is implicitly indexed
 /// starting from 1.
-///
 #[test]
 fn prop_every_shape_entry_element_index_is_nonzero() {
     fn property(oracle: Oracle) -> bool {
@@ -685,12 +650,9 @@ fn prop_every_shape_entry_element_index_is_nonzero() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);   
 }
 
-
-///
 /// Every vertex, element, and grouping statement is implicitly indexed
 /// in a Wavefront OBJ file starting from 1 rather than 0. Every index
 /// in a shape entry should be nonzero.
-///
 #[test]
 fn prop_every_shape_entry_group_index_is_nonzero() {
     fn property(oracle: Oracle) -> bool {
@@ -705,12 +667,10 @@ fn prop_every_shape_entry_group_index_is_nonzero() {
     quickcheck::quickcheck(property as fn(Oracle) -> bool);   
 }
 
-///
 /// A Wavefront OBJ file implicitly indexes every vertex, element, and grouping
 /// statement in monotone increasing order from the beginning of the file to
 /// to the end of the file. Also, every index is indexed beginning at 1 rather than 0.
 /// The shape entries should reflect this. 
-///
 #[test]
 fn prop_every_shape_entry_smoothing_group_index_is_nonzero() {
     fn property(oracle: Oracle) -> bool {

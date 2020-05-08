@@ -37,9 +37,8 @@ impl fmt::Display for ObjError {
 
 impl error::Error for ObjError {}
 
-///
+
 /// Parse a wavefront object file from a file buffer or other `Read` instance.
-///
 pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ObjError> {
     let mut reader = BufReader::new(file);
     let mut string = String::new();
@@ -54,9 +53,7 @@ pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ObjError> {
 }
 
 
-///
 /// Parse a wavefront object file from a file path.
-///
 pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, ObjError> {
     if !path.as_ref().exists() {
         let disp = path.as_ref().display();
@@ -73,9 +70,7 @@ pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, ObjError> {
 }
 
 
-///
 /// Parse a wavefront object file from a string.
-///
 pub fn parse_str(st: &str) -> Result<ObjectSet, ParseError> {
     let mut parser = Parser::new(st.chars());
     parser.parse()
@@ -92,10 +87,8 @@ fn slice_res(st: &Result<String, ParseError>) -> Result<&str, &ParseError> {
     st.as_ref().map(|s| &s[..])
 }
 
-///
 /// An error that is returned from parsing an invalid *.obj file, or
 /// another kind of error.
-///
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
     line_number: usize,
@@ -120,9 +113,7 @@ impl fmt::Display for ParseError {
 
 impl error::Error for ParseError {}
 
-///
 /// A Wavefront OBJ file parser.
-///
 pub struct Parser<Stream> where Stream: Iterator<Item=char> {
     line_number: usize,
     lexer: iter::Peekable<Lexer<Stream>>,
