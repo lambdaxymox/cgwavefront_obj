@@ -6,7 +6,7 @@ use criterion::{
 };
 use wavefront_obj as obj;
 
-const SAMPLE_DATA: &str = "../sample_data/minicooper.obj";
+const SAMPLE_DATA: &str = "../assets/minicooper.obj";
 
 
 fn criterion_benchmark(c: &mut Criterion) {

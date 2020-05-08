@@ -27,6 +27,10 @@ codegen-units = 1
 panic = 'unwind'
 
 [[bench]]
+name = "benchmark_cube"
+harness = false
+
+[[bench]]
 name = "benchmark_teapot"
 harness = false
 
