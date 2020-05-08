@@ -10,7 +10,7 @@ use std::fs::File;
 use std::io::Read;
 
 
-const SAMPLE_DATA: &str = "sample_data/teapot.obj";
+const SAMPLE_DATA: &str = "assets/teapot.obj";
 
 
 struct Test {
