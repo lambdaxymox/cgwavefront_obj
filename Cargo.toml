@@ -33,3 +33,11 @@ harness = false
 [[bench]]
 name = "benchmark_al"
 harness = false
+
+[[bench]]
+name = "benchmark_minicooper"
+harness = false
+
+[[bench]]
+name = "benchmark_symphysis"
+harness = false
