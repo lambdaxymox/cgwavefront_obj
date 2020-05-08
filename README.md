@@ -19,7 +19,7 @@ Add the following line to your `Cargo.toml` file
 ```toml
 [dependencies]
 # ...
-wavefront_obj = "0.5.6"
+wavefront_obj = "0.5.7"
 # ...
 ```
 to import the library. Include the line
