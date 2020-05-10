@@ -103,9 +103,11 @@ pub enum ErrorKind {
     ExpectedVertexTextureIndexButGot(String),
     ExpectedVertexTextureNormalIndexButGot(String),
     EveryFaceElementMustHaveAtLeastThreeVertices,
-    EveryVTNIndexMustHaveTheSameFormForAGivenFace,
+    EveryVTNIndexMustHaveTheSameFormForAGivenElement,
     InvalidElementDeclaration(String),
-    InvalidElement,
+    ElementMustBeAPointLineOrFace,
+    SmoothingGroupNameMustBeOffOrInteger(String),
+    SmoothingGroupDeclarationHasNoName,
 }
 
 impl fmt::Display for ErrorKind {
@@ -119,12 +121,12 @@ impl fmt::Display for ErrorKind {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
     line_number: usize,
-    kind: String,
+    kind: ErrorKind,
 }
 
 impl ParseError {
     /// Generate a new parse error.
-    fn new(line_number: usize, kind: String) -> ParseError {
+    fn new(line_number: usize, kind: ErrorKind) -> ParseError {
         ParseError {
             line_number: line_number,
             kind: kind,
@@ -141,7 +143,7 @@ impl fmt::Display for ParseError {
 impl error::Error for ParseError {}
 
 #[inline]
-fn error<T>(line_number: usize, kind: String) -> Result<T, ParseError> {
+fn error<T>(line_number: usize, kind: ErrorKind) -> Result<T, ParseError> {
     Err(ParseError::new(line_number, kind))
 }
 
@@ -181,7 +183,7 @@ impl<'a> Parser<'a> {
     fn next_string(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
-            None => error(self.line_number, format!("Expected string but got `end of file`."))
+            None => error(self.line_number, ErrorKind::EndOfFile)
         }
     }
 
@@ -189,7 +191,7 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st == tag {
             true => Ok(st),
-            false => error(self.line_number, format!("Expected `{}` statement but got: `{}`.", tag, st))
+            false => error(self.line_number, ErrorKind::ExpectedStatementButGot(tag.into(), st.into()))
         }
     }
 
@@ -197,7 +199,7 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<f32>() {
             Ok(val) => Ok(val),
-            Err(_) => error(self.line_number, format!("Expected `f32` but got `{}`.", st)),
+            Err(_) => error(self.line_number, ErrorKind::ExpectedFloatButGot(st.into())),
         }
     }
 
@@ -205,7 +207,7 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<u32>() {
             Ok(val) => Ok(val),
-            Err(_) => error(self.line_number, format!("Expected integer but got `{}`.", st)),
+            Err(_) => error(self.line_number, ErrorKind::ExpectedIntegerButGot(st.into())),
         }
     }
 
@@ -372,7 +374,7 @@ impl<'a> Parser<'a> {
             Err(_) => {},
         }
 
-        error(self.line_number, format!("Expected `vertex/texture/normal` index but got `{}`", st))
+        error(self.line_number, ErrorKind::ExpectedVertexTextureNormalIndexButGot(st.into()))
     }
 
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
@@ -399,7 +401,7 @@ impl<'a> Parser<'a> {
                         elements_parsed += 1;
                     }
                     Err(_) => {
-                        return error(self.line_number,format!("Expected integer but got `{}`.", st))
+                        return error(self.line_number,ErrorKind::ExpectedIntegerButGot(st.into()))
                     }
                 }
                 _ => break,
@@ -420,9 +422,7 @@ impl<'a> Parser<'a> {
         // Verify that each VTN index has the same type and if of a valid form.
         for i in 1..vtn_indices.len() {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
-                return error(self.line_number,
-                    format!("Every vertex/texture/normal index must have the same form.")
-                );
+                return error(self.line_number, ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement);
             }
         }
 
@@ -442,17 +442,13 @@ impl<'a> Parser<'a> {
 
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
-            return error(self.line_number,
-                format!("A face element must have at least three vertices.")
-            );  
+            return error(self.line_number, ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices);
         }
 
         // Verify that each VTN index has the same type and if of a valid form.
         for i in 1..vtn_indices.len() {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
-                return error(self.line_number,
-                    format!("Every vertex/texture/normal index must have the same form.")
-                );
+                return error(self.line_number, ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement);
             }
         }
 
@@ -472,7 +468,7 @@ impl<'a> Parser<'a> {
             Some("p") => self.parse_point(elements),
             Some("l") => self.parse_line(elements),
             Some("f") => self.parse_face(elements),
-            _ => error(self.line_number, format!("Parser error: Line must be a point, line, or face.")),
+            _ => error(self.line_number, ErrorKind::ElementMustBeAPointLineOrFace),
         }
     }
 
@@ -502,12 +498,10 @@ impl<'a> Parser<'a> {
             } else if let Ok(number) = name.parse::<u32>() {
                 smoothing_groups.push(SmoothingGroup::new(number));
             } else {
-                return error(self.line_number, format!(
-                    "Expected integer or `off` for smoothing group name but got `{}`", name
-                ));
+                return error(self.line_number, ErrorKind::SmoothingGroupNameMustBeOffOrInteger(name.into()));
             }
         } else {
-            return error(self.line_number, format!("Parser error: Invalid smoothing group name."));
+            return error(self.line_number, ErrorKind::SmoothingGroupDeclarationHasNoName);
         }
 
         Ok(1)
@@ -667,9 +661,7 @@ impl<'a> Parser<'a> {
                     break;
                 }
                 Some(other_st) => {
-                    return error(self.line_number, format!(
-                        "Parse error: Invalid element declaration in obj file. Got `{}`", other_st
-                    ));
+                    return error(self.line_number, ErrorKind::InvalidElementDeclaration(other_st.into()));
                 }
             }
         }
