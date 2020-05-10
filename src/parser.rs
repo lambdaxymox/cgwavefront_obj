@@ -297,7 +297,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn expect(&mut self, tag: &str) -> Result<(), ParseError> {
+    fn expect_tag(&mut self, tag: &str) -> Result<(), ParseError> {
         match self.next() {
             None => error(self.line_number, ErrorKind::EndOfFile),
             Some(st) if st != tag => error(
@@ -331,7 +331,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
-        self.expect("v")?;
+        self.expect_tag("v")?;
  
         let x = self.parse_f32()?;
         let y = self.parse_f32()?;
@@ -343,7 +343,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
-        self.expect("vt")?;
+        self.expect_tag("vt")?;
 
         let u = self.parse_f32()?;
         let mv = self.try_once(|st| st.parse::<f32>().ok());
@@ -355,7 +355,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
-        self.expect("vn")?;
+        self.expect_tag("vn")?;
 
         let i = self.parse_f32()?;
         let j = self.parse_f32()?;
@@ -374,7 +374,7 @@ impl<'a> Parser<'a> {
     }
 
     fn skip_one_or_more_newlines(&mut self) -> Result<(), ParseError> {
-        self.expect("\n")?;
+        self.expect_tag("\n")?;
         self.skip_zero_or_more_newlines();
         Ok(())
     }
@@ -382,7 +382,7 @@ impl<'a> Parser<'a> {
     fn parse_object_name(&mut self) -> Result<&'a str, ParseError> {
         match self.peek() {
             Some("o") => {
-                self.expect("o")?;
+                self.expect_tag("o")?;
                 let object_name = self.next_string();
                 self.skip_one_or_more_newlines()?;
                 
@@ -444,7 +444,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
-        self.expect("p")?;
+        self.expect_tag("p")?;
 
         let v_index = self.parse_u32()?;
         elements.push(Element::Point(VTNIndex::V(v_index)));
@@ -468,7 +468,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
-        self.expect("l")?;
+        self.expect_tag("l")?;
 
         let mut vtn_indices = vec![];
         vtn_indices.push(self.parse_vtn_index()?);
@@ -491,7 +491,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
-        self.expect("f")?;
+        self.expect_tag("f")?;
         
         let mut vtn_indices = vec![];
         self.parse_vtn_indices(&mut vtn_indices)?;
@@ -529,7 +529,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_groups(&mut self, groups: &mut Vec<Group>) -> Result<u32, ParseError> {
-        self.expect("g")?;
+        self.expect_tag("g")?;
         let mut groups_parsed = 0;
         loop {
             match self.next_string() {
@@ -547,7 +547,7 @@ impl<'a> Parser<'a> {
     fn parse_smoothing_group(&mut self, 
         smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<u32, ParseError> {
 
-        self.expect("s")?;
+        self.expect_tag("s")?;
         if let Ok(name) = self.next_string() {
             if name == "off" {
                 smoothing_groups.push(SmoothingGroup::new(0));
