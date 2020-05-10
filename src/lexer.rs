@@ -1,174 +1,184 @@
-use std::iter;
+use std::str;
 
- 
+
 #[inline]
-fn is_whitespace(ch: char) -> bool {
-    ch == ' ' || ch == '\\' || ch == '\t'
+fn is_whitespace(ch: u8) -> bool {
+    ch == b' ' || ch == b'\\' || ch == b'\t'
 }
 
 #[inline]
-fn is_newline(ch: char) -> bool {
-    ch == '\n' || ch == '\r'
+fn is_newline(ch: u8) -> bool {
+    ch == b'\n' || ch == b'\r'
 }
 
 #[inline]
-fn is_whitespace_or_newline(ch: char) -> bool {
+fn is_whitespace_or_newline(ch: u8) -> bool {
     is_whitespace(ch) || is_newline(ch)
 }
-/// The return type from the lexer.
-#[derive(Clone, Debug)]
-pub struct Token {
-    pub line_number: usize,
-    pub content: String,
-}
-
-impl Token {
-    fn new(line_number: usize, content: String) -> Token {
-        Token {
-            line_number: line_number,
-            content: content,
-        }
-    }
-}
-
 /// A OBJ file lexer tokenizes an input character stream.
 #[derive(Clone)]
-pub struct Lexer<Stream> where Stream: Iterator<Item=char> {
+pub struct Lexer<'a> {
     /// The current line position in the token stream.
     current_line_number: usize,
+    /// The cursor position in the character stream.
+    stream_position: usize,
     /// The input stream.
-    stream: iter::Peekable<Stream>,
+    stream: &'a [u8],
 }
 
-impl<Stream> Lexer<Stream> where Stream: Iterator<Item=char> {
+impl<'a> Lexer<'a> {
     /// Create a new lexer.
-    pub fn new(stream: Stream) -> Lexer<Stream> {
+    pub fn new(stream: &'a str) -> Lexer<'a> {
         Lexer {
             current_line_number: 1,
-            stream: stream.peekable(),
+            stream_position: 0,
+            stream: stream.as_bytes(),
         }
     }
 
-    /// The function `peek_u8` looks at the character at the current position
+    /// The function `peek` looks at the character at the current position
     /// in the byte stream without advancing the stream.
     #[inline]
-    fn peek_char(&mut self) -> Option<char> {
-        self.stream.peek().map(|&x| x)
+    fn peek(&mut self) -> Option<&u8> {
+        self.stream.get(self.stream_position)
     }
 
     /// the function `advance` advances the lexer by one
     /// character in the byte stream.
     fn advance(&mut self) {
-        match self.stream.next() {
-            Some(ch) if is_newline(ch) => {
+        match self.peek() {
+            Some(&ch) if is_newline(ch) => {
                 self.current_line_number += 1;
             },
             _ => {}
         }
+        self.stream_position += 1;
+    }
+
+    /// Given a boolean predicate that operates on bytes, advance through the 
+    /// stream while the predicate is still satisfied.
+    /// This function returns the number of characters skipped.
+    fn skip_while<P: Fn(u8) -> bool>(&mut self, predicate: P) -> usize {
+        let mut skipped = 0;
+        loop {
+            match self.peek() {
+                Some(&ch) if predicate(ch) => {
+                    self.advance();
+                    skipped += 1;
+                }
+                Some(_) | None => {
+                    break;
+                }
+            }
+        }
+
+        skipped
+    }
+
+    /// Given a predicate that operates on bytes, advance through stream while the predicates
+    /// is not satisfied. That is, advance one character at a time unless the predicate is 
+    /// satisfied, and then stop. This function returns the number of characters skipped.
+    fn skip_unless<P: Fn(u8) -> bool>(&mut self, not_predicate: P) -> usize {
+        self.skip_while(|ch| !not_predicate(ch))
     }
 
     /// The function `skip_comment` consumes a comment line
     /// without returning it.
     fn skip_comment(&mut self) -> usize {
-        let mut skipped = 0;
-        loop {
-            match self.peek_char() { 
-                Some(ch) if !is_newline(ch) => {
-                    self.advance();
-                    skipped += 1;
-                }
-                _ => break,
-            }
+        match self.peek() {
+            Some(b'#') => self.skip_unless(is_newline),
+            _ => 0,
         }
-
-        skipped
     }
 
     /// The function `skip_whitespace` consumes a string of whitespace
     /// characters without returning them.
     fn skip_whitespace(&mut self) -> usize {
-        let mut skipped = 0;
-        loop {
-            match self.peek_char() {
-                Some(ch) if is_whitespace(ch) => {
-                    self.advance();
-                    skipped += 1;
-                }
-                _ => {
-                    break;
-                }
-            }
-        }
-
-        skipped
+        self.skip_while(is_whitespace)
     }
 
-    /// The method `next_token` fetches the next token from the input stream.
-    fn next_token(&mut self) -> Option<Token> {
-        // The lexer has processed each token it has seen so far. 
-        // We must fetch and then buffer another token from the stream.
+    /// This function fetches the next token from the input stream.
+    fn next_token(&mut self) -> Option<&'a [u8]> {
+        self.skip_whitespace();
+        self.skip_comment();
 
-        // Count the number of bytes consumed for a token.
-        let mut consumed: usize = 0;
-        let mut token: String = String::new();
-        loop {
-            match self.peek_char() {
-                Some(ch) if ch == '#' => {
-                    self.skip_comment();
-                }
-                Some(ch) if is_whitespace_or_newline(ch) => {
-                    // If the cursor is pointing at a whitespace or newline character,
-                    // there are two possible situations:
-                    // (1) We are at the end of the token,
-                    // (2) We have not encountered a token yet.
-                    if consumed != 0 {
-                        // We are at the end of a token.
-                        break;
-                    } else if is_newline(ch) {
-                        // We are at the end of a line.
-                        self.advance();
-                        token.push('\n');
-                        consumed += 1;
-                        break;
-                    } else {
-                        // We have consumed only whitespace. No token has been found yet.
-                        self.skip_whitespace();
-                    }
-                }
-                Some(ch) => {
-                    self.advance();
-                    token.push(ch);
-                    consumed += 1;
-                }
-                None => {
-                    break;
+        let start_position = self.stream_position;
+
+        match self.peek() {
+            Some(&ch) if is_newline(ch) => {
+                self.advance();
+                self.stream.get(start_position..self.stream_position)
+            }
+            Some(_) => {
+                let skipped = self.skip_unless(|ch| is_whitespace_or_newline(ch) || ch == b'#');
+                if skipped > 0 {
+                    self.stream.get(start_position..self.stream_position)
+                } else {
+                    None
                 }
             }
-        }
-
-        if consumed != 0 {
-            // We consumed a token.
-            debug_assert!(token.len() != 0);
-            Some(Token::new(self.current_line_number, token))
-        } else {
-            debug_assert!(token.len() == 0);
-            None
+            None => None,
         }
     }
 }
 
-impl<Stream> Iterator for Lexer<Stream> where Stream: Iterator<Item=char> {
-    type Item = Token;
+impl<'a> Iterator for Lexer<'a> {
+    type Item = &'a [u8];
 
     fn next(&mut self) -> Option<Self::Item> {
         self.next_token()
     }
 }
 
+pub struct ObjectLexer<'a> {
+    inner: Lexer<'a>,
+    cache: Option<Option<&'a str>>,
+}
+
+impl<'a> ObjectLexer<'a> {
+    pub fn new(lexer: Lexer<'a>) -> ObjectLexer<'a> {
+        ObjectLexer {
+            inner: lexer,
+            cache: None,
+        }
+    }
+
+    pub fn next_token(&mut self) -> Option<&'a str> {
+        match self.cache.take() {
+            Some(token) => token,
+            None => {
+                self.inner.next_token().map(
+                    |t| { unsafe { str::from_utf8_unchecked(t) } 
+                })
+            }
+        }
+    }
+
+    pub fn peek(&mut self) -> Option<&'a str> {
+        match self.cache {
+            Some(token) => token,
+            None => {
+                let next_token = self.inner.next_token().map(
+                    |t| { unsafe { str::from_utf8_unchecked(t) } 
+                });
+                self.cache.replace(next_token);
+                next_token
+            }
+        }
+    }
+}
+
+impl<'a> Iterator for ObjectLexer<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next_token()
+    }
+}
 
 #[cfg(test)]
 mod tests {
-    use super::Lexer;
+    use super::{Lexer, ObjectLexer};
     use std::slice;
 
 
@@ -398,8 +408,8 @@ mod tests {
     #[test]
     fn test_lexer() {
         for test_case in test_cases().iter() {
-            let lexer = Lexer::new(test_case.data.chars());
-            let result = lexer.map(|token| token.content).collect::<Vec<String>>();
+            let lexer = ObjectLexer::new(Lexer::new(&test_case.data));
+            let result = lexer.map(|token| token.into()).collect::<Vec<String>>();
             assert_eq!(result, test_case.expected);
         }
     }
@@ -407,11 +417,11 @@ mod tests {
     #[test]
     fn test_lexer_tokenwise() {
         for test_case in test_cases().iter() {
-            let lexer = Lexer::new(test_case.data.chars());
+            let lexer = ObjectLexer::new(Lexer::new(&test_case.data));
         
             for (result, expected) in lexer.zip(test_case.expected.iter()) {
                 assert_eq!(
-                    &result.content, expected,
+                    result, expected,
                     "result = {:?}; expected = {:?}", result, expected
                 );
             }

@@ -180,7 +180,7 @@ fn test_parse_object_set() {
     let tests = test_cases();
     
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result = parser.parse().unwrap();
 
         assert_eq!(result, test.expected);
@@ -194,7 +194,7 @@ fn test_parse_object_set_should_parse_objects() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.name, expected.name);
@@ -215,7 +215,7 @@ fn test_parse_object_set_should_parse_object_names() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap(); 
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.name, expected.name);
@@ -229,7 +229,7 @@ fn test_parse_object_set_should_parse_vertices() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.vertex_set.len(), expected.vertex_set.len(), "Length mismatch.");
@@ -248,7 +248,7 @@ fn test_parse_object_set_should_parse_texture_vertices() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {         
             assert_eq!(result.texture_vertex_set.len(), expected.texture_vertex_set.len(), "Length mismatch.");
@@ -267,7 +267,7 @@ fn test_parse_object_set_should_parse_normal_vertices() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.normal_vertex_set.len(), expected.normal_vertex_set.len(), "Length mismatch.");
@@ -287,7 +287,7 @@ fn test_parse_object_set_should_parse_groups() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.group_set.len(), expected.group_set.len(), "Length mismatch.");
@@ -306,7 +306,7 @@ fn test_parse_object_set_should_parse_smoothing_groups() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.smoothing_group_set.len(), expected.smoothing_group_set.len(), "Length mismatch.");
@@ -325,7 +325,7 @@ fn test_parse_object_set_should_parse_elements() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(result.element_set.len(), expected.element_set.len(), "Length mismatch.");
@@ -345,7 +345,7 @@ fn test_parse_object_set_should_parse_shape_entries() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for (result, expected) in result_set.iter().zip(test.expected.iter()) { 
             assert_eq!(result.shape_set.len(), expected.shape_set.len(), "Length mismatch.");
@@ -367,7 +367,7 @@ fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for result in result_set.iter() { 
             for (shape, next_shape) in result.shape_set.iter().zip(result.shape_set[1..].iter()) {
@@ -385,7 +385,7 @@ fn test_parse_object_every_element_belongs_to_a_group() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
@@ -403,7 +403,7 @@ fn test_parse_object_every_element_group_exists() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
@@ -424,7 +424,7 @@ fn test_parse_object_every_element_smoothing_group_exists() {
     let tests = test_cases();
 
     for test in tests.iter() {
-        let mut parser = Parser::new(test.data.chars());
+        let mut parser = Parser::new(&test.data);
         let result_set = parser.parse().unwrap();
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {

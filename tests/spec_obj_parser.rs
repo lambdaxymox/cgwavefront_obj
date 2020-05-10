@@ -360,8 +360,8 @@ impl Oracle {
         Oracle { model: model, text: text }
     }
 
-    fn actual(&self) -> Parser<str::Chars> {
-        let input = self.text.chars();
+    fn actual(&self) -> Parser {
+        let input = &self.text;
         Parser::new(input)
     }
 
