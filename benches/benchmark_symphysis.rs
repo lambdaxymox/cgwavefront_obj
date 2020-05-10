@@ -9,11 +9,11 @@ use wavefront_obj as obj;
 const SAMPLE_DATA: &str = "assets/symphysis.obj";
 
 
-fn criterion_benchmark(c: &mut Criterion) {
+fn benchmark(c: &mut Criterion) {
     c.bench_function("parse symphysis.obj", |b| b.iter(|| {
         obj::parse_file(black_box(SAMPLE_DATA)).unwrap()
     }));
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, benchmark);
 criterion_main!(benches);
