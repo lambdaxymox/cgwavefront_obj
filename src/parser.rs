@@ -26,23 +26,64 @@ use std::path::Path;
 
 
 #[derive(Clone, Debug)]
-pub enum ObjError {
-    Source,
+pub enum ObjErrorKind {
+    SourceExistsButCouldNotBeRead,
     SourceDoesNotExist(String),
-    Parse(ParseError),
+    ParseError,
 }
 
-impl fmt::Display for ObjError {
+#[derive(Debug)]
+pub struct ObjError {
+    kind: ObjErrorKind,
+    error: Option<Box<dyn error::Error>>,
+}
+
+impl ObjError {
+    fn new(kind: ObjErrorKind, error: Box<dyn error::Error>) -> ObjError {
+        ObjError {
+            kind: kind,
+            error: Some(error),
+        }
+    }
+
+    fn from_kind(kind: ObjErrorKind) -> ObjError {
+        ObjError {
+            kind: kind,
+            error: None,
+        }
+    }
+}
+
+impl fmt::Display for ObjError{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            ObjError::Source => {
-                write!(f, "An error occurred in the OBJ source.")
+        match &self.kind {
+            ObjErrorKind::SourceExistsButCouldNotBeRead => {
+                match self.error {
+                    Some(ref err) => {    
+                        write!(f, 
+                            "The source exists but could not be read with the underlying error: {}.",
+                            err 
+                        )
+                    }
+                    _ => {
+                        write!(f, 
+                            "The source exists but could not be read with the underlying error: Unknown Error.", 
+                        )
+                    }
+                }
             }
-            ObjError::SourceDoesNotExist(source) => {
-                write!(f, "Source could not be found: {}.", source)
+            ObjErrorKind::SourceDoesNotExist(source) => {
+                write!(f, "The OBJ data souce source could not be found: {}.", source)
             }
-            ObjError::Parse(parse_error) => {
-                write!(f, "{}", parse_error)
+            ObjErrorKind::ParseError => {
+                match self.error {
+                    Some(ref err) => {    
+                        write!(f, "An error occurred while parsing the wavefront obj file: {}", err)
+                    }
+                    _ => {
+                        write!(f, "An error occurred while parsing the wavefront obj file: Unknown Error")
+                    }
+                }                
             }
         }
     }
@@ -61,7 +102,7 @@ pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ObjError> {
 
     match parser.parse() {
         Ok(obj_set) => Ok(obj_set),
-        Err(e) => Err(ObjError::Parse(e)),
+        Err(e) => Err(ObjError::new(ObjErrorKind::ParseError, Box::new(e))),
     }
 }
 
@@ -71,12 +112,14 @@ pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, ObjError> {
     if !path.as_ref().exists() {
         let disp = path.as_ref().display();
 
-        return Err(ObjError::SourceDoesNotExist(format!("{}", disp)));
+        return Err(ObjError::from_kind(ObjErrorKind::SourceDoesNotExist(format!("{}", disp))));
     }
 
     let file = match File::open(path) {
         Ok(val) => val,
-        Err(_) => return Err(ObjError::Source)
+        Err(e) => return Err(
+            ObjError::new(ObjErrorKind::SourceExistsButCouldNotBeRead, Box::new(e))
+        )
     };
 
     parse(file)
