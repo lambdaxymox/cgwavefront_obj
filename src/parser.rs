@@ -15,7 +15,6 @@ use crate::lexer::{
     Lexer,
     ObjectLexer,
 };
-use std::iter;
 use std::error;
 use std::fmt;
 use std::io::{
@@ -90,16 +89,6 @@ pub fn parse_str(st: &str) -> Result<ObjectSet, ParseError> {
     parser.parse()
 }
 
-
-#[inline]
-fn slice(st: &Option<String>) -> Option<&str> {
-    st.as_ref().map(|st| &st[..])
-}
-
-#[inline]
-fn slice_res(st: &Result<String, ParseError>) -> Result<&str, &ParseError> {
-    st.as_ref().map(|s| &s[..])
-}
 
 /// An error that is returned from parsing an invalid *.obj file, or
 /// another kind of error.

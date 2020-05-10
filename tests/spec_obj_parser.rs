@@ -17,7 +17,6 @@ use rand::{Rng, RngCore};
 
 use std::marker;
 use std::fmt;
-use std::str;
 
 
 /// The model of the Wavefront OBJ format parser for model based testing.
