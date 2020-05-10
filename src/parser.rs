@@ -297,11 +297,13 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn expect(&mut self, tag: &str) -> Result<&'a str, ParseError> {
-        let st = self.next_string()?;
-        match st == tag {
-            true => Ok(st),
-            false => error(self.line_number, ErrorKind::ExpectedStatementButGot(tag.into(), st.into()))
+    fn expect(&mut self, tag: &str) -> Result<(), ParseError> {
+        match self.next() {
+            None => error(self.line_number, ErrorKind::EndOfFile),
+            Some(st) if st != tag => error(
+                self.line_number, ErrorKind::ExpectedStatementButGot(tag.into(), st.into())
+            ),
+            _ => Ok(())
         }
     }
 
