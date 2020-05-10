@@ -101,7 +101,7 @@ pub enum ErrorKind {
     ExpectedNormalIndexButGot(String),
     ExpectedVertexNormalIndexButGot(String),
     ExpectedVertexTextureIndexButGot(String),
-    ExpectedVertexTextureNormalIndexButGot(String),
+    ExpectedVTNIndexButGot(String),
     EveryFaceElementMustHaveAtLeastThreeVertices,
     EveryVTNIndexMustHaveTheSameFormForAGivenElement,
     InvalidElementDeclaration(String),
@@ -281,100 +281,92 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
-        enum VTNErrorKind {
-            ExpectedVertexIndexButGot,
-            ExpectedNormalIndexButGot,
-            ExpectedVertexNormalIndexButGot,
-            ExpectedTextureIndexButGot,
-            ExpectedVertexTextureIndexButGot,
-        }
-
-        fn parse_vn(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+        fn parse_vn(st: &str) -> Option<VTNIndex> {
             if let Some(v_index_in_str) = st.find("//") {
                 let v_index = match st[0..v_index_in_str].parse::<u32>() {
                     Ok(val) => val,
-                    Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+                    Err(_) =>  return None,
                 };
                 let vn_index = match st[v_index_in_str+2..].parse::<u32>() {
                     Ok(val) => val,
-                    Err(_) => return Err(VTNErrorKind::ExpectedNormalIndexButGot),
+                    Err(_) => return None,
                 };
     
-                return Ok(VTNIndex::VN(v_index, vn_index));
+                return Some(VTNIndex::VN(v_index, vn_index));
             } else {
-                return Err(VTNErrorKind::ExpectedVertexNormalIndexButGot);
+                return None;
             }
         }
     
-        fn parse_vt(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+        fn parse_vt(st: &str) -> Option<VTNIndex> {
             if let Some(v_index_in_str) = st.find("/") {
                 let v_index = match st[0..v_index_in_str].parse::<u32>() {
                     Ok(val) => val,
-                    Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+                    Err(_) => return None,
                 };
                 let vt_index = match st[v_index_in_str+1..].parse::<u32>() {
                     Ok(val) => val,
-                    Err(_) => return Err(VTNErrorKind::ExpectedTextureIndexButGot)
+                    Err(_) => return None
                 };
     
-                return Ok(VTNIndex::VT(v_index, vt_index));
+                return Some(VTNIndex::VT(v_index, vt_index));
             } else {
-                return Err(VTNErrorKind::ExpectedVertexTextureIndexButGot);
+                return None;
             }
         }
     
-        fn parse_vtn(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+        fn parse_vtn(st: &str) -> Option<VTNIndex> {
             let v_index_in_str = match st.find("/") {
                 Some(val) => val,
-                None => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+                None => return None,
             };
             let v_index = match st[0..v_index_in_str].parse::<u32>() {
                 Ok(val) => val,
-                Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+                Err(_) => return None,
             };
             let vt_index_in_str = match st[(v_index_in_str + 1)..].find("/") {
                 Some(val) => v_index_in_str + 1 + val,
-                None => return Err(VTNErrorKind::ExpectedTextureIndexButGot),
+                None => return None,
             };
             let vt_index = match st[(v_index_in_str + 1)..vt_index_in_str].parse::<u32>() {
                 Ok(val) => val,
-                Err(_) => return Err(VTNErrorKind::ExpectedTextureIndexButGot),
+                Err(_) => return None,
             };
             let vn_index = match st[(vt_index_in_str + 1)..].parse::<u32>() {
                 Ok(val) => val,
-                Err(_) => return Err(VTNErrorKind::ExpectedNormalIndexButGot),
+                Err(_) => return None,
             };
        
-            Ok(VTNIndex::VTN(v_index, vt_index, vn_index))
+            Some(VTNIndex::VTN(v_index, vt_index, vn_index))
         }
     
-        fn parse_v(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+        fn parse_v(st: &str) -> Option<VTNIndex> {
             match st.parse::<u32>() {
-                Ok(val) => Ok(VTNIndex::V(val)),
-                Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot)
+                Ok(val) => Some(VTNIndex::V(val)),
+                Err(_) => return None
             }
         }
 
 
         let st = self.next_string()?;
         match parse_vn(&st) {
-            Ok(val) => return Ok(val),
-            Err(_) => {},
+            Some(val) => return Ok(val),
+            _ => {},
         }
         match parse_vtn(&st) {
-            Ok(val) => return Ok(val),
-            Err(_) => {},
+            Some(val) => return Ok(val),
+            _ => {},
         }
         match parse_vt(&st) {
-            Ok(val) => return Ok(val),
-            Err(_) => {},
+            Some(val) => return Ok(val),
+            _ => {},
         }
         match parse_v(&st) {
-            Ok(val) => return Ok(val),
-            Err(_) => {},
+            Some(val) => return Ok(val),
+            _ => {},
         }
 
-        error(self.line_number, ErrorKind::ExpectedVertexTextureNormalIndexButGot(st.into()))
+        error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into()))
     }
 
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
