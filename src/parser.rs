@@ -263,73 +263,7 @@ impl<'a> Parser<'a> {
             _ => Ok("")
         }
     }
-    /*
-    fn parse_vn(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
-        if let Some(v_index_in_str) = st.find("//") {
-            let v_index = match st[0..v_index_in_str].parse::<u32>() {
-                Ok(val) => val,
-                Err(_) => return self.error(format!("Expected `vertex` index but got `{}`", st))
-            };
-            let vn_index = match st[v_index_in_str+2..].parse::<u32>() {
-                Ok(val) => val,
-                Err(_) => return self.error(format!("Expected `normal` index but got `{}`", st))
-            };
 
-            return Ok(VTNIndex::VN(v_index, vn_index));
-        } else {
-            return self.error(format!("Expected `vertex//normal` index but got `{}`", st))
-        }
-    }
-
-    fn parse_vt(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
-        if let Some(v_index_in_str) = st.find("/") {
-            let v_index = match st[0..v_index_in_str].parse::<u32>() {
-                Ok(val) => val,
-                Err(_) => return self.error(format!("Expected `vertex` index but got `{}`", st))
-            };
-            let vt_index = match st[v_index_in_str+1..].parse::<u32>() {
-                Ok(val) => val,
-                Err(_) => return self.error(format!("Expected `texture` index but got `{}`", st))
-            };
-
-            return Ok(VTNIndex::VT(v_index, vt_index));
-        } else {
-            return self.error(format!("Expected `vertex/texture` index but got `{}`", st))
-        }
-    }
-
-    fn parse_vtn(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
-        let v_index_in_str = match st.find("/") {
-            Some(val) => val,
-            None => return self.error(format!("Expected `vertex` index but got `{}`", st))
-        };
-        let v_index = match st[0..v_index_in_str].parse::<u32>() {
-            Ok(val) => val,
-            Err(_) => return self.error(format!("Expected `vertex` index but got `{}`", st))
-        };
-        let vt_index_in_str = match st[(v_index_in_str + 1)..].find("/") {
-            Some(val) => v_index_in_str + 1 + val,
-            None => return self.error(format!("Expected `texture` index but got `{}`", st))
-        };
-        let vt_index = match st[(v_index_in_str + 1)..vt_index_in_str].parse::<u32>() {
-            Ok(val) => val,
-            Err(_) => return self.error(format!("Expected `texture` index but got `{}`", st))
-        };
-        let vn_index = match st[(vt_index_in_str + 1)..].parse::<u32>() {
-            Ok(val) => val,
-            Err(_) => return self.error(format!("Expected `normal` index but got `{}`", st))
-        };
-   
-        Ok(VTNIndex::VTN(v_index, vt_index, vn_index))
-    }
-
-    fn parse_v(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
-        match st.parse::<u32>() {
-            Ok(val) => Ok(VTNIndex::V(val)),
-            Err(_) => return self.error(format!("Expected `vertex` index but got `{}`", st))
-        }
-    }
-    */
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         enum VTNErrorKind {
             ExpectedVertexIndexButGot,
