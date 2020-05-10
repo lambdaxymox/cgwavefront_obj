@@ -418,16 +418,13 @@ impl<'a> Parser<'a> {
             return error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into()));
         }
         
-        // Check the splits.
-        let vtn = match (split1, split2, split3) {
-            (Some(v), None, None) => VTNIndex::V(v),
-            (Some(v), None, Some(n)) => VTNIndex::VN(v, n),
-            (Some(v), Some(t), None) => VTNIndex::VT(v, t),
-            (Some(v), Some(t), Some(n)) => VTNIndex::VTN(v, t, n),
+        match (split1, split2, split3) {
+            (Some(v), None, None) => Ok(VTNIndex::V(v)),
+            (Some(v), None, Some(n)) => Ok(VTNIndex::VN(v, n)),
+            (Some(v), Some(t), None) => Ok(VTNIndex::VT(v, t)),
+            (Some(v), Some(t), Some(n)) => Ok(VTNIndex::VTN(v, t, n)),
             _ => return error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into())),
-        };
-        
-        Ok(vtn)
+        }
     }
 
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
