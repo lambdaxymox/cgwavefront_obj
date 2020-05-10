@@ -391,6 +391,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
+        /*
         fn parse_vn(st: &str) -> Option<VTNIndex> {
             if let Some(v_index_in_str) = st.find("//") {
                 let v_index = match st[0..v_index_in_str].parse::<u32>() {
@@ -475,8 +476,45 @@ impl<'a> Parser<'a> {
             Some(val) => return Ok(val),
             _ => {},
         }
-
-        error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into()))
+        */
+        let process_split = |split: &str| -> Result<Option<u32>, ParseError> {
+            if split.len() > 0 {
+                let index = split.parse::<u32>();
+                Ok(index.ok())
+            } else {
+                Ok(None)
+            }
+        };
+    
+        let st = self.next_string()?;
+        let mut splits_iter = st.split('/');
+        let split1 = splits_iter
+            .next()
+            .and_then(|s| process_split(&s).transpose())
+            .transpose()?;
+        let split2 = splits_iter
+            .next()
+            .and_then(|s| process_split(&s).transpose())
+            .transpose()?;
+        let split3 = splits_iter
+            .next()
+            .and_then(|s| process_split(&s).transpose())
+            .transpose()?;
+    
+        if split1.is_none() || splits_iter.next().is_some() {
+            return error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into()));
+        }
+        
+        // Check the splits.
+        let vtn = match (split1, split2, split3) {
+            (Some(v), None, None) => VTNIndex::V(v),
+            (Some(v), None, Some(n)) => VTNIndex::VN(v, n),
+            (Some(v), Some(t), None) => VTNIndex::VT(v, t),
+            (Some(v), Some(t), Some(n)) => VTNIndex::VTN(v, t, n),
+            _ => return error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into())),
+        };
+        
+        Ok(vtn)
     }
 
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {

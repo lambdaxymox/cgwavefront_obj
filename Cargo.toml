@@ -1,6 +1,6 @@
 [package]
 name = "wavefront_obj"
-version = "0.5.18"
+version = "0.5.19"
 authors = ["LambdaXymox <lambda.xymox@gmail.com>"]
 edition = "2018"
 readme = "README.md"
