@@ -112,7 +112,72 @@ pub enum ErrorKind {
 
 impl fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "")
+        use ErrorKind::*;
+        match &self {
+            &EndOfFile => {
+                write!(f, 
+                    "Prematurely reached the end of the file in the process of 
+                     getting the next token."
+                )
+            }
+            &ExpectedStatementButGot(expected, got) => {
+                write!(f, "Parse Error: Expected `{}` but got `{}` instead.", expected, got)
+            }
+            &ExpectedFloatButGot(got) => {
+                write!(f, "Expected a floating point number but got `{}` instead.", got)
+            }
+            &ExpectedIntegerButGot(got) => {
+                write!(f, "Expected an integer but got `{}` instead.", got)
+            }
+            &ExpectedVertexIndexButGot(got) => {
+                write!(f, "Expected a vertex index but got `{}` instead.", got)
+            }
+            &ExpectedTextureIndexButGot(got) => {
+                write!(f, "Expected a texture vertex index but got `{}` instead.", got)
+            }
+            &ExpectedNormalIndexButGot(got) => {
+                write!(f, "Expected a normal vertex index but got `{}` instead.", got)
+            }
+            &ExpectedVertexNormalIndexButGot(got) => {
+                write!(f, "Expected a `vertex//normal` index but got `{}` instead.", got)
+            }
+            &ExpectedVertexTextureIndexButGot(got) => {
+                write!(f, "Expected a `vertex/texture` index but got `{}` instead.", got)
+            }
+            &ExpectedVTNIndexButGot(got) => {
+                write!(f, "Expected a `vertex/texture/normal` index but got `{}` instead.", got)
+            }
+            &EveryFaceElementMustHaveAtLeastThreeVertices => {
+                write!(f, 
+                    "A face primitive must have at least three vertices.
+                     At minimum, a triangle requires three indices."
+                )
+            }
+            &EveryVTNIndexMustHaveTheSameFormForAGivenElement => {
+                write!(f, 
+                    "Every index describing the vertex data for a face must have the same form.
+                     For example, if the element is a face, and the geometry data wants to provide
+                     vertex and texture data to an application, each VTN index must be of the form
+                     `vertex/texture`."
+                )
+            }
+            &InvalidElementDeclaration(got) => {
+                write!(f, "The parser encountered an unsupported or invalid element declaration `{}`.", got)
+            }
+            &ElementMustBeAPointLineOrFace => {
+                write!(f, "An element must be declared as either a point (`p`), line (`l`), or face `f`.")
+            }
+            &SmoothingGroupNameMustBeOffOrInteger(got) => {
+                write!(f, 
+                    "A smoothing group name must either be `off`, which denotes that an
+                     object has no smoothing groups, or an integer. The parser got `{}` instead.",
+                    got
+                )
+            }
+            &SmoothingGroupDeclarationHasNoName => {
+                write!(f, "Got a smoothing group declaration without a smoothing group name.")
+            }
+        }
     }
 }
 
@@ -142,10 +207,12 @@ impl fmt::Display for ParseError {
 
 impl error::Error for ParseError {}
 
+
 #[inline]
 fn error<T>(line_number: usize, kind: ErrorKind) -> Result<T, ParseError> {
     Err(ParseError::new(line_number, kind))
 }
+
 
 /// A Wavefront OBJ file parser.
 pub struct Parser<'a> {
