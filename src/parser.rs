@@ -263,7 +263,7 @@ impl<'a> Parser<'a> {
             _ => Ok("")
         }
     }
-
+    /*
     fn parse_vn(&mut self, st: &str) -> Result<VTNIndex, ParseError> {
         if let Some(v_index_in_str) = st.find("//") {
             let v_index = match st[0..v_index_in_str].parse::<u32>() {
@@ -329,22 +329,97 @@ impl<'a> Parser<'a> {
             Err(_) => return self.error(format!("Expected `vertex` index but got `{}`", st))
         }
     }
-
+    */
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
+        enum VTNErrorKind {
+            ExpectedVertexIndexButGot,
+            ExpectedNormalIndexButGot,
+            ExpectedVertexNormalIndexButGot,
+            ExpectedTextureIndexButGot,
+            ExpectedVertexTextureIndexButGot,
+        }
+
+        fn parse_vn(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+            if let Some(v_index_in_str) = st.find("//") {
+                let v_index = match st[0..v_index_in_str].parse::<u32>() {
+                    Ok(val) => val,
+                    Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+                };
+                let vn_index = match st[v_index_in_str+2..].parse::<u32>() {
+                    Ok(val) => val,
+                    Err(_) => return Err(VTNErrorKind::ExpectedNormalIndexButGot),
+                };
+    
+                return Ok(VTNIndex::VN(v_index, vn_index));
+            } else {
+                return Err(VTNErrorKind::ExpectedVertexNormalIndexButGot);
+            }
+        }
+    
+        fn parse_vt(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+            if let Some(v_index_in_str) = st.find("/") {
+                let v_index = match st[0..v_index_in_str].parse::<u32>() {
+                    Ok(val) => val,
+                    Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+                };
+                let vt_index = match st[v_index_in_str+1..].parse::<u32>() {
+                    Ok(val) => val,
+                    Err(_) => return Err(VTNErrorKind::ExpectedTextureIndexButGot)
+                };
+    
+                return Ok(VTNIndex::VT(v_index, vt_index));
+            } else {
+                return Err(VTNErrorKind::ExpectedVertexTextureIndexButGot);
+            }
+        }
+    
+        fn parse_vtn(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+            let v_index_in_str = match st.find("/") {
+                Some(val) => val,
+                None => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+            };
+            let v_index = match st[0..v_index_in_str].parse::<u32>() {
+                Ok(val) => val,
+                Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot),
+            };
+            let vt_index_in_str = match st[(v_index_in_str + 1)..].find("/") {
+                Some(val) => v_index_in_str + 1 + val,
+                None => return Err(VTNErrorKind::ExpectedTextureIndexButGot),
+            };
+            let vt_index = match st[(v_index_in_str + 1)..vt_index_in_str].parse::<u32>() {
+                Ok(val) => val,
+                Err(_) => return Err(VTNErrorKind::ExpectedTextureIndexButGot),
+            };
+            let vn_index = match st[(vt_index_in_str + 1)..].parse::<u32>() {
+                Ok(val) => val,
+                Err(_) => return Err(VTNErrorKind::ExpectedNormalIndexButGot),
+            };
+       
+            Ok(VTNIndex::VTN(v_index, vt_index, vn_index))
+        }
+    
+        fn parse_v(st: &str) -> Result<VTNIndex, VTNErrorKind> {
+            match st.parse::<u32>() {
+                Ok(val) => Ok(VTNIndex::V(val)),
+                Err(_) => return Err(VTNErrorKind::ExpectedVertexIndexButGot)
+            }
+        }
+
+
         let st = self.next_string()?;
-        match self.parse_vn(&st) {
+        match parse_vn(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
         }
-        match self.parse_vtn(&st) {
+        match parse_vtn(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
         }
-        match self.parse_vt(&st) {
+        match parse_vt(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
         }
-        match self.parse_v(&st) {
+        match parse_v(&st) {
             Ok(val) => return Ok(val),
             Err(_) => {},
         }
