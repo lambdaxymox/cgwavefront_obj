@@ -444,8 +444,8 @@ impl<'a> Parser<'a> {
         elements.push(Element::Point(VTNIndex::V(v_index)));
         let mut elements_parsed = 1;
         loop {
-            match self.next_string() {
-                Ok(st) if st != "\n" => match st.parse::<u32>() {
+            match self.next() {
+                Some(st) if st != "\n" => match st.parse::<u32>() {
                     Ok(v_index) => { 
                         elements.push(Element::Point(VTNIndex::V(v_index)));
                         elements_parsed += 1;
