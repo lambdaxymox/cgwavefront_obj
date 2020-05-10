@@ -178,10 +178,6 @@ impl<'a> Parser<'a> {
         self.next();
     }
 
-    fn error<T>(&mut self, err: String) -> Result<T, ParseError> {
-        Err(ParseError::new(self.line_number, err))
-    }
-
     fn next_string(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
