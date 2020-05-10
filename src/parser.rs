@@ -337,7 +337,7 @@ impl<'a> Parser<'a> {
         let y = self.parse_f32()?;
         let z = self.parse_f32()?;
         let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = mw.unwrap_or(1.0);
+        let w = mw.unwrap_or(1_f32);
 
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }
@@ -347,9 +347,9 @@ impl<'a> Parser<'a> {
 
         let u = self.parse_f32()?;
         let mv = self.try_once(|st| st.parse::<f32>().ok());
-        let v = mv.unwrap_or(0.0);
+        let v = mv.unwrap_or(0_f32);
         let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = mw.unwrap_or(0.0);
+        let w = mw.unwrap_or(0_f32);
 
         Ok(TextureVertex { u: u, v: v, w: w })
     }
@@ -365,11 +365,8 @@ impl<'a> Parser<'a> {
     }
 
     fn skip_zero_or_more_newlines(&mut self) {
-        loop {
-            match self.peek() {
-                Some("\n") => self.advance(),
-                _ => break
-            }
+        while let Some("\n") = self.peek() {
+            self.advance();
         }
     }
 
