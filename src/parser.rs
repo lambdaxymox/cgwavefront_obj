@@ -526,8 +526,8 @@ impl<'a> Parser<'a> {
         self.expect_tag("g")?;
         let mut groups_parsed = 0;
         loop {
-            match self.next_string() {
-                Ok(name) if name != "\n" => {
+            match self.next() {
+                Some(name) if name != "\n" => {
                     groups.push(Group::new(name));
                     groups_parsed += 1;
                 }
