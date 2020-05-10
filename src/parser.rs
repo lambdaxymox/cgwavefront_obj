@@ -542,7 +542,7 @@ impl<'a> Parser<'a> {
         smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<u32, ParseError> {
 
         self.expect_tag("s")?;
-        if let Ok(name) = self.next_string() {
+        if let Some(name) = self.next() {
             if name == "off" {
                 smoothing_groups.push(SmoothingGroup::new(0));
             } else if let Ok(number) = name.parse::<u32>() {
