@@ -471,7 +471,7 @@ procedural texture file (`.cxc`), or an image file.
 
 **Tip**    To make sure that the texture retains its original look, use the 
 `.rfl` file `ident` as the underlying material.  This applies to the 
-`map_Ka`, "map_Kd", and `map_Ks` statements.  For more information on 
+`map_Ka`, `map_Kd`, and `map_Ks` statements.  For more information on 
 `.rfl` files, see chapter 8, "Spectral Curve File (`.rfl`)".
 
 The options for the `map_Ka` statement are listed below.  These options 
