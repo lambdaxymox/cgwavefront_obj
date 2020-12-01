@@ -1,4 +1,4 @@
-use crate::object::{
+use crate::obj::{
     ObjectSet, 
     Object, 
     ObjectBuilder,
@@ -786,7 +786,9 @@ mod primitive_tests {
 
 #[cfg(test)]
 mod vertex_tests {
-    use crate::object::Vertex;
+    use crate::obj::{
+        Vertex,
+    };
 
 
     #[test]
@@ -835,7 +837,9 @@ mod vertex_tests {
 
 #[cfg(test)]
 mod texture_vertex_tests {
-    use crate::object::TextureVertex;
+    use crate::obj::{
+        TextureVertex,
+    };
 
 
     #[test]
@@ -872,7 +876,9 @@ mod texture_vertex_tests {
 
 #[cfg(test)]
 mod normal_vertex_tests {
-    use crate::object::NormalVertex;
+    use crate::obj::{
+        NormalVertex,
+    };
 
 
     #[test]
@@ -917,8 +923,13 @@ mod object_tests {
 
 #[cfg(test)]
 mod vtn_index_tests {
-    use crate::object::VTNIndex;
-    use super::{Parser, ParseError};
+    use crate::obj::{
+        VTNIndex,
+    };
+    use super::{
+        Parser, 
+        ParseError
+    };
     use quickcheck;
     use rand::Rng;
 
@@ -1011,7 +1022,11 @@ mod vtn_index_tests {
 
 #[cfg(test)]
 mod element_tests {
-    use crate::object::{Element, VTNIndex};
+    use crate::obj::{
+        Element, 
+        VTNIndex,
+    };
+
 
     #[test]
     fn test_parse_point1() {
@@ -1144,7 +1159,10 @@ mod element_tests {
 
 #[cfg(test)]
 mod group_tests {
-    use crate::object::Group;
+    use crate::obj::{
+        Group,
+    };
+
 
     #[test]
     fn parse_group_name1() {
@@ -1173,7 +1191,10 @@ mod group_tests {
 
 #[cfg(test)]
 mod smoothing_group_tests {
-    use crate::object::SmoothingGroup;
+    use crate::obj::{
+        SmoothingGroup
+    };
+
 
     #[test]
     fn test_smoothing_group_name1() {
@@ -1211,11 +1232,18 @@ mod smoothing_group_tests {
 
 #[cfg(test)]
 mod objectset_tests {
-    use crate::object::{
-        ObjectSet, ObjectBuilder,
-        Vertex, NormalVertex, Element, VTNIndex, 
-        Group, SmoothingGroup, ShapeEntry,
+    use crate::obj::{
+        ObjectSet, 
+        ObjectBuilder,
+        Vertex, 
+        NormalVertex, 
+        Element, 
+        VTNIndex, 
+        Group, 
+        SmoothingGroup, 
+        ShapeEntry,
     };
+
 
     fn test_case() -> (Result<ObjectSet, super::ParseError>, Result<ObjectSet, super::ParseError>){
         let obj_file =r"                      \
