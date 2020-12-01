@@ -84,6 +84,7 @@ NewMtl             ::= "newmtl"
 Ka                 ::= "Ka"
 Kd                 ::= "Kd"
 Ks                 ::= "Ks"
+Ke                 ::= "Ke"
 Ns                 ::= "Ns"
 Ni                 ::= "Ni"
 Tf                 ::= "Tf"
@@ -101,6 +102,7 @@ MapBump            ::= "map_Bump"
 AmbientComponent   ::= Ka Float Float Float
 DiffuseComponent   ::= Kd Float Float Float
 SpecularComponent  ::= Ks Float Float Float
+EmissiveComponent  ::= Ke Float Float Float
 TransmissionFilter ::= Tf Float Float Float
 IlluminationModel  ::= Illum Number
 DissolveComponent  ::= Dissolve Float
@@ -119,6 +121,7 @@ MtlIlluminationStatements ::=
                             { AmbientComponent 
                             | DiffuseComponent 
                             | SpecularComponent 
+                            | EmissiveComponent 
                             | TransmissionFilter 
                             | DissolveComponent 
                             | SpecularExponent 
