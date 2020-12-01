@@ -134,6 +134,7 @@ MtlTextureMapStatements   ::=
                             }*
 MtlMaterial               ::= MtlName MtlIlluminationStatements MtlTextureMapStatements
 MtlSet                    ::= [MtlMaterial]*
+```
 
 ## Notation
 There are several extragrammatical symbols used in the grammar.
