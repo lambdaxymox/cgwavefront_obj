@@ -77,9 +77,10 @@ impl<'a> Lexer<'a> {
         skipped
     }
 
-    /// Given a predicate that operates on bytes, advance through stream while the predicates
-    /// is not satisfied. That is, advance one character at a time unless the predicate is 
-    /// satisfied, and then stop. This function returns the number of characters skipped.
+    /// Given a predicate that operates on bytes, advance through stream while 
+    /// the predicates is not satisfied. That is, advance one character at a 
+    /// time unless the predicate is satisfied, and then stop. This function 
+    /// returns the number of characters skipped.
     fn skip_unless<P: Fn(u8) -> bool>(&mut self, not_predicate: P) -> usize {
         self.skip_while(|ch| !not_predicate(ch))
     }
@@ -112,7 +113,9 @@ impl<'a> Lexer<'a> {
                 self.stream.get(start_position..self.stream_position)
             }
             Some(_) => {
-                let skipped = self.skip_unless(|ch| is_whitespace_or_newline(ch) || ch == b'#');
+                let skipped = self.skip_unless(|ch| {
+                    is_whitespace_or_newline(ch) || ch == b'#'
+                });
                 if skipped > 0 {
                     self.stream.get(start_position..self.stream_position)
                 } else {
@@ -177,6 +180,7 @@ impl<'a> Iterator for ObjectLexer<'a> {
         self.next_token()
     }
 }
+
 
 #[cfg(test)]
 mod tests {
