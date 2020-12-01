@@ -180,7 +180,10 @@ impl<'a> Iterator for ObjectLexer<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Lexer, ObjectLexer};
+    use super::{
+        Lexer, 
+        ObjectLexer,
+    };
     use std::slice;
 
 

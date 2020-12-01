@@ -15,7 +15,12 @@ pub struct Vertex {
 
 impl Vertex {
     pub fn new(x: f32, y: f32, z: f32, w: f32) -> Vertex {
-        Vertex { x: x, y: y, z: z, w: w }
+        Vertex { 
+            x: x, 
+            y: y, 
+            z: z, 
+            w: w 
+        }
     }
 }
 
@@ -34,7 +39,11 @@ pub struct TextureVertex {
 
 impl TextureVertex {
     pub fn new(u: f32, v: f32, w: f32) -> TextureVertex {
-        TextureVertex { u: u, v: v, w: w }
+        TextureVertex { 
+            u: u, 
+            v: v, 
+            w: w 
+        }
     }
 }
 
@@ -53,7 +62,11 @@ pub struct NormalVertex {
 
 impl NormalVertex {
     pub fn new(i: f32, j: f32, k: f32) -> NormalVertex {
-        NormalVertex { i: i, j: j, k: k }
+        NormalVertex { 
+            i: i, 
+            j: j, 
+            k: k 
+        }
     }
 }
 
@@ -123,7 +136,9 @@ impl fmt::Display for Element {
 pub struct Group(String);
 
 impl Group {
-    pub fn new(name: &str) -> Group { Group(String::from(name)) }
+    pub fn new(name: &str) -> Group { 
+        Group(String::from(name)) 
+    }
 }
 
 impl fmt::Display for Group {
@@ -144,11 +159,15 @@ impl SmoothingGroup {
         SmoothingGroup(name)
     }
 
-    pub fn as_int(&self) -> u32 { self.0 }
+    pub fn as_int(&self) -> u32 { 
+        self.0 
+    }
 }
 
 impl Default for SmoothingGroup {
-    fn default() -> SmoothingGroup { SmoothingGroup::new(0) }
+    fn default() -> SmoothingGroup { 
+        SmoothingGroup::new(0) 
+    }
 }
 
 impl fmt::Display for SmoothingGroup {
@@ -222,8 +241,12 @@ pub struct Object {
 impl Object {
     pub fn new(
         name: String,
-        vertex_set: VertexSet, texture_vertex_set: TextureVertexSet, normal_vertex_set: NormalVertexSet,
-        group_set: GroupSet, smoothing_group_set: SmoothingGroupSet, element_set: ElementSet,
+        vertex_set: VertexSet, 
+        texture_vertex_set: TextureVertexSet, 
+        normal_vertex_set: NormalVertexSet,
+        group_set: GroupSet, 
+        smoothing_group_set: SmoothingGroupSet, 
+        element_set: ElementSet,
         shape_set: ShapeSet) -> Object {
         
         Object {
@@ -290,8 +313,12 @@ impl Default for Object {
     fn default() -> Object {
         Object::new(
             String::from(""),   
-            Default::default(), Default::default(), Default::default(), 
-            Default::default(), Default::default(), Default::default(),
+            Default::default(), 
+            Default::default(), 
+            Default::default(), 
+            Default::default(), 
+            Default::default(), 
+            Default::default(),
             Default::default()
         )
     }
@@ -871,9 +898,10 @@ impl Compositor for TextObjectSetCompositor {
 
 #[cfg(test)]
 mod compositor_tests {
-    use super::CompositorInstructions;
     use super::*;
-    use std::iter::FromIterator;
+    use std::iter::{
+        FromIterator
+    };
 
 
     struct Test {
