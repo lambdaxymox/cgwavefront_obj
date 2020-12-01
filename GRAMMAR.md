@@ -67,56 +67,58 @@ materials that are extracted from a `*.mtl` file. Each material is composed of
 multiple illumination model parameters and texture maps.
 
 ```
-Empty              ::= ''
-Digit              ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-Letter             ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' 
-                     | 'k' | 'l' | 'm' | 'n' | 'o '| 'p' | 'q' | 'r' | 's' | 't' 
-                     | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' 
-                     | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' 
-                     | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T'
-                     | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
-String             ::= [Letter]+ [Digit | Letter]*
-Digits             ::= [Digit]+
-Whitespace         ::= [' ' | '\t' ]+
-Number             ::= Digits
-Float              ::= Number '.' Digits
-NewMtl             ::= "newmtl"
-Ka                 ::= "Ka"
-Kd                 ::= "Kd"
-Ks                 ::= "Ks"
-Ke                 ::= "Ke"
-Ns                 ::= "Ns"
-Ni                 ::= "Ni"
-Tf                 ::= "Tf"
-Illum              ::= "illum"
-Dissolve           ::= "d"
-Bump               ::= "bump"
-Disp               ::= "disp"
-MapKa              ::= "map_Ka"
-MapKd              ::= "map_Kd"
-MapKs              ::= "map_Ks"
-MapNs              ::= "map_Ns"
-MapDissolve        ::= "map_d"
-MapBump            ::= "map_Bump"
+Empty                     ::= ''
+Digit                     ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+Letter                    ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' 
+                            | 'k' | 'l' | 'm' | 'n' | 'o '| 'p' | 'q' | 'r' | 's' | 't' 
+                            | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' 
+                            | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' 
+                            | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T'
+                            | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+String                    ::= [Letter]+ [Digit | Letter]*
+Digits                    ::= [Digit]+
+Whitespace                ::= [' ' | '\t' ]+
+Number                    ::= Digits
+Float                     ::= Number '.' Digits
+NewMtl                    ::= "newmtl"
+Ka                        ::= "Ka"
+Kd                        ::= "Kd"
+Ks                        ::= "Ks"
+Ke                        ::= "Ke"
+Ns                        ::= "Ns"
+Ni                        ::= "Ni"
+Tf                        ::= "Tf"
+Illum                     ::= "illum"
+Dissolve                  ::= "d"
+Bump                      ::= "bump"
+Disp                      ::= "disp"
+MapKa                     ::= "map_Ka"
+MapKd                     ::= "map_Kd"
+MapKs                     ::= "map_Ks"
+MapKe                     ::= "map_Ke"
+MapNs                     ::= "map_Ns"
+MapDissolve               ::= "map_d"
+MapBump                   ::= "map_Bump"
 
-AmbientComponent   ::= Ka Float Float Float
-DiffuseComponent   ::= Kd Float Float Float
-SpecularComponent  ::= Ks Float Float Float
-EmissiveComponent  ::= Ke Float Float Float
-TransmissionFilter ::= Tf Float Float Float
-IlluminationModel  ::= Illum Number
-DissolveComponent  ::= Dissolve Float
-SpecularExponent   ::= Ns Float
-OpticalDensity     ::= Ni Float
+AmbientComponent          ::= Ka Float Float Float
+DiffuseComponent          ::= Kd Float Float Float
+SpecularComponent         ::= Ks Float Float Float
+EmissiveComponent         ::= Ke Float Float Float
+TransmissionFilter        ::= Tf Float Float Float
+IlluminationModel         ::= Illum Number
+DissolveComponent         ::= Dissolve Float
+SpecularExponent          ::= Ns Float
+OpticalDensity            ::= Ni Float
 
-AmbientMap         ::= MapKa String
-DiffuseMap         ::= MapKd String
-SpecularMap        ::= MapKs String
-BumpMap            ::= MapBump String | Bump String
-DisplacementMap    ::= Disp String
-DissolveMap        ::= MapDissolve String
+AmbientMap                ::= MapKa String
+DiffuseMap                ::= MapKd String
+SpecularMap               ::= MapKs String
+EmissiveMap               ::= MapKe String
+BumpMap                   ::= MapBump String | Bump String
+DisplacementMap           ::= Disp String
+DissolveMap               ::= MapDissolve String
 
-MtlName            ::= NewMtl String
+MtlName                   ::= NewMtl String
 MtlIlluminationStatements ::= 
                             { AmbientComponent 
                             | DiffuseComponent 
@@ -131,12 +133,13 @@ MtlTextureMapStatements   ::=
                             { AmbientMap
                             | DiffuseMap
                             | SpecularMap
+                            | EmissiveMap
                             | BumpMap
                             | DisplacementMap
                             | DissolveMap
                             }*
-MtlMaterial               ::= MtlName MtlIlluminationStatements MtlTextureMapStatements
-MtlSet                    ::= [MtlMaterial]*
+Material                  ::= MtlName MtlIlluminationStatements MtlTextureMapStatements
+MtlSet                    ::= [Material]*
 ```
 
 ## Notation
