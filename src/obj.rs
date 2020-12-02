@@ -207,16 +207,6 @@ pub struct Shape {
     groups: Vec<Group>,
     smoothing_groups: Vec<SmoothingGroup>,
 }
-/*
-pub type VertexSet = Vec<Vertex>;
-pub type TextureVertexSet = Vec<TextureVertex>;
-pub type NormalVertexSet = Vec<NormalVertex>;
-pub type ElementSet = Vec<Element>;
-pub type ShapeSet = Vec<ShapeEntry>;
-pub type GroupSet = Vec<Group>;
-pub type SmoothingGroupSet = Vec<SmoothingGroup>;
-*/
-
 
 #[derive(Clone, Debug)]
 pub enum VTNTriple<'a> {
