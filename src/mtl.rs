@@ -310,6 +310,7 @@ impl<'a> Parser<'a> {
             }
             _ => return Ok(None)
         }
+
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => error(
@@ -366,6 +367,37 @@ impl<'a> Parser<'a> {
                 ErrorKind::UnknownIlluminationModel,
                 format!("Unknown illumination model: {}.", n)
             )
+        }
+    }
+
+    fn parse_newmtl(&mut self) -> Result<&'a str, ParseError> {
+        match self.next() {
+            Some("newmtl") => {}
+            Some(st) => {
+                return error(
+                    self.line_number,
+                    ErrorKind::ExpectedTag,
+                    format!("Expected `newmtl` but got {}.", st)
+                )
+            }
+            None => {
+                return error(
+                    self.line_number,
+                    ErrorKind::EndOfFile,
+                    format!("Expected `newmtl` but got end of input.")
+                )
+            }
+        }
+
+        match self.next() {
+            Some(st) => Ok(st),
+            None => {
+                return error(
+                    self.line_number,
+                    ErrorKind::EndOfFile,
+                    format!("Expected material name but got end of input.")
+                )
+            }
         }
     }
 }
@@ -572,6 +604,23 @@ mod mtl_illumination_statement_tests {
 
         let result_kind = result.unwrap_err().kind;
         assert_eq!(result_kind, expected_kind);
+    }
+
+    #[test]
+    fn test_parse_newmtl1() {
+        let mut parser = Parser::new("newmtl material_name");
+        let expected = Ok("material_name");
+        let result = parser.parse_newmtl();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_newmtl2() {
+        let mut parser = Parser::new("newmtl    ");
+        let result = parser.parse_newmtl();
+
+        assert!(result.is_err());
     }
 }
 
