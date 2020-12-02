@@ -19,7 +19,7 @@ pub struct Color {
 }
 
 impl Color {
-    fn new(r: f64, g: f64, b: f64) -> Color {
+    const fn new(r: f64, g: f64, b: f64) -> Color {
         Color { 
             r: r,
             g: g,
@@ -27,7 +27,7 @@ impl Color {
         }
     }
 
-    fn zero() -> Color {
+    const fn zero() -> Color {
         Color {
             r: 0_f64,
             g: 0_f64,
