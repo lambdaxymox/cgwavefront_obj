@@ -4,16 +4,6 @@ use crate::lexer::{
 };
 use std::error;
 use std::fmt;
-use std::fs::{
-    File,
-};
-use std::io::{
-    Read,
-    BufReader,
-};
-use std::path::{
-    Path,
-};
 
 
 pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
@@ -220,12 +210,6 @@ impl<'a> Parser<'a> {
         while let Some("\n") = self.peek() {
             self.advance();
         }
-    }
-
-    fn skip_one_or_more_newlines(&mut self) -> Result<(), ParseError> {
-        self.expect_tag("\n")?;
-        self.skip_zero_or_more_newlines();
-        Ok(())
     }
 
     fn parse_f64(&mut self) -> Result<f64, ParseError> {
