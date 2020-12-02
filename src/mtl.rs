@@ -6,6 +6,11 @@ use std::error;
 use std::fmt;
 
 
+
+pub fn parse<T: AsRef<str>>(input: T) -> Result<MtlSet, ParseError> {
+    Parser::new(input.as_ref()).parse_mtlset()
+}
+
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct Color {
     pub r: f64,
@@ -87,6 +92,7 @@ pub enum ErrorKind {
     ExpectedTag,
     ExpectedFloat,
     ExpectedInteger,
+    ExpectedEndOfInput,
     UnknownIlluminationModel,
     ErrorParsingMaterial,
 }
@@ -534,6 +540,35 @@ impl<'a> Parser<'a> {
         }
 
         Ok(material)
+    }
+
+    fn parse_mtlset(&mut self) -> Result<MtlSet, ParseError> {
+        self.skip_zero_or_more_newlines();
+
+        let mut materials = Vec::new();
+
+        loop {
+            match self.peek() {
+                Some("newmtl") => {
+                    let material = self.parse_material()?;
+                    materials.push(material);
+                }
+                _ => break,
+            }
+        }
+        
+        match self.peek() {
+            Some(st) => {
+                return error(
+                    self.line_number,
+                    ErrorKind::ExpectedEndOfInput,
+                    format!("Expeted end of input but got `{}`.", st)
+                )
+            }
+            None => {}
+        }
+
+        Ok(MtlSet { materials: materials })
     }
 }
 
