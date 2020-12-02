@@ -126,6 +126,7 @@ MaterialProperties ::=
                      | EmissiveComponent 
                      | TransmissionFilter 
                      | DissolveComponent 
+                     | IlluminationModel
                      | SpecularExponent 
                      | OpticalDensity 
                      | AmbientMap
