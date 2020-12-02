@@ -13,6 +13,16 @@ pub struct Color {
     pub b: f64
 }
 
+impl Color {
+    fn zero() -> Color {
+        Color {
+            r: 0_f64,
+            g: 0_f64,
+            b: 0_f64
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IlluminationModel {
     Ambient,
@@ -35,9 +45,34 @@ pub struct Material {
     pub map_diffuse: Option<String>,
     pub map_specular: Option<String>,
     pub map_emissive: Option<String>,
+    pub map_specular_exponent: Option<String>,
     pub map_bump: Option<String>,
     pub map_displacement: Option<String>,
     pub map_dissolve: Option<String>,
+}
+
+impl Material {
+    fn new() -> Material {
+        Material {
+            name: String::new(),
+            color_ambient: Color::zero(),
+            color_diffuse: Color::zero(),
+            color_specular: Color::zero(),
+            color_emissive: Color::zero(),
+            specular_exponent: 0_f64,
+            dissolve: 0_f64,
+            optical_density: None,
+            illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+            map_ambient: None,
+            map_diffuse: None,
+            map_specular: None,
+            map_emissive: None,
+            map_specular_exponent: None,
+            map_bump: None,
+            map_displacement: None,
+            map_dissolve: None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -53,6 +88,7 @@ pub enum ErrorKind {
     ExpectedFloat,
     ExpectedInteger,
     UnknownIlluminationModel,
+    ErrorParsingMaterial,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -355,6 +391,23 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_map_specular_exponent(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("map_Ns") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("map_Ns")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
     fn parse_illumination_model(&mut self) -> Result<IlluminationModel, ParseError> {
         self.expect_tag("illum")?;
         let model_number = self.parse_usize()?;
@@ -399,6 +452,88 @@ impl<'a> Parser<'a> {
                 )
             }
         }
+    }
+
+    fn parse_material(&mut self) -> Result<Material, ParseError> {
+        let mut material = Material::new();
+        let name = self.parse_newmtl()?;
+        material.name = String::from(name);
+        
+        self.skip_zero_or_more_newlines();
+        loop {
+            match self.peek() {
+                Some("Ka") => {
+                    material.color_ambient = self.parse_ambient_component()?;
+                }
+                Some("Kd") => {
+                    material.color_diffuse = self.parse_diffuse_component()?;
+                }
+                Some("Ks") => {
+                    material.color_specular = self.parse_specular_component()?;
+                }
+                Some("Ke") => {
+                    material.color_emissive = self.parse_emissive_component()?;
+                }
+                Some("d") => {
+                    material.dissolve = self.parse_dissolve_component()?;
+                }
+                Some("illum") => {
+                    material.illumination_model = self.parse_illumination_model()?;
+                }
+                Some("Ns") => {
+                    material.specular_exponent = self.parse_specular_exponent()?;
+                }
+                Some("Ni") => {
+                    let optical_density = self.parse_optical_density()?;
+                    material.optical_density = Some(optical_density);
+                }
+                Some("map_Ka") => {
+                    let name = self.parse_map_ambient()?;
+                    material.map_ambient = name.map(|st| String::from(st));
+                }
+                Some("map_Kd") => {
+                    let name = self.parse_map_diffuse()?;
+                    material.map_diffuse = name.map(|st| String::from(st));
+                }
+                Some("map_Ks") => {
+                    let name = self.parse_map_specular()?;
+                    material.map_specular = name.map(|st| String::from(st));
+                }
+                Some("map_Ke") => {
+                    let name = self.parse_map_emissive()?;
+                    material.map_emissive = name.map(|st| String::from(st));
+                }
+                Some("map_Ns") => {
+                    let name = self.parse_map_specular_exponent()?;
+                    material.map_specular_exponent = name.map(|st| String::from(st));
+                }
+                Some("map_Bump") | Some("bump") => {
+                    let map_bump = self.parse_map_bump()?;
+                    material.map_bump = map_bump.map(|name| String::from(name));
+                }
+                Some("disp") => {
+                    let map_displacement = self.parse_map_displacement()?;
+                    material.map_displacement = map_displacement.map(|name| String::from(name));
+                }
+                Some("map_d") => {
+                    let map_dissolve = self.parse_map_dissolve()?;
+                    material.map_dissolve = map_dissolve.map(|name| String::from(name));
+                }
+                Some("newmtl") | None => {
+                    break;
+                }
+                Some(other_st) => {
+                    return error(
+                        self.line_number, 
+                        ErrorKind::ErrorParsingMaterial,
+                        format!("Could not parse the token `{}`.", other_st) 
+                    );
+                }
+            }
+            self.skip_zero_or_more_newlines();
+        }
+
+        Ok(material)
     }
 }
 
