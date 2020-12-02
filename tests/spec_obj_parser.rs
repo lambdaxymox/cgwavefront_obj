@@ -200,7 +200,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
             element_set.push(Element::Face(vtn_index1, vtn_index2, vtn_index3));
         }
 
-        assert_eq!(element_set.len(), element_count as usize);
+        assert_eq!(element_set.len(), element_count);
         element_set
     }
 
@@ -662,7 +662,7 @@ fn prop_every_shape_entry_element_exists() {
 
         result_set.iter().all(|result| { 
             result.shape_set.iter().all(|shape_entry| { 
-                result.element_set.get((shape_entry.element - 1) as usize).is_some()
+                result.element_set.get(shape_entry.element - 1).is_some()
             })
         })
     }

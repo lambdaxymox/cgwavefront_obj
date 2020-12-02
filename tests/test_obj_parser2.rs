@@ -467,17 +467,17 @@ fn test_parse_object_every_element_group_exists() {
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
                 assert!(shape.groups.iter().all(|&group_index| {
-                    ((group_index  as usize)) > 0 &&
-                    ((group_index  as usize)) <= result.group_set.len()
+                    group_index > 0 &&
+                    group_index <= result.group_set.len()
                 }));
             }
         }
     }      
 }
 
-/// Every element in a Wavefront OBJ belongs to at least one smoothing group. The 
-/// parser should correctly identify every group in the file; no nonexistent 
-/// smoothing groups should appear in the shape entry table. 
+/// Every element in a Wavefront OBJ belongs to at least one smoothing group. 
+/// The parser should correctly identify every group in the file; no 
+/// nonexistent smoothing groups should appear in the shape entry table. 
 #[test]
 fn test_parse_object_every_element_smoothing_group_exists() {
     let tests = test_cases();
@@ -488,8 +488,8 @@ fn test_parse_object_every_element_smoothing_group_exists() {
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
                 assert!(
-                    ((shape.smoothing_group as usize) > 0) &&
-                    ((shape.smoothing_group as usize) <= result.smoothing_group_set.len())
+                    shape.smoothing_group > 0 &&
+                    shape.smoothing_group <= result.smoothing_group_set.len()
                 );
             }
         }

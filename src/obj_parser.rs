@@ -469,7 +469,7 @@ impl<'a> Parser<'a> {
                smoothing_group_index) in smoothing_group_entry_table {
  
             for i in min_element_index..max_element_index {
-                shape_entry_table[(i - 1) as usize].smoothing_group = smoothing_group_index;
+                shape_entry_table[i - 1].smoothing_group = smoothing_group_index;
             }
         }
         debug_assert!(shape_entry_table.len() == elements.len());

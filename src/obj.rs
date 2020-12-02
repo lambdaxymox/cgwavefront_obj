@@ -262,26 +262,26 @@ impl Object {
     pub fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
-                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
+                let vertex = self.vertex_set.get(v_index - 1)?;
 
                 Some(VTNTriple::V(vertex))
             }
             VTNIndex::VT(v_index, vt_index) => { 
-                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
-                let texture_vertex = self.texture_vertex_set.get((vt_index - 1) as usize)?;
+                let vertex = self.vertex_set.get(v_index - 1)?;
+                let texture_vertex = self.texture_vertex_set.get(vt_index - 1)?;
 
                 Some(VTNTriple::VT(vertex, texture_vertex))
             }
             VTNIndex::VN(v_index, vn_index) => {
-                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
-                let normal_vertex = self.normal_vertex_set.get((vn_index - 1) as usize)?;
+                let vertex = self.vertex_set.get(v_index - 1)?;
+                let normal_vertex = self.normal_vertex_set.get(vn_index - 1)?;
 
                 Some(VTNTriple::VN(vertex, normal_vertex))
             }
             VTNIndex::VTN(v_index, vt_index, vn_index) => {
-                let vertex = self.vertex_set.get((v_index - 1) as usize)?;
-                let texture_vertex = self.texture_vertex_set.get((vt_index - 1) as usize)?;
-                let normal_vertex = self.normal_vertex_set.get((vn_index - 1) as usize)?;
+                let vertex = self.vertex_set.get(v_index - 1)?;
+                let texture_vertex = self.texture_vertex_set.get(vt_index - 1)?;
+                let normal_vertex = self.normal_vertex_set.get(vn_index - 1)?;
 
                 Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
             }
@@ -503,11 +503,11 @@ enum GroupingStatement {
 /// statements in a Wavefront OBJ file derived from an object set.
 #[derive(Clone, Debug, PartialEq)]
 struct CompositorInstructions {
-    instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>>,
+    instructions: BTreeMap<(usize, usize), Vec<GroupingStatement>>,
 }
 
 impl CompositorInstructions {
-    fn new(instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>>) -> Self {
+    fn new(instructions: BTreeMap<(usize, usize), Vec<GroupingStatement>>) -> Self {
         Self { instructions: instructions }
     }
 
@@ -518,7 +518,7 @@ impl CompositorInstructions {
     /// order. So any gaps in the grouping indices in the index buffer indicates 
     /// which groups are missing, and we can fill there in when generating a 
     /// *.obj file from an object set.
-    fn generate_missing_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
+    fn generate_missing_groups(object: &Object) -> BTreeMap<(usize, usize), Vec<GroupingStatement>> {
         let mut missing_groups = BTreeMap::new();
         
         // It is possible that there are missing groups that appear before the 
@@ -529,13 +529,13 @@ impl CompositorInstructions {
         let mut current_statements = vec![];
         for group_index in 1..initial_group {
             current_statements.push(GroupingStatement::G(vec![
-                object.group_set[(group_index - 1) as usize].clone()
+                object.group_set[group_index - 1].clone()
             ]));
         }
 
         for smoothing_group_index in 1..initial_smoothing_group {
             current_statements.push(GroupingStatement::S(
-                object.smoothing_group_set[(smoothing_group_index - 1) as usize]
+                object.smoothing_group_set[smoothing_group_index - 1]
             ));
         }
 
@@ -551,7 +551,7 @@ impl CompositorInstructions {
                 // We have crossed a group or smoothing group boundary. Here we 
                 // have found the end of the interval of elements with the same 
                 // groups and smoothing groups.
-                missing_groups.insert((min_element_index as u32, max_element_index as u32), current_statements);
+                missing_groups.insert((min_element_index as usize, max_element_index as usize), current_statements);
 
                 // Which groups and smoothing groups are missing? There is 
                 // ambiguity in ordering any possible missing groups and 
@@ -569,7 +569,7 @@ impl CompositorInstructions {
                     let gap_end = shape_entry.groups[0];
                     for group_index in gap_start..gap_end {
                         current_statements.push(GroupingStatement::G(vec![
-                            object.group_set[(group_index - 1) as usize].clone()
+                            object.group_set[group_index - 1].clone()
                         ]));
                     }
                 }
@@ -582,13 +582,13 @@ impl CompositorInstructions {
                     let gap_end = shape_entry.smoothing_group;
                     for smoothing_group_index in gap_start..gap_end {
                         current_statements.push(GroupingStatement::S(
-                            object.smoothing_group_set[(smoothing_group_index - 1) as usize]
+                            object.smoothing_group_set[smoothing_group_index - 1]
                         ));
                     }
                 }
 
                 // Place the missing groups into the table.
-                //missing_groups.insert((min_element_index as u32, max_element_index as u32), statements);
+                //missing_groups.insert((min_element_index, max_element_index), statements);
 
                 // Continue with the next interval.
                 current_entry = shape_entry;
@@ -600,7 +600,7 @@ impl CompositorInstructions {
         }
 
         // Process the last existing interval.
-        missing_groups.insert((min_element_index as u32, max_element_index as u32), current_statements);
+        missing_groups.insert((min_element_index as usize, max_element_index as usize), current_statements);
 
         // The last interval of empty groups and smoothing groups
         // lies off the end of the element list.
@@ -616,7 +616,7 @@ impl CompositorInstructions {
         let mut final_statements = vec![];
         for group_index in (final_group + 1)..((object.group_set.len() + 1)) {
             final_statements.push(GroupingStatement::G(vec![
-                object.group_set[(group_index - 1) as usize].clone()
+                object.group_set[group_index - 1].clone()
             ]));
         }
 
@@ -624,17 +624,17 @@ impl CompositorInstructions {
             in (final_smoothing_group + 1)..((object.smoothing_group_set.len() + 1)) {
             
             final_statements.push(GroupingStatement::S(
-                object.smoothing_group_set[(smoothing_group_index - 1) as usize]
+                object.smoothing_group_set[smoothing_group_index - 1]
             ));
         }
 
-        missing_groups.insert((min_element_index as u32, min_element_index as u32), final_statements);
+        missing_groups.insert((min_element_index as usize, min_element_index as usize), final_statements);
 
         missing_groups
     }
 
     /// Place the grouping statements for the groups that contain elements.
-    fn generate_found_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
+    fn generate_found_groups(object: &Object) -> BTreeMap<(usize, usize), Vec<GroupingStatement>> {
         let mut found_groups = BTreeMap::new();
         let mut min_element_index = 1;
         let mut max_element_index = 1;
@@ -642,12 +642,12 @@ impl CompositorInstructions {
         let mut current_entry = &object.shape_set[0];
 
         let new_groups = current_entry.groups.iter().fold(vec![], |mut acc, group_index| {
-            acc.push(object.group_set[(group_index - 1) as usize].clone());
+            acc.push(object.group_set[group_index - 1].clone());
             acc
         });
         current_statements.push(GroupingStatement::G(new_groups));
         current_statements.push(GroupingStatement::S(
-            object.smoothing_group_set[(current_entry.smoothing_group - 1) as usize])
+            object.smoothing_group_set[current_entry.smoothing_group - 1])
         );
 
         for shape_entry in object.shape_set.iter() {
@@ -661,7 +661,7 @@ impl CompositorInstructions {
                 // Are the groups different?
                 if shape_entry.groups != current_entry.groups {
                     let new_groups = shape_entry.groups.iter().fold(vec![], |mut acc, group_index| {
-                        acc.push(object.group_set[(group_index - 1) as usize].clone());
+                        acc.push(object.group_set[group_index - 1].clone());
                         acc
                     });
                     current_statements.push(GroupingStatement::G(new_groups));
@@ -670,7 +670,7 @@ impl CompositorInstructions {
                 // Are the smoothing groups different?
                 if shape_entry.smoothing_group != current_entry.smoothing_group {
                     current_statements.push(GroupingStatement::S(
-                        object.smoothing_group_set[(shape_entry.smoothing_group - 1) as usize])
+                        object.smoothing_group_set[shape_entry.smoothing_group - 1])
                     );
                 }
 
@@ -711,7 +711,7 @@ impl CompositorInstructions {
         // In order to fill in these groups correctly, we place the missing
         // group statements for each interval, followed by the grouping 
         // statements for the corresponding interval of elements.
-        let mut instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>> = BTreeMap::new();
+        let mut instructions: BTreeMap<(usize, usize), Vec<GroupingStatement>> = BTreeMap::new();
         for interval in missing_groups.keys() {
             let mut statements = missing_groups[interval].clone();
             statements.append(&mut found_groups[interval].clone());
@@ -779,14 +779,14 @@ impl TextObjectCompositor {
         })        
     }
 
-    fn compose_elements(&self, object: &Object, interval: (u32, u32)) -> String {
+    fn compose_elements(&self, object: &Object, interval: (usize, usize)) -> String {
         let string = (interval.0..interval.1).fold(String::new(), |acc, i| {
-            acc + &format!("{}\n", object.element_set[(i - 1) as usize])
+            acc + &format!("{}\n", object.element_set[i - 1])
         });
         format!("{}", string)
     }
 
-    fn get_group_instructions(&self, object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
+    fn get_group_instructions(&self, object: &Object) -> BTreeMap<(usize, usize), Vec<GroupingStatement>> {
         let instructions = CompositorInstructions::generate(object);
         instructions.instructions
     }
@@ -909,8 +909,8 @@ mod compositor_tests {
 
     struct Test {
         object: Object,
-        expected_missing_groups: BTreeMap<(u32, u32), Vec<GroupingStatement>>, 
-        expected_found_groups: BTreeMap<(u32, u32), Vec<GroupingStatement>>,
+        expected_missing_groups: BTreeMap<(usize, usize), Vec<GroupingStatement>>, 
+        expected_found_groups: BTreeMap<(usize, usize), Vec<GroupingStatement>>,
         expected: CompositorInstructions,
     }
 

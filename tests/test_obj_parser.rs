@@ -3414,8 +3414,8 @@ fn test_parse_object_every_element_group_exists() {
     for result in result_set.iter() { 
         for shape in result.shape_set.iter() {
             assert!(shape.groups.iter().all(|&group_index| {
-                ((group_index  as usize)) > 0 &&
-                ((group_index  as usize)) <= result.group_set.len()
+                group_index > 0 &&
+                group_index <= result.group_set.len()
             }));
         }
     }
