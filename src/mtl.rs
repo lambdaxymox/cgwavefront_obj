@@ -860,4 +860,163 @@ mod mtlset_parser_tests {
 
         assert_eq!(result, expected);
     }
+
+    #[test]
+    fn test_parse_multiple_materials() {
+        let mtl_file = r"
+        # Blender MTL File: 'None'                                             \
+        # Material Count: 1                                                    \
+                                                                               \
+        newmtl Scene_-_Root                                                    \
+        Ns 225.000000                                                          \
+        Ka 1.000000 1.000000 1.000000                                          \
+        Kd 0.800000 0.800000 0.800000                                          \
+        Ks 0.500000 0.500000 0.500000                                          \
+        Ke 0.0 0.0 0.0                                                         \
+        Ni 1.450000                                                            \
+        d 1.000000                                                             \
+        illum 2                                                                \
+        map_Kd diffuse.jpg                                                     \
+        map_Bump normal.png                                                    \
+        map_Ks specular.jpg                                                    \
+        disp roughness.jpg                                                     \
+                                                                               \        
+        # This is a bright green material.  When applied to an object, it will \ 
+        # remain bright green regardless of any lighting in the scene.         \
+        newmtl neon_green                                                      \
+        Kd 0.0000 1.0000 0.0000                                                \
+        illum 0                                                                \
+                                                                               \
+        # This is a flat green material.                                       \
+        newmtl flat_green                                                      \
+        Ka 0.0000 1.0000 0.0000                                                \
+        Kd 0.0000 1.0000 0.0000                                                \
+        illum 1                                                                \
+                                                                               \
+        # This is a flat green, partially dissolved material.                  \
+        newmtl diss_green                                                      \
+        Ka 0.0000 1.0000 0.0000                                                \
+        Kd 0.0000 1.0000 0.0000                                                \
+        d 0.8000                                                               \
+        illum 1                                                                \
+                                                                               \
+        # This is a shiny green material.  When applied to an object, it       \
+        # shows a white specular highlight.                                    \
+        newmtl shiny_green                                                     \
+        Ka 0.0000 1.0000 0.0000                                                \
+        Kd 0.0000 1.0000 0.0000                                                \
+        Ks 1.0000 1.0000 1.0000                                                \
+        Ns 200.0000                                                            \
+        illum 1                                                                \
+        ";
+        let expected = MaterialSet {
+            materials: vec![
+                Material {
+                    name: String::from("Scene_-_Root"),
+                    color_ambient: Color::new(1_f64, 1_f64, 1_f64),
+                    color_diffuse: Color::new(0.8_f64, 0.8_f64, 0.8_f64),
+                    color_specular: Color::new(0.5_f64, 0.5_f64, 0.5_f64),
+                    color_emissive: Color::new(0_f64, 0_f64, 0_f64),
+                    specular_exponent: 225_f64,
+                    dissolve: 1_f64,
+                    optical_density: Some(1.45_f64),
+                    illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+                    map_ambient: None,
+                    map_diffuse: Some(String::from("diffuse.jpg")),
+                    map_specular: Some(String::from("specular.jpg")),
+                    map_emissive: None,
+                    map_specular_exponent: None,
+                    map_bump: Some(String::from("normal.png")),
+                    map_displacement: Some(String::from("roughness.jpg")),
+                    map_dissolve: None,
+                },
+                Material {
+                    name: String::from("neon_green"),
+                    color_ambient: Color::zero(),
+                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
+                    color_specular: Color::zero(),
+                    color_emissive: Color::zero(),
+                    specular_exponent: 0_f64,
+                    dissolve: 0_f64,
+                    optical_density: None,
+                    illumination_model: IlluminationModel::Ambient,
+                    map_ambient: None,
+                    map_diffuse: None,
+                    map_specular: None,
+                    map_emissive: None,
+                    map_specular_exponent: None,
+                    map_bump: None,
+                    map_displacement: None,
+                    map_dissolve: None,
+                },
+                Material {
+                    name: String::from("flat_green"),
+                    color_ambient: Color::new(0_f64, 1_f64, 0_f64),
+                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
+                    color_specular: Color::zero(),
+                    color_emissive: Color::zero(),
+                    specular_exponent: 0_f64,
+                    dissolve: 0_f64,
+                    optical_density: None,
+                    illumination_model: IlluminationModel::AmbientDiffuse,
+                    map_ambient: None,
+                    map_diffuse: None,
+                    map_specular: None,
+                    map_emissive: None,
+                    map_specular_exponent: None,
+                    map_bump: None,
+                    map_displacement: None,
+                    map_dissolve: None,
+                },
+                Material {
+                    name: String::from("diss_green"),
+                    color_ambient: Color::new(0_f64, 1_f64, 0_f64),
+                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
+                    color_specular: Color::zero(),
+                    color_emissive: Color::zero(),
+                    specular_exponent: 0_f64,
+                    dissolve: 0.8_f64,
+                    optical_density: None,
+                    illumination_model: IlluminationModel::AmbientDiffuse,
+                    map_ambient: None,
+                    map_diffuse: None,
+                    map_specular: None,
+                    map_emissive: None,
+                    map_specular_exponent: None,
+                    map_bump: None,
+                    map_displacement: None,
+                    map_dissolve: None,
+                },
+                Material {
+                    name: String::from("shiny_green"),
+                    color_ambient: Color::new(0_f64, 1_f64, 0_f64),
+                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
+                    color_specular: Color::new(1_f64, 1_f64, 1_f64),
+                    color_emissive: Color::zero(),
+                    specular_exponent: 200_f64,
+                    dissolve: 0_f64,
+                    optical_density: None,
+                    illumination_model: IlluminationModel::AmbientDiffuse,
+                    map_ambient: None,
+                    map_diffuse: None,
+                    map_specular: None,
+                    map_emissive: None,
+                    map_specular_exponent: None,
+                    map_bump: None,
+                    map_displacement: None,
+                    map_dissolve: None,
+                },
+            ],
+        };
+        let result = super::parse(mtl_file);
+        assert!(result.is_ok());
+        let result = result.unwrap();
+
+        for (result_i, expected_i) 
+            in result.materials.iter().zip(expected.materials.iter()) {
+        
+            assert_eq!(result_i, expected_i);
+        }
+    }
 }
+
