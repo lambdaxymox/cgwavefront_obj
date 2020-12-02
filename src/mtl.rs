@@ -230,6 +230,128 @@ impl<'a> Parser<'a> {
         self.expect_tag("Ni")?;
         self.parse_f64()
     }
+
+    fn parse_map_ambient(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("map_Ka") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("map_Ka")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
+    fn parse_map_diffuse(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("map_Kd") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("map_Kd")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
+    fn parse_map_specular(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("map_Ks") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("map_Ks")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
+    fn parse_map_emissive(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("map_Ke") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("map_Ke")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
+    fn parse_map_bump(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("map_Bump") => {
+                self.expect_tag("map_Bump");
+            }
+            Some("bump") => {
+                self.expect_tag("bump");
+            }
+            _ => return Ok(None)
+        }
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
+    fn parse_map_displacement(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("disp") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("disp")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
+    fn parse_map_dissolve(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("map_d") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("map_d")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
 }
 
 
@@ -322,6 +444,78 @@ mod mtl_illumination_statement_tests {
         let result = parser.parse_optical_density();
 
         assert_eq!(result, expected); 
+    }
+
+    #[test]
+    fn test_map_ambient() {
+        let mut parser = Parser::new("map_Ka ambient.png");
+        let expected = Ok(Some("ambient.png"));
+        let result = parser.parse_map_ambient();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_diffuse() {
+        let mut parser = Parser::new("map_Kd diffuse.png");
+        let expected = Ok(Some("diffuse.png"));
+        let result = parser.parse_map_diffuse();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_specular() {
+        let mut parser = Parser::new("map_Ks specular.png");
+        let expected = Ok(Some("specular.png"));
+        let result = parser.parse_map_specular();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_emissive() {
+        let mut parser = Parser::new("map_Ke emissive.png");
+        let expected = Ok(Some("emissive.png"));
+        let result = parser.parse_map_emissive();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_bump1() {
+        let mut parser = Parser::new("map_Bump normal.png");
+        let expected = Ok(Some("normal.png"));
+        let result = parser.parse_map_bump();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_bump2() {
+        let mut parser = Parser::new("bump normal.png");
+        let expected = Ok(Some("normal.png"));
+        let result = parser.parse_map_bump();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_displacement() {
+        let mut parser = Parser::new("disp roughness.png");
+        let expected = Ok(Some("roughness.png"));
+        let result = parser.parse_map_displacement();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_map_dissolve() {
+        let mut parser = Parser::new("map_d alpha.png");
+        let expected = Ok(Some("alpha.png"));
+        let result = parser.parse_map_dissolve();
+
+        assert_eq!(result, expected);
     }
 }
 
