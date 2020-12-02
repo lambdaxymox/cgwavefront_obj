@@ -199,9 +199,9 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_f32(&mut self) -> Result<f32, ParseError> {
+    fn parse_f64(&mut self) -> Result<f64, ParseError> {
         let st = self.next_string()?;
-        match st.parse::<f32>() {
+        match st.parse::<f64>() {
             Ok(val) => Ok(val),
             Err(_) => error(self.line_number, ErrorKind::ExpectedFloatButGot(st.into())),
         }
@@ -225,11 +225,11 @@ impl<'a> Parser<'a> {
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
         self.expect_tag("v")?;
  
-        let x = self.parse_f32()?;
-        let y = self.parse_f32()?;
-        let z = self.parse_f32()?;
-        let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = mw.unwrap_or(1_f32);
+        let x = self.parse_f64()?;
+        let y = self.parse_f64()?;
+        let z = self.parse_f64()?;
+        let mw = self.try_once(|st| st.parse::<f64>().ok());
+        let w = mw.unwrap_or(1_f64);
 
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }
@@ -237,11 +237,11 @@ impl<'a> Parser<'a> {
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
         self.expect_tag("vt")?;
 
-        let u = self.parse_f32()?;
-        let mv = self.try_once(|st| st.parse::<f32>().ok());
-        let v = mv.unwrap_or(0_f32);
-        let mw = self.try_once(|st| st.parse::<f32>().ok());
-        let w = mw.unwrap_or(0_f32);
+        let u = self.parse_f64()?;
+        let mv = self.try_once(|st| st.parse::<f64>().ok());
+        let v = mv.unwrap_or(0_f64);
+        let mw = self.try_once(|st| st.parse::<f64>().ok());
+        let w = mw.unwrap_or(0_f64);
 
         Ok(TextureVertex { u: u, v: v, w: w })
     }
@@ -249,9 +249,9 @@ impl<'a> Parser<'a> {
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
         self.expect_tag("vn")?;
 
-        let i = self.parse_f32()?;
-        let j = self.parse_f32()?;
-        let k = self.parse_f32()?;
+        let i = self.parse_f64()?;
+        let j = self.parse_f64()?;
+        let k = self.parse_f64()?;
 
         Ok(NormalVertex { i: i, j: j, k: k })
     }
@@ -666,7 +666,7 @@ mod primitive_tests {
     #[test]
     fn test_parse_f32() {
         let mut parser = super::Parser::new("-1.929448");
-        assert_eq!(parser.parse_f32(), Ok(-1.929448));
+        assert_eq!(parser.parse_f64(), Ok(-1.929448));
     }
 
     #[test]

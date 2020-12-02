@@ -7,14 +7,14 @@ use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vertex {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-    pub w: f32,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    pub w: f64,
 }
 
 impl Vertex {
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Vertex {
+    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Vertex {
         Vertex { 
             x: x, 
             y: y, 
@@ -32,13 +32,13 @@ impl fmt::Display for Vertex {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TextureVertex {
-    pub u: f32,
-    pub v: f32,
-    pub w: f32,
+    pub u: f64,
+    pub v: f64,
+    pub w: f64,
 }
 
 impl TextureVertex {
-    pub fn new(u: f32, v: f32, w: f32) -> TextureVertex {
+    pub fn new(u: f64, v: f64, w: f64) -> TextureVertex {
         TextureVertex { 
             u: u, 
             v: v, 
@@ -55,13 +55,13 @@ impl fmt::Display for TextureVertex {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct NormalVertex {
-    pub i: f32,
-    pub j: f32,
-    pub k: f32,
+    pub i: f64,
+    pub j: f64,
+    pub k: f64,
 }
 
 impl NormalVertex {
-    pub fn new(i: f32, j: f32, k: f32) -> NormalVertex {
+    pub fn new(i: f64, j: f64, k: f64) -> NormalVertex {
         NormalVertex { 
             i: i, 
             j: j, 

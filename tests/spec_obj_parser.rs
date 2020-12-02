@@ -67,26 +67,26 @@ impl<G> ObjectGenerator<G> where G: RngCore {
     }
 
     fn gen_vertex(&self, g: &mut G, use_w: bool) -> Vertex {
-        let x = g.gen::<f32>();
-        let y = g.gen::<f32>();
-        let z = g.gen::<f32>();
+        let x = g.gen::<f64>();
+        let y = g.gen::<f64>();
+        let z = g.gen::<f64>();
         let w = if use_w { g.gen_range(-1.0, 1.0) } else { 1.0 };
 
         Vertex::new(x, y, z, w)
     }
 
     fn gen_texture_vertex(&self, g: &mut G) -> TextureVertex {
-        let u = g.gen::<f32>();
-        let v = g.gen::<f32>();
-        let w = g.gen::<f32>();
+        let u = g.gen::<f64>();
+        let v = g.gen::<f64>();
+        let w = g.gen::<f64>();
 
         TextureVertex::new(u, v, w)
     }
 
     fn gen_normal_vertex(&self, g: &mut G) -> NormalVertex {
-        let i = g.gen::<f32>();
-        let j = g.gen::<f32>();
-        let k = g.gen::<f32>();
+        let i = g.gen::<f64>();
+        let j = g.gen::<f64>();
+        let k = g.gen::<f64>();
 
         NormalVertex::new(i, j, k)
     }
