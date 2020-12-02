@@ -21,13 +21,6 @@ use wavefront_obj::{
     ShapeEntry,
     TextObjectSetCompositor, 
     Compositor,
-    VertexSet, 
-    TextureVertexSet, 
-    NormalVertexSet, 
-    ElementSet, 
-    ShapeSet,
-    GroupSet, 
-    SmoothingGroupSet,
 };
 use wavefront_obj::{
     Parser, 
@@ -98,7 +91,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         NormalVertex::new(i, j, k)
     }
 
-    fn gen_vertex_set(&self, g: &mut G, len: usize) -> VertexSet {
+    fn gen_vertex_set(&self, g: &mut G, len: usize) -> Vec<Vertex> {
         let mut vertex_set = vec![];
         for _ in 0..len {
             let use_w = g.gen::<bool>();
@@ -109,7 +102,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         vertex_set
     }
 
-    fn gen_texture_vertex_set(&self, g: &mut G, len: usize) -> TextureVertexSet {
+    fn gen_texture_vertex_set(&self, g: &mut G, len: usize) -> Vec<TextureVertex> {
         let mut texture_vertex_set = vec![];
         for _ in 0..len {
             texture_vertex_set.push(self.gen_texture_vertex(g));
@@ -119,7 +112,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         texture_vertex_set
     }
 
-    fn gen_normal_vertex_set(&self, g: &mut G, len: usize) -> NormalVertexSet {
+    fn gen_normal_vertex_set(&self, g: &mut G, len: usize) -> Vec<NormalVertex> {
         let mut normal_vertex_set = vec![];
         for _ in 0..len {
             normal_vertex_set.push(self.gen_normal_vertex(g));
@@ -177,7 +170,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
     }
 
     fn gen_element_set(&self, g: &mut G, 
-        element_count: u32, v_count: u32, vt_count: u32, vn_count: u32) -> ElementSet {
+        element_count: u32, v_count: u32, vt_count: u32, vn_count: u32) -> Vec<Element> {
 
         let mut element_set = vec![];
         for _ in 0..element_count {
@@ -192,7 +185,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         element_set
     }
 
-    fn gen_group_set(&self, use_default: bool, count: usize) -> GroupSet {
+    fn gen_group_set(&self, use_default: bool, count: usize) -> Vec<Group> {
         assert!(count > 0);
 
         let mut group_set = vec![];
@@ -212,7 +205,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         group_set
     }
 
-    fn gen_smoothing_group_set(&self, count: usize) -> SmoothingGroupSet {
+    fn gen_smoothing_group_set(&self, count: usize) -> Vec<SmoothingGroup> {
         assert!(count > 0);
 
         let mut smoothing_group_set = vec![];
@@ -226,9 +219,11 @@ impl<G> ObjectGenerator<G> where G: RngCore {
     }
 
     fn gen_shape_set(&self, 
-        element_set: &ElementSet, 
-        group_slices: &[(usize, usize)], group_set: &[u32],
-        smoothing_group_slices: &[(usize, usize)], smoothing_group_set: &[u32]) -> ShapeSet {
+        element_set: &[Element], 
+        group_slices: &[(usize, usize)], 
+        group_set: &[u32],
+        smoothing_group_slices: &[(usize, usize)], 
+        smoothing_group_set: &[u32]) -> Vec<ShapeEntry> {
         
         assert!(group_slices.len() > 0);
         assert!(group_slices.len() == group_set.len());

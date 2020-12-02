@@ -207,7 +207,7 @@ pub struct Shape {
     groups: Vec<Group>,
     smoothing_groups: Vec<SmoothingGroup>,
 }
-
+/*
 pub type VertexSet = Vec<Vertex>;
 pub type TextureVertexSet = Vec<TextureVertex>;
 pub type NormalVertexSet = Vec<NormalVertex>;
@@ -215,7 +215,7 @@ pub type ElementSet = Vec<Element>;
 pub type ShapeSet = Vec<ShapeEntry>;
 pub type GroupSet = Vec<Group>;
 pub type SmoothingGroupSet = Vec<SmoothingGroup>;
-
+*/
 
 
 #[derive(Clone, Debug)]
@@ -229,25 +229,25 @@ pub enum VTNTriple<'a> {
 #[derive(Clone, PartialEq)]
 pub struct Object {
     pub name: String,
-    pub vertex_set: VertexSet,
-    pub texture_vertex_set: TextureVertexSet,
-    pub normal_vertex_set: NormalVertexSet,
-    pub group_set: GroupSet,
-    pub smoothing_group_set: SmoothingGroupSet,
-    pub element_set: ElementSet,
-    pub shape_set: ShapeSet,
+    pub vertex_set: Vec<Vertex>,
+    pub texture_vertex_set: Vec<TextureVertex>,
+    pub normal_vertex_set: Vec<NormalVertex>,
+    pub group_set: Vec<Group>,
+    pub smoothing_group_set: Vec<SmoothingGroup>,
+    pub element_set: Vec<Element>,
+    pub shape_set: Vec<ShapeEntry>,
 }
 
 impl Object {
     pub fn new(
         name: String,
-        vertex_set: VertexSet, 
-        texture_vertex_set: TextureVertexSet, 
-        normal_vertex_set: NormalVertexSet,
-        group_set: GroupSet, 
-        smoothing_group_set: SmoothingGroupSet, 
-        element_set: ElementSet,
-        shape_set: ShapeSet) -> Object {
+        vertex_set: Vec<Vertex>, 
+        texture_vertex_set: Vec<TextureVertex>, 
+        normal_vertex_set: Vec<NormalVertex>,
+        group_set: Vec<Group>, 
+        smoothing_group_set: Vec<SmoothingGroup>, 
+        element_set: Vec<Element>,
+        shape_set: Vec<ShapeEntry>) -> Object {
         
         Object {
             name: name,
@@ -382,13 +382,13 @@ impl fmt::Display for ObjectSet {
 
 pub struct ObjectBuilder {
     name: Option<String>,
-    vertex_set: VertexSet,
-    texture_vertex_set: Option<TextureVertexSet>,
-    normal_vertex_set: Option<NormalVertexSet>,
-    group_set: Option<GroupSet>,
-    smoothing_group_set: Option<SmoothingGroupSet>,
-    element_set: ElementSet,
-    shape_set: Option<ShapeSet>,
+    vertex_set: Vec<Vertex>,
+    texture_vertex_set: Option<Vec<TextureVertex>>,
+    normal_vertex_set: Option<Vec<NormalVertex>>,
+    group_set: Option<Vec<Group>>,
+    smoothing_group_set: Option<Vec<SmoothingGroup>>,
+    element_set: Vec<Element>,
+    shape_set: Option<Vec<ShapeEntry>>,
 }
 
 impl ObjectBuilder {
