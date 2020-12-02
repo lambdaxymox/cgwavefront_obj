@@ -11,6 +11,7 @@ pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
     Parser::new(input.as_ref()).parse_mtlset()
 }
 
+
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct Color {
     pub r: f64,
@@ -353,10 +354,10 @@ impl<'a> Parser<'a> {
     fn parse_map_bump(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Bump") => {
-                self.expect_tag("map_Bump");
+                self.expect_tag("map_Bump")?;
             }
             Some("bump") => {
-                self.expect_tag("bump");
+                self.expect_tag("bump")?;
             }
             _ => return Ok(None)
         }
