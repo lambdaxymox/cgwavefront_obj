@@ -187,9 +187,15 @@ impl<G> ObjectGenerator<G> where G: RngCore {
 
         let mut element_set = vec![];
         for _ in 0..element_count {
-            let vtn_index1 = self.gen_vtn_index(g, true, true, v_count, vt_count, vn_count);
-            let vtn_index2 = self.gen_vtn_index(g, true, true, v_count, vt_count, vn_count);
-            let vtn_index3 = self.gen_vtn_index(g, true, true, v_count, vt_count, vn_count);
+            let vtn_index1 = self.gen_vtn_index(
+                g, true, true, v_count, vt_count, vn_count
+            );
+            let vtn_index2 = self.gen_vtn_index(
+                g, true, true, v_count, vt_count, vn_count
+            );
+            let vtn_index3 = self.gen_vtn_index(
+                g, true, true, v_count, vt_count, vn_count
+            );
 
             element_set.push(Element::Face(vtn_index1, vtn_index2, vtn_index3));
         }
@@ -375,7 +381,7 @@ impl Arbitrary for ParserModel {
 
 /// The testing oracle defines an environment against which to assess the 
 /// correctness of the parser. The oracle consists of a parser model and an 
-/// object text. Given a generated object set, the model produces an equivalent 
+/// object text. Given a generated object set, the model produces an equivalent
 /// object text string and passes it to the parser. The parser satisfies the 
 /// model if the parsed object set matches the one produced by the model.
 #[derive(Clone, Debug)]
@@ -569,8 +575,8 @@ fn prop_parser_correctly_parses_valid_obj_files() {
 }
 
 /// Wavefront OBJ files implicitly index the elements in a file in monotone
-/// increasing order. The shape set element indices should appear in the same order
-/// in the set as the elements appear in the original file.
+/// increasing order. The shape set element indices should appear in the same 
+/// order in the set as the elements appear in the original file.
 #[test]
 fn prop_every_shape_set_should_be_monotone_increasing() {
     fn is_monotone(set: &[ShapeEntry]) -> bool {
@@ -613,16 +619,16 @@ fn prop_every_smoothing_group_exists() {
 
         result_set.iter().all(|result| {
             result.shape_set.iter().all(|shape_entry| {
-                result.smoothing_group_set.get((shape_entry.smoothing_group - 1) as usize).is_some()
+                result.smoothing_group_set.get(shape_entry.smoothing_group - 1).is_some()
             })
         })
     }
     quickcheck::quickcheck(property as fn(Oracle) -> bool);
 }
 
-/// Every element belongs to a smoothing group. If no grouping statements are specified,
-/// the elements default to a value of `default` for the group and `off`, or `0`
-/// for the smoothing group.
+/// Every element belongs to a smoothing group. If no grouping statements are 
+/// specified, the elements default to a value of `default` for the group and 
+/// `off`, or `0` for the smoothing group.
 #[test]
 fn prop_every_smoothing_group_has_at_least_one_element() {
     fn property(oracle: Oracle) -> bool {
@@ -698,8 +704,8 @@ fn prop_every_shape_entry_group_index_is_nonzero() {
 
 /// A Wavefront OBJ file implicitly indexes every vertex, element, and grouping
 /// statement in monotone increasing order from the beginning of the file to
-/// to the end of the file. Also, every index is indexed beginning at 1 rather than 0.
-/// The shape entries should reflect this. 
+/// to the end of the file. Also, every index is indexed beginning at 1 rather 
+/// than 0. The shape entries should reflect this. 
 #[test]
 fn prop_every_shape_entry_smoothing_group_index_is_nonzero() {
     fn property(oracle: Oracle) -> bool {
