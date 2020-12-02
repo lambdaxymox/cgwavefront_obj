@@ -12,8 +12,8 @@ use crate::obj::{
     ShapeEntry,
 };
 use crate::lexer::{
+    Tokenizer,
     Lexer,
-    ObjectLexer,
 };
 use std::error;
 use std::fmt;
@@ -152,14 +152,14 @@ fn error<T>(line_number: usize, kind: ErrorKind) -> Result<T, ParseError> {
 /// A Wavefront OBJ file parser.
 pub struct Parser<'a> {
     line_number: usize,
-    lexer: ObjectLexer<'a>,
+    lexer: Lexer<'a>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(input: &'a str) -> Parser<'a> {
         Parser {
             line_number: 1,
-            lexer: ObjectLexer::new(Lexer::new(input)),
+            lexer: Lexer::new(Tokenizer::new(input)),
         }
     }
 

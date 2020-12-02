@@ -19,7 +19,7 @@ fn is_whitespace_or_newline(ch: u8) -> bool {
 
 /// A OBJ file lexer tokenizes an input character stream.
 #[derive(Clone)]
-pub struct Lexer<'a> {
+pub struct Tokenizer<'a> {
     /// The current line position in the token stream.
     current_line_number: usize,
     /// The cursor position in the character stream.
@@ -28,10 +28,10 @@ pub struct Lexer<'a> {
     stream: &'a [u8],
 }
 
-impl<'a> Lexer<'a> {
+impl<'a> Tokenizer<'a> {
     /// Create a new lexer.
-    pub fn new(stream: &'a str) -> Lexer<'a> {
-        Lexer {
+    pub fn new(stream: &'a str) -> Tokenizer<'a> {
+        Tokenizer {
             current_line_number: 1,
             stream_position: 0,
             stream: stream.as_bytes(),
@@ -127,7 +127,7 @@ impl<'a> Lexer<'a> {
     }
 }
 
-impl<'a> Iterator for Lexer<'a> {
+impl<'a> Iterator for Tokenizer<'a> {
     type Item = &'a [u8];
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -135,14 +135,14 @@ impl<'a> Iterator for Lexer<'a> {
     }
 }
 
-pub struct ObjectLexer<'a> {
-    inner: Lexer<'a>,
+pub struct Lexer<'a> {
+    inner: Tokenizer<'a>,
     cache: Option<Option<&'a str>>,
 }
 
-impl<'a> ObjectLexer<'a> {
-    pub fn new(lexer: Lexer<'a>) -> ObjectLexer<'a> {
-        ObjectLexer {
+impl<'a> Lexer<'a> {
+    pub fn new(lexer: Tokenizer<'a>) -> Lexer<'a> {
+        Lexer {
             inner: lexer,
             cache: None,
         }
@@ -173,7 +173,7 @@ impl<'a> ObjectLexer<'a> {
     }
 }
 
-impl<'a> Iterator for ObjectLexer<'a> {
+impl<'a> Iterator for Lexer<'a> {
     type Item = &'a str;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -185,8 +185,8 @@ impl<'a> Iterator for ObjectLexer<'a> {
 #[cfg(test)]
 mod tests {
     use super::{
-        Lexer, 
-        ObjectLexer,
+        Tokenizer, 
+        Lexer,
     };
     use std::slice;
 
@@ -417,7 +417,7 @@ mod tests {
     #[test]
     fn test_lexer() {
         for test_case in test_cases().iter() {
-            let lexer = ObjectLexer::new(Lexer::new(&test_case.data));
+            let lexer = Lexer::new(Tokenizer::new(&test_case.data));
             let result = lexer.map(|token| token.into()).collect::<Vec<String>>();
             assert_eq!(result, test_case.expected);
         }
@@ -426,7 +426,7 @@ mod tests {
     #[test]
     fn test_lexer_tokenwise() {
         for test_case in test_cases().iter() {
-            let lexer = ObjectLexer::new(Lexer::new(&test_case.data));
+            let lexer = Lexer::new(Tokenizer::new(&test_case.data));
         
             for (result, expected) in lexer.zip(test_case.expected.iter()) {
                 assert_eq!(

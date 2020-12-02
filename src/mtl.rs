@@ -1,6 +1,6 @@
 use crate::lexer::{
+    Tokenizer,
     Lexer,
-    ObjectLexer,
 };
 use std::error;
 use std::fmt;
@@ -8,13 +8,6 @@ use std::fmt;
 
 pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
     Parser::new(input.as_ref()).parse_mtlset()
-}
-
-#[derive(Clone, Debug)]
-pub enum MtlErrorKind {
-    SourceExistsButCouldNotBeRead,
-    SourceDoesNotExist(String),
-    ParseError,
 }
 
 
@@ -157,14 +150,14 @@ fn error<T>(
 /// A Wavefront MTL file parser.
 pub struct Parser<'a> {
     line_number: usize,
-    lexer: ObjectLexer<'a>,
+    lexer: Lexer<'a>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(input: &'a str) -> Parser<'a> {
         Parser {
             line_number: 1,
-            lexer: ObjectLexer::new(Lexer::new(input)),
+            lexer: Lexer::new(Tokenizer::new(input)),
         }
     }
 
