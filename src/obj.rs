@@ -357,6 +357,7 @@ impl<'a> Iterator for ObjectSetIter<'a> {
 impl ops::Index<usize> for ObjectSet {
     type Output = Object;
 
+    #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         &self.objects[index]
     }
