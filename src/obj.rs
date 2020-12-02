@@ -107,13 +107,13 @@ impl fmt::Display for VTNIndex {
     }
 }
 
-type ElementIndex = u32;
-type VertexIndex = u32;
-type TextureVertexIndex = u32;
-type NormalVertexIndex = u32;
-type GroupIndex = u32;
-type ShapeIndex = u32;
-type SmoothingGroupIndex = u32;
+type ElementIndex = usize;
+type VertexIndex = usize;
+type TextureVertexIndex = usize;
+type NormalVertexIndex = usize;
+type GroupIndex = usize;
+type ShapeIndex = usize;
+type SmoothingGroupIndex = usize;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Element {
@@ -154,16 +154,16 @@ impl Default for Group {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct SmoothingGroup(u32);
+pub struct SmoothingGroup(usize);
 
 impl SmoothingGroup {
     #[inline]
-    pub const fn new(name: u32) -> SmoothingGroup { 
+    pub const fn new(name: usize) -> SmoothingGroup { 
         SmoothingGroup(name)
     }
 
     #[inline]
-    pub fn as_int(&self) -> u32 { 
+    pub fn as_usize(&self) -> usize { 
         self.0 
     }
 }
@@ -611,14 +611,14 @@ impl CompositorInstructions {
         let final_group = final_shape_entry.groups[final_shape_entry.groups.len() - 1];
         let final_smoothing_group = final_shape_entry.smoothing_group;
         let mut final_statements = vec![];
-        for group_index in (final_group + 1)..((object.group_set.len() + 1) as u32) {
+        for group_index in (final_group + 1)..((object.group_set.len() + 1)) {
             final_statements.push(GroupingStatement::G(vec![
                 object.group_set[(group_index - 1) as usize].clone()
             ]));
         }
 
         for smoothing_group_index 
-            in (final_smoothing_group + 1)..((object.smoothing_group_set.len() + 1) as u32) {
+            in (final_smoothing_group + 1)..((object.smoothing_group_set.len() + 1)) {
             
             final_statements.push(GroupingStatement::S(
                 object.smoothing_group_set[(smoothing_group_index - 1) as usize]

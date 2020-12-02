@@ -122,8 +122,11 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         normal_vertex_set
     }
 
-    fn gen_slices(&self, g: &mut G, 
-        range: (usize, usize), count: usize) -> Vec<(usize, usize)> {
+    fn gen_slices(
+        &self, 
+        g: &mut G, 
+        range: (usize, usize), 
+        count: usize) -> Vec<(usize, usize)> {
 
         assert!(range.0 > 0);
         assert!(range.0 < range.1);
@@ -146,9 +149,14 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         slices
     }
 
-    fn gen_vtn_index(&self, g: &mut G, 
-        use_vt: bool, use_vn: bool, 
-        v_count: u32, vt_count: u32, vn_count: u32) -> VTNIndex {
+    fn gen_vtn_index(
+        &self, 
+        g: &mut G, 
+        use_vt: bool, 
+        use_vn: bool, 
+        v_count: usize, 
+        vt_count: usize, 
+        vn_count: usize) -> VTNIndex {
 
         let v = g.gen_range(1, v_count + 1);
         if use_vt && use_vn {
@@ -169,8 +177,13 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         }
     }
 
-    fn gen_element_set(&self, g: &mut G, 
-        element_count: u32, v_count: u32, vt_count: u32, vn_count: u32) -> Vec<Element> {
+    fn gen_element_set(
+        &self, 
+        g: &mut G, 
+        element_count: usize, 
+        v_count: usize, 
+        vt_count: usize, 
+        vn_count: usize) -> Vec<Element> {
 
         let mut element_set = vec![];
         for _ in 0..element_count {
@@ -210,7 +223,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
 
         let mut smoothing_group_set = vec![];
         for i in 0..count {
-            let smoothing_group_i = SmoothingGroup::new(i as u32);
+            let smoothing_group_i = SmoothingGroup::new(i);
             smoothing_group_set.push(smoothing_group_i);
         }
 
@@ -221,9 +234,9 @@ impl<G> ObjectGenerator<G> where G: RngCore {
     fn gen_shape_set(&self, 
         element_set: &[Element], 
         group_slices: &[(usize, usize)], 
-        group_set: &[u32],
+        group_set: &[usize],
         smoothing_group_slices: &[(usize, usize)], 
-        smoothing_group_set: &[u32]) -> Vec<ShapeEntry> {
+        smoothing_group_set: &[usize]) -> Vec<ShapeEntry> {
         
         assert!(group_slices.len() > 0);
         assert!(group_slices.len() == group_set.len());
@@ -237,7 +250,7 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         let mut shape_set = vec![];
         for i in 1..(group_slices.len() + 1) {
             for j in group_slices[i - 1].0..group_slices[i - 1].1 {
-                let shape_entry = ShapeEntry::new(j as u32, &group_set[(i - 1)..i], 1);
+                let shape_entry = ShapeEntry::new(j, &group_set[(i - 1)..i], 1);
                 shape_set.push(shape_entry);
             }
         }
@@ -285,9 +298,9 @@ impl<G> ObjectGenerator<G> where G: RngCore {
 
         let element_count = g.gen_range(len, 2*len);
         let element_set = self.gen_element_set(
-            g,  element_count as u32,
-            vertex_set.len() as u32, texture_vertex_set.len() as u32, 
-            normal_vertex_set.len() as u32,
+            g,  element_count,
+            vertex_set.len(), texture_vertex_set.len(), 
+            normal_vertex_set.len(),
         );
 
         let use_g_default: bool = g.gen::<bool>();
@@ -304,9 +317,9 @@ impl<G> ObjectGenerator<G> where G: RngCore {
         let shape_set = self.gen_shape_set(
             &element_set, 
             &group_slices,
-            &(1..((group_set.len() + 1) as u32)).collect::<Vec<u32>>(), 
+            &(1..((group_set.len() + 1))).collect::<Vec<usize>>(), 
             &smoothing_group_slices, 
-            &(1..((smoothing_group_set.len() + 1) as u32)).collect::<Vec<u32>>(), 
+            &(1..((smoothing_group_set.len() + 1))).collect::<Vec<usize>>(), 
         );
 
         let mut builder = ObjectBuilder::new(vertex_set, element_set);

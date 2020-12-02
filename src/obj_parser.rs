@@ -207,9 +207,9 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_u32(&mut self) -> Result<u32, ParseError> {
+    fn parse_usize(&mut self) -> Result<usize, ParseError> {
         let st = self.next_string()?;
-        match st.parse::<u32>() {
+        match st.parse::<usize>() {
             Ok(val) => Ok(val),
             Err(_) => error(self.line_number, ErrorKind::ExpectedIntegerButGot(st.into())),
         }
@@ -282,9 +282,9 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
-        let process_split = |split: &str| -> Result<Option<u32>, ParseError> {
+        let process_split = |split: &str| -> Result<Option<usize>, ParseError> {
             if split.len() > 0 {
-                let index = split.parse::<u32>();
+                let index = split.parse::<usize>();
                 Ok(index.ok())
             } else {
                 Ok(None)
@@ -319,7 +319,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<u32, ParseError> {
+    fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<usize, ParseError> {
         let mut indices_parsed = 0;
         while let Ok(vtn_index) = self.parse_vtn_index() {
             vtn_indices.push(vtn_index);
@@ -329,15 +329,15 @@ impl<'a> Parser<'a> {
         Ok(indices_parsed)
     }
 
-    fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
+    fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
         self.expect_tag("p")?;
 
-        let v_index = self.parse_u32()?;
+        let v_index = self.parse_usize()?;
         elements.push(Element::Point(VTNIndex::V(v_index)));
         let mut elements_parsed = 1;
         loop {
             match self.next() {
-                Some(st) if st != "\n" => match st.parse::<u32>() {
+                Some(st) if st != "\n" => match st.parse::<usize>() {
                     Ok(v_index) => { 
                         elements.push(Element::Point(VTNIndex::V(v_index)));
                         elements_parsed += 1;
@@ -353,7 +353,7 @@ impl<'a> Parser<'a> {
         Ok(elements_parsed)
     }
 
-    fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
+    fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
         self.expect_tag("l")?;
 
         let mut vtn_indices = vec![];
@@ -373,10 +373,10 @@ impl<'a> Parser<'a> {
             elements.push(Element::Line(vtn_indices[i], vtn_indices[i + 1]));
         }
 
-        Ok((vtn_indices.len() - 1) as u32)
+        Ok(vtn_indices.len() - 1)
     }
 
-    fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {
+    fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
         self.expect_tag("f")?;
         
         let mut vtn_indices = vec![];
@@ -402,10 +402,10 @@ impl<'a> Parser<'a> {
             elements.push(Element::Face(vertex0, vtn_indices[i+1], vtn_indices[i+2]));
         }
 
-        Ok((vtn_indices.len() - 2) as u32)
+        Ok(vtn_indices.len() - 2)
     }
 
-    fn parse_elements(&mut self, elements: &mut Vec<Element>) -> Result<u32, ParseError> {  
+    fn parse_elements(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {  
         match self.peek() {
             Some("p") => self.parse_point(elements),
             Some("l") => self.parse_line(elements),
@@ -414,7 +414,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_groups(&mut self, groups: &mut Vec<Group>) -> Result<u32, ParseError> {
+    fn parse_groups(&mut self, groups: &mut Vec<Group>) -> Result<usize, ParseError> {
         self.expect_tag("g")?;
         let mut groups_parsed = 0;
         loop {
@@ -431,13 +431,13 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_smoothing_group(&mut self, 
-        smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<u32, ParseError> {
+        smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<usize, ParseError> {
 
         self.expect_tag("s")?;
         if let Some(name) = self.next() {
             if name == "off" {
                 smoothing_groups.push(SmoothingGroup::new(0));
-            } else if let Ok(number) = name.parse::<u32>() {
+            } else if let Ok(number) = name.parse::<usize>() {
                 smoothing_groups.push(SmoothingGroup::new(number));
             } else {
                 return error(self.line_number, ErrorKind::SmoothingGroupNameMustBeOffOrInteger(name.into()));
@@ -452,13 +452,13 @@ impl<'a> Parser<'a> {
     fn parse_shape_entries(&self,
         shape_entry_table: &mut Vec<ShapeEntry>,
         elements: &[Element],
-        group_entry_table: &[((u32, u32), (u32, u32))],
-        smoothing_group_entry_table: &[((u32, u32), u32)]) {
+        group_entry_table: &[((usize, usize), (usize, usize))],
+        smoothing_group_entry_table: &[((usize, usize), usize)]) {
 
         for &((min_element_index, max_element_index), 
               (min_group_index, max_group_index)) in group_entry_table { 
             
-            let groups: Vec<u32> = (min_group_index..max_group_index).collect();
+            let groups: Vec<usize> = (min_group_index..max_group_index).collect();
             for i in min_element_index..max_element_index {
                 shape_entry_table.push(ShapeEntry::new(i, &groups, 1));
             }
@@ -612,7 +612,10 @@ impl<'a> Parser<'a> {
         // Fill in the shape entries for the current group.
         let mut shape_entries = vec![];
         self.parse_shape_entries(
-            &mut shape_entries, &elements, &group_entry_table, &smoothing_group_entry_table
+            &mut shape_entries, 
+            &elements, 
+            &group_entry_table, 
+            &smoothing_group_entry_table
         );
 
         *min_vertex_index  += vertices.len();
@@ -664,15 +667,15 @@ impl<'a> Parser<'a> {
 #[cfg(test)]
 mod primitive_tests {
     #[test]
-    fn test_parse_f32() {
+    fn test_parse_f64() {
         let mut parser = super::Parser::new("-1.929448");
         assert_eq!(parser.parse_f64(), Ok(-1.929448));
     }
 
     #[test]
-    fn test_parse_u32() {
+    fn test_parse_usize() {
         let mut parser = super::Parser::new("    763   ");
-        assert_eq!(parser.parse_u32(), Ok(763));
+        assert_eq!(parser.parse_usize(), Ok(763));
     }
 }
 
