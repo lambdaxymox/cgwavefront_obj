@@ -14,7 +14,7 @@ pub struct Color {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Illumination {
+pub enum IlluminationModel {
     Ambient,
     AmbientDiffuse,
     AmbientDiffuseSpecular,
@@ -30,7 +30,7 @@ pub struct Material {
     pub specular_exponent: f64,
     pub dissolve: f64,
     pub optical_density: Option<f64>,
-    pub illumination: Illumination,
+    pub illumination_model: IlluminationModel,
     pub map_ambient: Option<String>,
     pub map_diffuse: Option<String>,
     pub map_specular: Option<String>,
@@ -52,6 +52,7 @@ pub enum ErrorKind {
     ExpectedTag,
     ExpectedFloat,
     ExpectedInteger,
+    UnknownIlluminationModel,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -352,6 +353,21 @@ impl<'a> Parser<'a> {
             ),
         }
     }
+
+    fn parse_illumination_model(&mut self) -> Result<IlluminationModel, ParseError> {
+        self.expect_tag("illum")?;
+        let model_number = self.parse_usize()?;
+        match model_number {
+            0 => Ok(IlluminationModel::Ambient),
+            1 => Ok(IlluminationModel::AmbientDiffuse),
+            2 => Ok(IlluminationModel::AmbientDiffuseSpecular),
+            n => error(
+                self.line_number, 
+                ErrorKind::UnknownIlluminationModel,
+                format!("Unknown illumination model: {}.", n)
+            )
+        }
+    }
 }
 
 
@@ -380,6 +396,8 @@ mod mtl_illumination_statement_tests {
     use super::{
         Color,
         Parser,
+        ErrorKind,
+        IlluminationModel,
     };
 
 
@@ -518,6 +536,42 @@ mod mtl_illumination_statement_tests {
         assert_eq!(result, expected);
     }
 
+    #[test]
+    fn test_parse_illumination_model0() {
+        let mut parser = Parser::new("illum 0");
+        let expected = Ok(IlluminationModel::Ambient);
+        let result = parser.parse_illumination_model();
 
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_illumination_model1() {
+        let mut parser = Parser::new("illum 1");
+        let expected = Ok(IlluminationModel::AmbientDiffuse);
+        let result = parser.parse_illumination_model();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_illumination_model2() {
+        let mut parser = Parser::new("illum 2");
+        let expected = Ok(IlluminationModel::AmbientDiffuseSpecular);
+        let result = parser.parse_illumination_model();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_illumination_model3() {
+        let mut parser = Parser::new("illum 3");
+        let expected_kind = ErrorKind::UnknownIlluminationModel;
+        let result = parser.parse_illumination_model();
+        assert!(result.is_err());
+
+        let result_kind = result.unwrap_err().kind;
+        assert_eq!(result_kind, expected_kind);
+    }
 }
 
