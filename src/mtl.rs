@@ -447,7 +447,7 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_ambient() {
+    fn test_parse_map_ambient() {
         let mut parser = Parser::new("map_Ka ambient.png");
         let expected = Ok(Some("ambient.png"));
         let result = parser.parse_map_ambient();
@@ -456,7 +456,7 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_diffuse() {
+    fn test_parse_map_diffuse() {
         let mut parser = Parser::new("map_Kd diffuse.png");
         let expected = Ok(Some("diffuse.png"));
         let result = parser.parse_map_diffuse();
@@ -465,7 +465,7 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_specular() {
+    fn test_parse_map_specular() {
         let mut parser = Parser::new("map_Ks specular.png");
         let expected = Ok(Some("specular.png"));
         let result = parser.parse_map_specular();
@@ -474,7 +474,7 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_emissive() {
+    fn test_parse_map_emissive() {
         let mut parser = Parser::new("map_Ke emissive.png");
         let expected = Ok(Some("emissive.png"));
         let result = parser.parse_map_emissive();
@@ -483,7 +483,7 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_bump1() {
+    fn test_parse_map_bump1() {
         let mut parser = Parser::new("map_Bump normal.png");
         let expected = Ok(Some("normal.png"));
         let result = parser.parse_map_bump();
@@ -492,7 +492,7 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_bump2() {
+    fn test_parse_map_bump2() {
         let mut parser = Parser::new("bump normal.png");
         let expected = Ok(Some("normal.png"));
         let result = parser.parse_map_bump();
@@ -501,7 +501,7 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_displacement() {
+    fn test_parse_map_displacement() {
         let mut parser = Parser::new("disp roughness.png");
         let expected = Ok(Some("roughness.png"));
         let result = parser.parse_map_displacement();
@@ -510,12 +510,14 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
-    fn test_map_dissolve() {
+    fn test_parse_map_dissolve() {
         let mut parser = Parser::new("map_d alpha.png");
         let expected = Ok(Some("alpha.png"));
         let result = parser.parse_map_dissolve();
 
         assert_eq!(result, expected);
     }
+
+
 }
 
