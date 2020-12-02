@@ -5,13 +5,23 @@ use criterion::{
     Criterion
 };
 use wavefront_obj as obj;
+use std::fs::{
+    File,
+};
+use std::io::{
+    Read,
+};
+
 
 const SAMPLE_DATA: &str = "assets/teapot.obj";
 
 
 fn benchmark(c: &mut Criterion) {
     c.bench_function("parse teapot.obj", |b| b.iter(|| {
-        obj::parse_file(black_box(SAMPLE_DATA)).unwrap()
+        let mut file = File::open(SAMPLE_DATA).expect("File not found.");
+        let mut buffer = String::new();
+        file.read_to_string(&mut buffer).unwrap();
+        obj::parse(black_box(buffer)).unwrap()
     }));
 }
 
