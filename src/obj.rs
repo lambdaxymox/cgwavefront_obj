@@ -446,11 +446,6 @@ impl ObjectBuilder {
     }
 }
 
-
-trait ObjectCompositor {
-    fn compose(&self, object: &Object) -> String;
-}
-
 struct DisplayObjectCompositor { }
 
 impl DisplayObjectCompositor {
@@ -485,11 +480,6 @@ impl DisplayObjectCompositor {
     }
 }
 
-impl ObjectCompositor for DisplayObjectCompositor {
-    fn compose(&self, object: &Object) -> String {
-        self.compose(object)
-    } 
-}
 
 #[derive(Clone, Debug, PartialEq)]
 enum GroupingStatement {
@@ -729,9 +719,9 @@ impl CompositorInstructions {
     }
 }
 
-/// A `TextObjectCompositor` generates a Wavefront OBJ text block from an object.
-/// One can use it to automatically generate OBJ files.
-struct TextObjectCompositor { }
+/// A `TextObjectCompositor` generates a Wavefront OBJ text block from an 
+/// object. One can use it to automatically generate OBJ files.
+struct TextObjectCompositor {}
 
 impl TextObjectCompositor {
     fn new() -> TextObjectCompositor { 
@@ -841,26 +831,16 @@ impl TextObjectCompositor {
     }
 }
 
-impl ObjectCompositor for TextObjectCompositor {
-    fn compose(&self, object: &Object) -> String {
-        self.compose(object)
-    }
-}
-
-pub trait Compositor {
-    fn compose(&self, object_set: &ObjectSet) -> String;
-}
-
 /// The `DisplayObjectCompositor` type is the default compositor
 /// for presenting object set information to the end user.
 pub struct DisplayObjectSetCompositor { }
 
 impl DisplayObjectSetCompositor {
-    pub fn new() -> Self { Self {} }
-}
+    pub fn new() -> Self { 
+        Self {} 
+    }
 
-impl Compositor for DisplayObjectSetCompositor {
-    fn compose(&self, object_set: &ObjectSet) -> String {
+    pub fn compose(&self, object_set: &ObjectSet) -> String {
         let compositor = DisplayObjectCompositor::new();
         let mut string = String::from("ObjectSet {\n");
         
@@ -879,11 +859,11 @@ impl Compositor for DisplayObjectSetCompositor {
 pub struct TextObjectSetCompositor { }
 
 impl TextObjectSetCompositor {
-    pub fn new() -> Self { Self {} }
-}
+    pub fn new() -> Self { 
+        Self {}
+    }
 
-impl Compositor for TextObjectSetCompositor {
-    fn compose(&self, object_set: &ObjectSet) -> String {
+    pub fn compose(&self, object_set: &ObjectSet) -> String {
         let compositor = TextObjectCompositor::new();
         
         let mut string = String::new();

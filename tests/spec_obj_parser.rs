@@ -20,7 +20,6 @@ use wavefront_obj::{
     SmoothingGroup, 
     ShapeEntry,
     TextObjectSetCompositor, 
-    Compositor,
 };
 use wavefront_obj::{
     Parser, 
