@@ -45,8 +45,7 @@ impl<'a> Tokenizer<'a> {
         self.stream.get(self.stream_position)
     }
 
-    /// the function `advance` advances the lexer by one
-    /// character in the byte stream.
+    /// Advance the lexer by one character in the byte stream.
     fn advance(&mut self) {
         match self.peek() {
             Some(&ch) if is_newline(ch) => {
@@ -88,8 +87,10 @@ impl<'a> Tokenizer<'a> {
         self.skip_while(|ch| !not_predicate(ch))
     }
 
-    /// The function `skip_comment` consumes a comment line
-    /// without returning it.
+    /// Consume a comment line without returning it.
+    ///
+    /// This function returns the number of characters skipped, i.e. the length
+    /// of the comment line.
     fn skip_comment(&mut self) -> usize {
         match self.peek() {
             Some(b'#') => self.skip_unless(is_newline),
@@ -97,8 +98,9 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    /// The function `skip_whitespace` consumes a string of whitespace
-    /// characters without returning them.
+    /// Consume a string of whitespace characters without returning them.
+    ///
+    /// This function returns the number of whitspace characters consumed.
     fn skip_whitespace(&mut self) -> usize {
         self.skip_while(is_whitespace)
     }
