@@ -496,9 +496,10 @@ enum GroupingStatement {
     S(SmoothingGroup),
 }
 
-/// The compositor instructions to pass to an object compositor. The instructions
-/// describe to the compositor where to place grouping statements in a Wavefront OBJ file
-/// derived from an object set.
+/// The compositor instructions to pass to an object compositor. 
+///
+/// The instructions describe to the compositor where to place grouping 
+/// statements in a Wavefront OBJ file derived from an object set.
 #[derive(Clone, Debug, PartialEq)]
 struct CompositorInstructions {
     instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>>,
@@ -509,7 +510,8 @@ impl CompositorInstructions {
         Self { instructions: instructions }
     }
 
-    /// Find any missing groups and smoothing groups that contain no elements. 
+    /// Find any missing groups and smoothing groups that contain no elements.
+    ///
     /// We can find the missing groups in the object set because per the 
     /// specification, grouping statements are indexed in monotone increasing 
     /// order. So any gaps in the grouping indices in the index buffer indicates 
