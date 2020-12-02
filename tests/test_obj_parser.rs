@@ -1,10 +1,18 @@
 extern crate wavefront_obj;
 
 use wavefront_obj::{
-    Vertex, NormalVertex, Element, VTNIndex, ObjectSet, ObjectBuilder,
-    Group, ShapeEntry,
+    Vertex, 
+    NormalVertex, 
+    Element, 
+    VTNIndex, 
+    ObjectSet, 
+    ObjectBuilder,
+    Group, 
+    ShapeEntry,
 };
-use wavefront_obj::Parser;
+use wavefront_obj::{
+    Parser,
+};
 
 use std::fs::File;
 use std::io::Read;

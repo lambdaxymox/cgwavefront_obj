@@ -2,19 +2,41 @@ extern crate quickcheck;
 extern crate rand;
 extern crate wavefront_obj;
 
-use quickcheck::{Arbitrary, Gen};
-use wavefront_obj::{
-    Object, ObjectSet, ObjectBuilder,
-    Vertex, TextureVertex, NormalVertex, Element, VTNIndex,
-    Group, SmoothingGroup, ShapeEntry,
-    TextObjectSetCompositor, Compositor,
-    VertexSet, TextureVertexSet, NormalVertexSet, ElementSet, ShapeSet,
-    GroupSet, SmoothingGroupSet,
+
+use quickcheck::{
+    Arbitrary, 
+    Gen,
 };
-use wavefront_obj::{Parser, ParseError};
-use rand::{Rng, RngCore};
-
-
+use wavefront_obj::{
+    Object, 
+    ObjectSet, 
+    ObjectBuilder,
+    Vertex,
+    TextureVertex, 
+    NormalVertex, 
+    Element, 
+    VTNIndex,
+    Group, 
+    SmoothingGroup, 
+    ShapeEntry,
+    TextObjectSetCompositor, 
+    Compositor,
+    VertexSet, 
+    TextureVertexSet, 
+    NormalVertexSet, 
+    ElementSet, 
+    ShapeSet,
+    GroupSet, 
+    SmoothingGroupSet,
+};
+use wavefront_obj::{
+    Parser, 
+    ParseError,
+};
+use rand::{
+    Rng, 
+    RngCore
+};
 use std::marker;
 use std::fmt;
 

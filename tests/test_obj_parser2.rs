@@ -1,10 +1,21 @@
 extern crate wavefront_obj;
 
+
 use wavefront_obj::{
-    Vertex, TextureVertex, NormalVertex, Element, VTNIndex, ObjectSet, Object,
-    Group, SmoothingGroup, ShapeEntry,
+    Vertex, 
+    TextureVertex, 
+    NormalVertex, 
+    Element, 
+    VTNIndex, 
+    ObjectSet, 
+    Object,
+    Group, 
+    SmoothingGroup, 
+    ShapeEntry,
 };
-use wavefront_obj::Parser;
+use wavefront_obj::{
+    Parser,
+};
 
 use std::slice;
 
