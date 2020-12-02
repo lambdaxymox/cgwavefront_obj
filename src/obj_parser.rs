@@ -92,44 +92,9 @@ impl fmt::Display for ObjError{
 impl error::Error for ObjError {}
 
 
-/// Parse a wavefront object file from a file buffer or other `Read` instance.
-pub fn parse<F: Read>(file: F) -> Result<ObjectSet, ObjError> {
-    let mut reader = BufReader::new(file);
-    let mut string = String::new();
-    reader.read_to_string(&mut string).unwrap();
-
-    let mut parser = Parser::new(&string);
-
-    match parser.parse() {
-        Ok(obj_set) => Ok(obj_set),
-        Err(e) => Err(ObjError::new(ObjErrorKind::ParseError, Box::new(e))),
-    }
-}
-
-
-/// Parse a wavefront object file from a file path.
-pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<ObjectSet, ObjError> {
-    if !path.as_ref().exists() {
-        let disp = path.as_ref().display();
-
-        return Err(ObjError::from_kind(ObjErrorKind::SourceDoesNotExist(format!("{}", disp))));
-    }
-
-    let file = match File::open(path) {
-        Ok(val) => val,
-        Err(e) => return Err(
-            ObjError::new(ObjErrorKind::SourceExistsButCouldNotBeRead, Box::new(e))
-        )
-    };
-
-    parse(file)
-}
-
-
 /// Parse a wavefront object file from a string.
-pub fn parse_str(st: &str) -> Result<ObjectSet, ParseError> {
-    let mut parser = Parser::new(st);
-    parser.parse()
+pub fn parse<T: AsRef<str>>(input: T) -> Result<ObjectSet, ParseError> {
+    Parser::new(input.as_ref()).parse()
 }
 
 
