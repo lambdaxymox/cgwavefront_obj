@@ -17,7 +17,7 @@ fn is_whitespace_or_newline(ch: u8) -> bool {
 }
 
 
-/// A OBJ file lexer tokenizes an input character stream.
+/// A lexer tokenizes an input character stream.
 #[derive(Clone)]
 pub struct Tokenizer<'a> {
     /// The current line position in the token stream.
@@ -29,7 +29,7 @@ pub struct Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    /// Create a new lexer.
+    /// Construct a new tokenizer.
     pub fn new(stream: &'a str) -> Tokenizer<'a> {
         Tokenizer {
             current_line_number: 1,
@@ -38,8 +38,8 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    /// The function `peek` looks at the character at the current position
-    /// in the byte stream without advancing the stream.
+    /// Read the character at the current position in the byte stream without 
+    /// advancing the stream.
     #[inline]
     fn peek(&mut self) -> Option<&u8> {
         self.stream.get(self.stream_position)
@@ -58,7 +58,8 @@ impl<'a> Tokenizer<'a> {
     }
 
     /// Given a boolean predicate that operates on bytes, advance through the 
-    /// stream while the predicate is still satisfied.
+    /// stream while the predicate is still satisfied. 
+    ///
     /// This function returns the number of characters skipped.
     fn skip_while<P: Fn(u8) -> bool>(&mut self, predicate: P) -> usize {
         let mut skipped = 0;
@@ -78,9 +79,11 @@ impl<'a> Tokenizer<'a> {
     }
 
     /// Given a predicate that operates on bytes, advance through stream while 
-    /// the predicates is not satisfied. That is, advance one character at a 
-    /// time unless the predicate is satisfied, and then stop. This function 
-    /// returns the number of characters skipped.
+    /// the predicates is not satisfied. 
+    ///
+    /// That is, advance one character at a time unless the predicate is 
+    /// satisfied, and then stop. This function returns the number of characters 
+    /// skipped.
     fn skip_unless<P: Fn(u8) -> bool>(&mut self, not_predicate: P) -> usize {
         self.skip_while(|ch| !not_predicate(ch))
     }
@@ -135,12 +138,17 @@ impl<'a> Iterator for Tokenizer<'a> {
     }
 }
 
+/// A lexical analyzer that caches tokens from the tokenizer to supports
+/// peeking into the steam without advancing the stream, and lookahead.
 pub struct Lexer<'a> {
+    /// The tokenizer for the input byte stream.
     inner: Tokenizer<'a>,
+    /// The lookahead cache for the lexer.
     cache: Option<Option<&'a str>>,
 }
 
 impl<'a> Lexer<'a> {
+    /// Construct a new lexical analyzer.
     pub fn new(lexer: Tokenizer<'a>) -> Lexer<'a> {
         Lexer {
             inner: lexer,
@@ -148,6 +156,9 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Read the next token from the token stream.
+    ///
+    /// Calling this function advances the state of the input stream.
     pub fn next_token(&mut self) -> Option<&'a str> {
         match self.cache.take() {
             Some(token) => token,
@@ -159,6 +170,10 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Read the next token from the token stream. 
+    ///
+    /// Calling this function does not advance the state of the stream, but it 
+    /// may fill the cache on any given call.
     pub fn peek(&mut self) -> Option<&'a str> {
         match self.cache {
             Some(token) => token,
@@ -412,8 +427,6 @@ mod tests {
         }
     }
 
-    /// for each instance of sample data, the resulting token stream
-    /// should match the expected output from the lexer.
     #[test]
     fn test_lexer() {
         for test_case in test_cases().iter() {
