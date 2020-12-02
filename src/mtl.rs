@@ -220,6 +220,16 @@ impl<'a> Parser<'a> {
         self.expect_tag("d")?;
         self.parse_f64()
     }
+
+    fn parse_specular_exponent(&mut self) -> Result<f64, ParseError> {
+        self.expect_tag("Ns")?;
+        self.parse_f64()
+    }
+
+    fn parse_optical_density(&mut self) -> Result<f64, ParseError> {
+        self.expect_tag("Ni")?;
+        self.parse_f64()
+    }
 }
 
 
@@ -292,6 +302,24 @@ mod mtl_illumination_statement_tests {
         let mut parser = Parser::new("d 0.24325634");
         let expected = Ok(0.24325634);
         let result = parser.parse_dissolve_component();
+
+        assert_eq!(result, expected); 
+    }
+
+    #[test]
+    fn test_parse_specular_exponent() {
+        let mut parser = Parser::new("Ns 3.24325634");
+        let expected = Ok(3.24325634);
+        let result = parser.parse_specular_exponent();
+
+        assert_eq!(result, expected); 
+    }
+
+    #[test]
+    fn test_parse_optical_density() {
+        let mut parser = Parser::new("Ni 1.24325634");
+        let expected = Ok(1.24325634);
+        let result = parser.parse_optical_density();
 
         assert_eq!(result, expected); 
     }
