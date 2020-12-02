@@ -7,7 +7,7 @@ use std::fmt;
 
 
 
-pub fn parse<T: AsRef<str>>(input: T) -> Result<MtlSet, ParseError> {
+pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
     Parser::new(input.as_ref()).parse_mtlset()
 }
 
@@ -19,6 +19,14 @@ pub struct Color {
 }
 
 impl Color {
+    fn new(r: f64, g: f64, b: f64) -> Color {
+        Color { 
+            r: r,
+            g: g,
+            b: b
+        }
+    }
+
     fn zero() -> Color {
         Color {
             r: 0_f64,
@@ -81,7 +89,7 @@ impl Material {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct MtlSet {
+pub struct MaterialSet {
     pub materials: Vec<Material>,
 }
 
@@ -542,7 +550,7 @@ impl<'a> Parser<'a> {
         Ok(material)
     }
 
-    fn parse_mtlset(&mut self) -> Result<MtlSet, ParseError> {
+    fn parse_mtlset(&mut self) -> Result<MaterialSet, ParseError> {
         self.skip_zero_or_more_newlines();
 
         let mut materials = Vec::new();
@@ -568,7 +576,7 @@ impl<'a> Parser<'a> {
             None => {}
         }
 
-        Ok(MtlSet { materials: materials })
+        Ok(MaterialSet { materials: materials })
     }
 }
 
@@ -794,3 +802,62 @@ mod mtl_illumination_statement_tests {
     }
 }
 
+
+#[cfg(test)]
+mod mtlset_parser_tests {
+    use super::{
+        Color,
+        IlluminationModel,
+        Material,
+        MaterialSet,
+    };
+
+
+    #[test]
+    fn test_parse() {
+        let mtl_file = r"
+            # Blender MTL File: 'None'      \
+            # Material Count: 1             \
+                                            \
+            newmtl Scene_-_Root             \
+            Ns 225.000000                   \
+            Ka 1.000000 1.000000 1.000000   \
+            Kd 0.800000 0.800000 0.800000   \
+            Ks 0.500000 0.500000 0.500000   \
+            Ke 0.0 0.0 0.0                  \
+            Ni 1.450000                     \
+            d 1.000000                      \
+            illum 2                         \
+            map_Kd diffuse.jpg              \
+            map_Bump normal.png             \
+            map_Ks specular.jpg             \
+            disp roughness.jpg              \
+        ";
+        let expected = Ok(MaterialSet {
+            materials: vec![
+                Material {
+                    name: String::from("Scene_-_Root"),
+                    color_ambient: Color::new(1_f64, 1_f64, 1_f64),
+                    color_diffuse: Color::new(0.8_f64, 0.8_f64, 0.8_f64),
+                    color_specular: Color::new(0.5_f64, 0.5_f64, 0.5_f64),
+                    color_emissive: Color::new(0_f64, 0_f64, 0_f64),
+                    specular_exponent: 225_f64,
+                    dissolve: 1_f64,
+                    optical_density: Some(1.45_f64),
+                    illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+                    map_ambient: None,
+                    map_diffuse: Some(String::from("diffuse.jpg")),
+                    map_specular: Some(String::from("specular.jpg")),
+                    map_emissive: None,
+                    map_specular_exponent: None,
+                    map_bump: Some(String::from("normal.png")),
+                    map_displacement: Some(String::from("roughness.jpg")),
+                    map_dissolve: None,
+                },
+            ],
+        });
+        let result = super::parse(mtl_file);
+
+        assert_eq!(result, expected);
+    }
+}
