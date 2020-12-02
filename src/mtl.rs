@@ -4,12 +4,117 @@ use crate::lexer::{
 };
 use std::error;
 use std::fmt;
+use std::fs::{
+    File,
+};
+use std::io::{
+    Read,
+    BufReader,
+};
+use std::path::{
+    Path,
+};
 
 
+pub fn parse<F: Read>(file: F) -> Result<MaterialSet, MtlError> {
+    let mut reader = BufReader::new(file);
+    let mut string = String::new();
+    reader.read_to_string(&mut string).unwrap();
 
-pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
+    let mut parser = Parser::new(&string);
+
+    match parser.parse_mtlset() {
+        Ok(obj_set) => Ok(obj_set),
+        Err(e) => Err(MtlError::new(MtlErrorKind::ParseError, Box::new(e))),
+    }
+}
+
+pub fn parse_file<P: AsRef<Path>>(path: P) -> Result<MaterialSet, MtlError> {
+    if !path.as_ref().exists() {
+        let disp = path.as_ref().display();
+
+        return Err(MtlError::from_kind(MtlErrorKind::SourceDoesNotExist(format!("{}", disp))));
+    }
+
+    let file = match File::open(path) {
+        Ok(val) => val,
+        Err(e) => return Err(
+            MtlError::new(MtlErrorKind::SourceExistsButCouldNotBeRead, Box::new(e))
+        )
+    };
+
+    parse(file)
+}
+
+pub fn parse_str<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
     Parser::new(input.as_ref()).parse_mtlset()
 }
+
+#[derive(Clone, Debug)]
+pub enum MtlErrorKind {
+    SourceExistsButCouldNotBeRead,
+    SourceDoesNotExist(String),
+    ParseError,
+}
+
+#[derive(Debug)]
+pub struct MtlError {
+    kind: MtlErrorKind,
+    error: Option<Box<dyn error::Error>>,
+}
+
+impl MtlError {
+    fn new(kind: MtlErrorKind, error: Box<dyn error::Error>) -> MtlError {
+        MtlError {
+            kind: kind,
+            error: Some(error),
+        }
+    }
+
+    fn from_kind(kind: MtlErrorKind) -> MtlError {
+        MtlError {
+            kind: kind,
+            error: None,
+        }
+    }
+}
+
+impl fmt::Display for MtlError{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self.kind {
+            MtlErrorKind::SourceExistsButCouldNotBeRead => {
+                match self.error {
+                    Some(ref err) => {    
+                        write!(f, 
+                            "The source exists but could not be read with the underlying error: {}.",
+                            err 
+                        )
+                    }
+                    _ => {
+                        write!(f, 
+                            "The source exists but could not be read with the underlying error: Unknown Error.", 
+                        )
+                    }
+                }
+            }
+            MtlErrorKind::SourceDoesNotExist(source) => {
+                write!(f, "The MTL data souce source could not be found: {}.", source)
+            }
+            MtlErrorKind::ParseError => {
+                match self.error {
+                    Some(ref err) => {    
+                        write!(f, "An error occurred while parsing the mtl file: {}", err)
+                    }
+                    _ => {
+                        write!(f, "An error occurred while parsing the mtl file: Unknown Error")
+                    }
+                }                
+            }
+        }
+    }
+}
+
+impl error::Error for MtlError {}
 
 
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
@@ -857,7 +962,7 @@ mod mtlset_parser_tests {
                 },
             ],
         });
-        let result = super::parse(mtl_file);
+        let result = super::parse_str(mtl_file);
 
         assert_eq!(result, expected);
     }
@@ -1009,7 +1114,7 @@ mod mtlset_parser_tests {
                 },
             ],
         };
-        let result = super::parse(mtl_file);
+        let result = super::parse_str(mtl_file);
         assert!(result.is_ok());
         let result = result.unwrap();
 
