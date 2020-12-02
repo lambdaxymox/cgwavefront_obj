@@ -551,7 +551,7 @@ impl CompositorInstructions {
                 // We have crossed a group or smoothing group boundary. Here we 
                 // have found the end of the interval of elements with the same 
                 // groups and smoothing groups.
-                missing_groups.insert((min_element_index as usize, max_element_index as usize), current_statements);
+                missing_groups.insert((min_element_index, max_element_index), current_statements);
 
                 // Which groups and smoothing groups are missing? There is 
                 // ambiguity in ordering any possible missing groups and 
@@ -600,7 +600,7 @@ impl CompositorInstructions {
         }
 
         // Process the last existing interval.
-        missing_groups.insert((min_element_index as usize, max_element_index as usize), current_statements);
+        missing_groups.insert((min_element_index, max_element_index), current_statements);
 
         // The last interval of empty groups and smoothing groups
         // lies off the end of the element list.
@@ -628,7 +628,7 @@ impl CompositorInstructions {
             ));
         }
 
-        missing_groups.insert((min_element_index as usize, min_element_index as usize), final_statements);
+        missing_groups.insert((min_element_index, min_element_index), final_statements);
 
         missing_groups
     }
