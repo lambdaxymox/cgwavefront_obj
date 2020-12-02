@@ -1,6 +1,17 @@
 use std::str;
 
 
+/// A lexer tokenizes an input character stream.
+#[derive(Clone)]
+pub struct Tokenizer<'a> {
+    /// The current line position in the token stream.
+    current_line_number: usize,
+    /// The cursor position in the character stream.
+    stream_position: usize,
+    /// The input stream.
+    stream: &'a [u8],
+}
+
 #[inline]
 fn is_whitespace(ch: u8) -> bool {
     ch == b' ' || ch == b'\\' || ch == b'\t'
@@ -14,18 +25,6 @@ fn is_newline(ch: u8) -> bool {
 #[inline]
 fn is_whitespace_or_newline(ch: u8) -> bool {
     is_whitespace(ch) || is_newline(ch)
-}
-
-
-/// A lexer tokenizes an input character stream.
-#[derive(Clone)]
-pub struct Tokenizer<'a> {
-    /// The current line position in the token stream.
-    current_line_number: usize,
-    /// The cursor position in the character stream.
-    stream_position: usize,
-    /// The input stream.
-    stream: &'a [u8],
 }
 
 impl<'a> Tokenizer<'a> {
@@ -105,7 +104,9 @@ impl<'a> Tokenizer<'a> {
         self.skip_while(is_whitespace)
     }
 
-    /// This function fetches the next token from the input stream.
+    /// Fetch the next token from the input stream.
+    ///
+    /// This function advances the state of the input stream.
     fn next_token(&mut self) -> Option<&'a [u8]> {
         self.skip_whitespace();
         self.skip_comment();
