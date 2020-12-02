@@ -148,17 +148,21 @@ impl fmt::Display for Group {
 }
 
 impl Default for Group {
-    fn default() -> Group { Group::new("default") }
+    fn default() -> Group { 
+        Group::new("default") 
+    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroup(u32);
 
 impl SmoothingGroup {
-    pub fn new(name: u32) -> SmoothingGroup { 
+    #[inline]
+    pub const fn new(name: u32) -> SmoothingGroup { 
         SmoothingGroup(name)
     }
 
+    #[inline]
     pub fn as_int(&self) -> u32 { 
         self.0 
     }
@@ -321,9 +325,9 @@ pub struct ObjectSet {
 }
 
 impl ObjectSet {
-    pub fn new(vec: Vec<Object>) -> ObjectSet {
+    pub fn new(objects: Vec<Object>) -> ObjectSet {
         ObjectSet {
-            objects: vec,
+            objects: objects,
         }    
     }
 
@@ -333,7 +337,9 @@ impl ObjectSet {
         }
     }
 
-    pub fn len(&self) -> usize { self.objects.len() }
+    pub fn len(&self) -> usize { 
+        self.objects.len()
+    }
 }
 
 pub struct ObjectSetIter<'a> {
@@ -503,10 +509,11 @@ impl CompositorInstructions {
         Self { instructions: instructions }
     }
 
-    /// Find any missing groups and smoothing groups that contain no elements. We can find the 
-    /// missing groups in the object set because per the specification, grouping statements are
-    /// indexed in monotone increasing order. So any gaps in the grouping indices in the index
-    /// buffer indicates which groups are missing, and we can fill there in when generating a 
+    /// Find any missing groups and smoothing groups that contain no elements. 
+    /// We can find the missing groups in the object set because per the 
+    /// specification, grouping statements are indexed in monotone increasing 
+    /// order. So any gaps in the grouping indices in the index buffer indicates 
+    /// which groups are missing, and we can fill there in when generating a 
     /// *.obj file from an object set.
     fn generate_missing_groups(object: &Object) -> BTreeMap<(u32, u32), Vec<GroupingStatement>> {
         let mut missing_groups = BTreeMap::new();
@@ -529,29 +536,32 @@ impl CompositorInstructions {
             ));
         }
 
-        // In order to fill in the missing groups and smoothing groups, we need to know
-        // which groups and smoothing groups are occupied in the object. After that, we
-        // can determine which groups are missing and fill them in.
+        // In order to fill in the missing groups and smoothing groups, we need
+        // to know which groups and smoothing groups are occupied in the object. 
+        // After that, we can determine which groups are missing and fill them in.
         let mut current_entry = &object.shape_set[0];
         let mut min_element_index = 1;
         let mut max_element_index = 1;
         for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
-                // We have crossed a group or smoothing group boundary. Here we have found the 
-                // end of the interval of elements with the same groups and smoothing groups.
+                // We have crossed a group or smoothing group boundary. Here we 
+                // have found the end of the interval of elements with the same 
+                // groups and smoothing groups.
                 missing_groups.insert((min_element_index as u32, max_element_index as u32), current_statements);
 
-                // Which groups and smoothing groups are missing? There is ambiguity in 
-                // ordering any possible missing groups and smoothing groups. We choose to 
-                // disambiguate this by finding the missing groups and dropping them 
-                // in first, followed by dropping in the missing smoothing groups 
-                // before proceeding with the groups and smoothing groups that have elements.
+                // Which groups and smoothing groups are missing? There is 
+                // ambiguity in ordering any possible missing groups and 
+                // smoothing groups. We choose to disambiguate this by finding
+                // the missing groups and dropping them in first, followed by 
+                // dropping in the missing smoothing groups before proceeding 
+                // with the groups and smoothing groups that have elements.
                 current_statements = vec![];
 
                 // Are the groups different?
                 if shape_entry.groups != current_entry.groups {
-                    // Derive the missing groups from the gap between shape_entry and current_entry.
+                    // Derive the missing groups from the gap between shape_entry 
+                    // and current_entry.
                     let gap_start = 1 + current_entry.groups[current_entry.groups.len() - 1];
                     let gap_end = shape_entry.groups[0];
                     for group_index in gap_start..gap_end {
@@ -563,8 +573,8 @@ impl CompositorInstructions {
 
                 // Are the smoothing groups different?
                 if shape_entry.smoothing_group != current_entry.smoothing_group {
-                    // Derive the missing smoothing groups from the gap between shape_entry and 
-                    // current_entry.
+                    // Derive the missing smoothing groups from the gap between 
+                    // shape_entry and current_entry.
                     let gap_start = 1 + current_entry.smoothing_group;
                     let gap_end = shape_entry.smoothing_group;
                     for smoothing_group_index in gap_start..gap_end {
@@ -595,8 +605,8 @@ impl CompositorInstructions {
 
         // It is possible that there are missing groups that appear after the 
         // final groups and smoothing groups in the shape set. We must calculate
-        // these last one for otherwise they would get lost when passing the text to
-        // the parser.
+        // these last one for otherwise they would get lost when passing the 
+        // text to the parser.
         let final_shape_entry = &object.shape_set[(min_element_index - 1) - 1];
         let final_group = final_shape_entry.groups[final_shape_entry.groups.len() - 1];
         let final_smoothing_group = final_shape_entry.smoothing_group;
@@ -694,10 +704,10 @@ impl CompositorInstructions {
             )
         );
 
-        // The missing groups appear in the gaps between groups of elements. In order
-        // to fill in these groups correctly, we place the missing group statements for 
-        // each interval, followed by the grouping statements for the corresponding interval
-        // of elements.
+        // The missing groups appear in the gaps between groups of elements. 
+        // In order to fill in these groups correctly, we place the missing
+        // group statements for each interval, followed by the grouping 
+        // statements for the corresponding interval of elements.
         let mut instructions: BTreeMap<(u32, u32), Vec<GroupingStatement>> = BTreeMap::new();
         for interval in missing_groups.keys() {
             let mut statements = missing_groups[interval].clone();
@@ -716,7 +726,7 @@ impl CompositorInstructions {
     }
 }
 
-/// A `TextObjectCompositor` generates a Wavefront OBJ text block from an Object.
+/// A `TextObjectCompositor` generates a Wavefront OBJ text block from an object.
 /// One can use it to automatically generate OBJ files.
 struct TextObjectCompositor { }
 
@@ -930,32 +940,32 @@ mod compositor_tests {
             data: vec![ 
                 Test {
                     /* 
-                        #### Original object file text.
-                        o  Object1
-                        v  -36.84435  -31.289864  -23.619797  -8.21862 
-                        # 1 vertex
+                    #### Original object file text.
+                    o  Object1
+                    v  -36.84435  -31.289864  -23.619797  -8.21862 
+                    # 1 vertex
 
-                        vt  -44.275238  28.583176  -23.780418
-                        # 1 texture vertex
+                    vt  -44.275238  28.583176  -23.780418
+                    # 1 texture vertex
 
-                        vn  93.94331  -61.460472  -32.00753 
-                        # 1 normal vertex
+                    vn  93.94331  -61.460472  -32.00753 
+                    # 1 normal vertex
 
-                        g  Group0
-                        g  Group1
-                        # ### Equivalently,
-                        # ### g Group2,
-                        # ### s  0
-                        s  0
-                        g  Group2
-                        s  1
-                        g  Group3
-                        f 1/1/1 1/1/1 1/1/1
-                        # 1 element
+                    g  Group0
+                    g  Group1
+                    # ### Equivalently,
+                    # ### g Group2,
+                    # ### s  0
+                    s  0
+                    g  Group2
+                    s  1
+                    g  Group3
+                    f 1/1/1 1/1/1 1/1/1
+                    # 1 element
 
-                        g  Group4
-                        s  2 
-                        # ### End Object 1
+                    g  Group4
+                    s  2 
+                    # ### End Object 1
                     */
                     object: Object::new(
                         String::from("Object1"),
@@ -1020,66 +1030,66 @@ mod compositor_tests {
             data: vec![ 
                 Test {
                     /* 
-                        #### BEGIN Object 1
-                        o  Object1 
-                        v  -81.75473  49.89659  50.217773  -0.21859932 
-                        v  58.582382  40.18698  20.389153  -0.8563268 
-                        v  20.67199  -32.264946  -43.075634  -0.8146236 
-                        v  -0.51555634  -61.86371  -63.40442  -0.816622 
-                        v  64.52879  5.6848984  82.95958  -0.8919699 
-                        v  -22.82035  26.620651  98.339966  0.47607088 
-                        v  74.063614  -72.82653  16.68911  0.57268834 
-                        v  36.223984  40.50911  -46.372032  -0.27578998 
-                        # 8 vertices
+                    #### BEGIN Object 1
+                    o  Object1 
+                    v  -81.75473  49.89659  50.217773  -0.21859932 
+                    v  58.582382  40.18698  20.389153  -0.8563268 
+                    v  20.67199  -32.264946  -43.075634  -0.8146236 
+                    v  -0.51555634  -61.86371  -63.40442  -0.816622 
+                    v  64.52879  5.6848984  82.95958  -0.8919699 
+                    v  -22.82035  26.620651  98.339966  0.47607088 
+                    v  74.063614  -72.82653  16.68911  0.57268834 
+                    v  36.223984  40.50911  -46.372032  -0.27578998 
+                    # 8 vertices
 
-                        vt  -31.56221  -66.285965  85.67 
-                        vt  -94.91446  -32.6334  -76.25124 
-                        vt  74.14935  -93.767525  -95.665504 
-                        vt  58.248764  -77.56836  -90.145615 
-                        vt  -23.581291  -45.771004  -2.3966064 
-                        vt  47.556717  -94.74621  -95.27831 
-                        vt  -40.32562  -28.224586  -69.58597 
-                        vt  18.032005  41.304443  83.784836 
-                        # 8 texture vertices
+                    vt  -31.56221  -66.285965  85.67 
+                    vt  -94.91446  -32.6334  -76.25124 
+                    vt  74.14935  -93.767525  -95.665504 
+                    vt  58.248764  -77.56836  -90.145615 
+                    vt  -23.581291  -45.771004  -2.3966064 
+                    vt  47.556717  -94.74621  -95.27831 
+                    vt  -40.32562  -28.224586  -69.58597 
+                    vt  18.032005  41.304443  83.784836 
+                    # 8 texture vertices
 
-                        vn  37.12401  65.5159  -67.49673 
-                        vn  -27.513626  68.86371  -40.72206 
-                        vn  -2.038643  -48.640347  65.63937 
-                        vn  93.694565  63.53665  52.100876 
-                        vn  40.664124  55.000015  -45.83249 
-                        vn  30.624634  31.461197  -93.17193 
-                        vn  25.595596  30.777481  79.21614 
-                        vn  -36.078453  1.8164139  21.209381 
-                        # 8 normal vertices
+                    vn  37.12401  65.5159  -67.49673 
+                    vn  -27.513626  68.86371  -40.72206 
+                    vn  -2.038643  -48.640347  65.63937 
+                    vn  93.694565  63.53665  52.100876 
+                    vn  40.664124  55.000015  -45.83249 
+                    vn  30.624634  31.461197  -93.17193 
+                    vn  25.595596  30.777481  79.21614 
+                    vn  -36.078453  1.8164139  21.209381 
+                    # 8 normal vertices
 
-                        # 0 elements
+                    # 0 elements
 
-                        g  Group0
-                        s  off
-                        f  7/1/4  2/7/1  4/1/7
-                        # 1 element
+                    g  Group0
+                    s  off
+                    f  7/1/4  2/7/1  4/1/7
+                    # 1 element
 
-                        s  off
-                        f  7/5/7  5/8/5  2/7/4
-                        f  8/2/7  8/1/1  7/8/4
-                        # 2 elements
+                    s  off
+                    f  7/5/7  5/8/5  2/7/4
+                    f  8/2/7  8/1/1  7/8/4
+                    # 2 elements
 
-                        g  Group1
-                        g  Group2
-                        f  8/5/2  7/1/1  5/6/3
-                        f  4/7/8  7/7/7  6/8/5
-                        f  5/8/2  6/7/2  3/2/5
-                        f  6/3/6  3/5/4  6/5/1
-                        # 4 elements
+                    g  Group1
+                    g  Group2
+                    f  8/5/2  7/1/1  5/6/3
+                    f  4/7/8  7/7/7  6/8/5
+                    f  5/8/2  6/7/2  3/2/5
+                    f  6/3/6  3/5/4  6/5/1
+                    # 4 elements
 
-                        g  Group3  
-                        s  1 
-                        f  2/5/1  4/6/5  8/1/6
-                        # 1 element
+                    g  Group3  
+                    s  1 
+                    f  2/5/1  4/6/5  8/1/6
+                    # 1 element
 
-                        # 0 elements
+                    # 0 elements
 
-                        #### END Object 1
+                    #### END Object 1
                     */
                     object: Object::new(
                         String::from("Object1"),
