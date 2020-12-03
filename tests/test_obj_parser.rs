@@ -1,6 +1,7 @@
 extern crate wavefront_obj;
 
-use wavefront_obj::{
+
+use wavefront_obj::obj::{
     Vertex, 
     NormalVertex, 
     Element, 
@@ -10,7 +11,7 @@ use wavefront_obj::{
     Group, 
     ShapeEntry,
 };
-use wavefront_obj::{
+use wavefront_obj::obj::{
     Parser,
 };
 

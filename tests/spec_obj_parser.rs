@@ -7,7 +7,7 @@ use quickcheck::{
     Arbitrary, 
     Gen,
 };
-use wavefront_obj::{
+use wavefront_obj::obj::{
     Object, 
     ObjectSet, 
     ObjectBuilder,
@@ -21,7 +21,7 @@ use wavefront_obj::{
     ShapeEntry,
     TextObjectSetCompositor, 
 };
-use wavefront_obj::{
+use wavefront_obj::obj::{
     Parser, 
     ParseError,
 };

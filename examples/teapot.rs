@@ -1,6 +1,6 @@
 extern crate wavefront_obj;
 
-use wavefront_obj as obj;
+use wavefront_obj::obj;
 use std::fs::{
     File, 
 };

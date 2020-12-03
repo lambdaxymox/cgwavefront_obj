@@ -1,7 +1,7 @@
 extern crate wavefront_obj;
 
 
-use wavefront_obj::{
+use wavefront_obj::obj::{
     Vertex, 
     TextureVertex, 
     NormalVertex, 
@@ -13,7 +13,7 @@ use wavefront_obj::{
     SmoothingGroup, 
     ShapeEntry,
 };
-use wavefront_obj::{
+use wavefront_obj::obj::{
     Parser,
 };
 
