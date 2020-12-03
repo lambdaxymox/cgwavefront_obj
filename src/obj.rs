@@ -901,338 +901,6 @@ impl TextObjectSetCompositor {
 }
 
 
-#[cfg(test)]
-mod compositor_tests {
-    use super::*;
-    use std::iter::{
-        FromIterator
-    };
-
-
-    struct Test {
-        object: Object,
-        expected_missing_groups: BTreeMap<(usize, usize), Vec<GroupingStatement>>, 
-        expected_found_groups: BTreeMap<(usize, usize), Vec<GroupingStatement>>,
-        expected: CompositorInstructions,
-    }
-
-    struct TestSet { 
-        data: Vec<Test>,
-    }
-
-    impl TestSet {
-        fn iter(&self) -> TestSetIter {
-            TestSetIter {
-                inner: self.data.iter(),
-            }
-        }
-    }
-
-    struct TestSetIter<'a> {
-        inner: slice::Iter<'a, Test>,
-    }
-
-    impl<'a> Iterator for TestSetIter<'a> {
-        type Item = &'a Test;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            self.inner.next()
-        }
-    }
-
-    fn test_cases() -> TestSet {
-        TestSet { 
-            data: vec![ 
-                Test {
-                    /* 
-                    #### Original object file text.
-                    o  Object1
-                    v  -36.84435  -31.289864  -23.619797  -8.21862 
-                    # 1 vertex
-
-                    vt  -44.275238  28.583176  -23.780418
-                    # 1 texture vertex
-
-                    vn  93.94331  -61.460472  -32.00753 
-                    # 1 normal vertex
-
-                    g  Group0
-                    g  Group1
-                    # ### Equivalently,
-                    # ### g Group2,
-                    # ### s  0
-                    s  0
-                    g  Group2
-                    s  1
-                    g  Group3
-                    f 1/1/1 1/1/1 1/1/1
-                    # 1 element
-
-                    g  Group4
-                    s  2 
-                    # ### End Object 1
-                    */
-                    object: Object::new(
-                        String::from("Object1"),
-                        vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
-                        vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
-                        vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
-                        vec![
-                            Group::new("Group0"), Group::new("Group1"), 
-                            Group::new("Group2"), Group::new("Group3"), Group::new("Group4")
-                        ],
-                        vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
-                        vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
-                        vec![ShapeEntry::new(1, &vec![4], 2)],
-                    ),
-                    expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
-                        vec![
-                            ((1, 2), vec![
-                                GroupingStatement::G(vec![Group::new("Group0")]),
-                                GroupingStatement::G(vec![Group::new("Group1")]),
-                                GroupingStatement::G(vec![Group::new("Group2")]),
-                                GroupingStatement::S(SmoothingGroup::new(0)),
-                            ]),
-                            ((2, 2), vec![
-                                GroupingStatement::G(vec![Group::new("Group4")]),
-                                GroupingStatement::S(SmoothingGroup::new(2)),
-                            ]),
-                        ]
-                    )),
-                    expected_found_groups: BTreeMap::from(FromIterator::from_iter(
-                        vec![
-                            ((1, 2), vec![
-                                GroupingStatement::G(vec![Group::new("Group3")]),
-                                GroupingStatement::S(SmoothingGroup::new(1)),
-                            ]),
-                            ((2, 2), vec![]),
-
-                        ]
-                    )),
-                    expected: CompositorInstructions::new(FromIterator::from_iter(
-                        vec![
-                            ((1, 2), vec![
-                                GroupingStatement::G(vec![Group::new("Group0")]),
-                                GroupingStatement::G(vec![Group::new("Group1")]),
-                                GroupingStatement::G(vec![Group::new("Group2")]),
-                                GroupingStatement::S(SmoothingGroup::new(0)),
-                                GroupingStatement::G(vec![Group::new("Group3")]),
-                                GroupingStatement::S(SmoothingGroup::new(1))
-                            ]),
-                            ((2, 2), vec![
-                                GroupingStatement::G(vec![Group::new("Group4")]),
-                                GroupingStatement::S(SmoothingGroup::new(2))
-                            ]),
-                        ]    
-                    )),
-                },
-            ]
-        }
-    }
-
-    fn test_cases2() -> TestSet {
-        TestSet { 
-            data: vec![ 
-                Test {
-                    /* 
-                    #### BEGIN Object 1
-                    o  Object1 
-                    v  -81.75473  49.89659  50.217773  -0.21859932 
-                    v  58.582382  40.18698  20.389153  -0.8563268 
-                    v  20.67199  -32.264946  -43.075634  -0.8146236 
-                    v  -0.51555634  -61.86371  -63.40442  -0.816622 
-                    v  64.52879  5.6848984  82.95958  -0.8919699 
-                    v  -22.82035  26.620651  98.339966  0.47607088 
-                    v  74.063614  -72.82653  16.68911  0.57268834 
-                    v  36.223984  40.50911  -46.372032  -0.27578998 
-                    # 8 vertices
-
-                    vt  -31.56221  -66.285965  85.67 
-                    vt  -94.91446  -32.6334  -76.25124 
-                    vt  74.14935  -93.767525  -95.665504 
-                    vt  58.248764  -77.56836  -90.145615 
-                    vt  -23.581291  -45.771004  -2.3966064 
-                    vt  47.556717  -94.74621  -95.27831 
-                    vt  -40.32562  -28.224586  -69.58597 
-                    vt  18.032005  41.304443  83.784836 
-                    # 8 texture vertices
-
-                    vn  37.12401  65.5159  -67.49673 
-                    vn  -27.513626  68.86371  -40.72206 
-                    vn  -2.038643  -48.640347  65.63937 
-                    vn  93.694565  63.53665  52.100876 
-                    vn  40.664124  55.000015  -45.83249 
-                    vn  30.624634  31.461197  -93.17193 
-                    vn  25.595596  30.777481  79.21614 
-                    vn  -36.078453  1.8164139  21.209381 
-                    # 8 normal vertices
-
-                    # 0 elements
-
-                    g  Group0
-                    s  off
-                    f  7/1/4  2/7/1  4/1/7
-                    # 1 element
-
-                    s  off
-                    f  7/5/7  5/8/5  2/7/4
-                    f  8/2/7  8/1/1  7/8/4
-                    # 2 elements
-
-                    g  Group1
-                    g  Group2
-                    f  8/5/2  7/1/1  5/6/3
-                    f  4/7/8  7/7/7  6/8/5
-                    f  5/8/2  6/7/2  3/2/5
-                    f  6/3/6  3/5/4  6/5/1
-                    # 4 elements
-
-                    g  Group3  
-                    s  1 
-                    f  2/5/1  4/6/5  8/1/6
-                    # 1 element
-
-                    # 0 elements
-
-                    #### END Object 1
-                    */
-                    object: Object::new(
-                        String::from("Object1"),
-                        vec![
-                            Vertex::new(-81.75473,    49.89659,   50.217773, -0.21859932),
-                            Vertex::new( 58.582382,   40.18698,   20.389153, -0.8563268 ),
-                            Vertex::new( 20.67199,   -32.264946, -43.075634, -0.8146236 ),
-                            Vertex::new(-0.51555634, -61.86371,  -63.40442,  -0.816622  ),
-                            Vertex::new( 64.52879,    5.6848984,  82.95958,  -0.8919699 ),
-                            Vertex::new(-22.82035,    26.620651,  98.339966,  0.47607088),
-                            Vertex::new( 74.063614,  -72.82653,   16.68911,   0.57268834),
-                            Vertex::new( 36.223984,   40.50911,  -46.372032, -0.27578998),
-                        ],
-                        vec![
-                            TextureVertex::new(-31.56221,  -66.285965,  85.67    ),
-                            TextureVertex::new(-94.91446,  -32.6334,   -76.25124 ),
-                            TextureVertex::new( 74.14935,  -93.767525, -95.665504),
-                            TextureVertex::new( 58.248764, -77.56836,  -90.145615),
-                            TextureVertex::new(-23.581291, -45.771004, -2.3966064), 
-                            TextureVertex::new( 47.556717, -94.74621,  -95.27831 ),
-                            TextureVertex::new(-40.32562,  -28.224586, -69.58597 ), 
-                            TextureVertex::new( 18.032005,  41.304443,  83.784836),
-                        ],
-                        vec![
-                            NormalVertex::new( 37.12401,   65.5159,   -67.49673 ),
-                            NormalVertex::new(-27.513626,  68.86371,  -40.72206 ),
-                            NormalVertex::new(-2.038643,  -48.640347,  65.63937 ),
-                            NormalVertex::new( 93.694565,  63.53665,   52.100876),
-                            NormalVertex::new( 40.664124,  55.000015, -45.83249 ),
-                            NormalVertex::new( 30.624634,  31.461197, -93.17193 ),
-                            NormalVertex::new( 25.595596,  30.777481,  79.21614 ),
-                            NormalVertex::new(-36.078453,  1.8164139,  21.209381),
-                        ],
-                        vec![
-                            Group::new("Group0"), Group::new("Group1"), 
-                            Group::new("Group2"), Group::new("Group3"),
-                        ],
-                        vec![
-                            SmoothingGroup::new(0), SmoothingGroup::new(1),
-                        ],
-                        vec![
-                            Element::Face(VTNIndex::VTN(7, 1, 4), VTNIndex::VTN(2, 7, 1), VTNIndex::VTN(4, 1, 7)),
-                            Element::Face(VTNIndex::VTN(7, 5, 7), VTNIndex::VTN(5, 8, 5), VTNIndex::VTN(2, 7, 4)),
-                            Element::Face(VTNIndex::VTN(8, 2, 7), VTNIndex::VTN(8, 1, 1), VTNIndex::VTN(7, 8, 4)),
-                            Element::Face(VTNIndex::VTN(8, 5, 2), VTNIndex::VTN(7, 1, 1), VTNIndex::VTN(5, 6, 3)),
-                            Element::Face(VTNIndex::VTN(4, 7, 8), VTNIndex::VTN(7, 7, 7), VTNIndex::VTN(6, 8, 5)),
-                            Element::Face(VTNIndex::VTN(5, 8, 2), VTNIndex::VTN(6, 7, 2), VTNIndex::VTN(3, 2, 5)),
-                            Element::Face(VTNIndex::VTN(6, 3, 6), VTNIndex::VTN(3, 5, 4), VTNIndex::VTN(6, 5, 1)),
-                            Element::Face(VTNIndex::VTN(2, 5, 1), VTNIndex::VTN(4, 6, 5), VTNIndex::VTN(8, 1, 6)),
-                        ], 
-                        vec![
-                            ShapeEntry::new(1, &vec![1], 1), ShapeEntry::new(2, &vec![1], 1),
-                            ShapeEntry::new(3, &vec![1], 1), ShapeEntry::new(4, &vec![3], 1),
-                            ShapeEntry::new(5, &vec![3], 1), ShapeEntry::new(6, &vec![3], 1),
-                            ShapeEntry::new(7, &vec![3], 1), ShapeEntry::new(8, &vec![4], 2),
-                        ],
-                    ),
-                    expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
-                        vec![
-                            ((1, 4), vec![]),
-                            ((4, 8), vec![
-                                GroupingStatement::G(vec![Group::new("Group1")]),
-                            ]),
-                            ((8, 9), vec![]),
-                            ((9, 9), vec![]),
-                        ]                        
-                    )),
-                    expected_found_groups: BTreeMap::from(FromIterator::from_iter(
-                        vec![
-                            ((1, 4), vec![
-                                GroupingStatement::G(vec![Group::new("Group0")]),
-                                GroupingStatement::S(SmoothingGroup::new(0)),
-                            ]),
-                            ((4, 8), vec![
-                                GroupingStatement::G(vec![Group::new("Group2")]),
-                            ]),
-                            ((8, 9), vec![
-                                GroupingStatement::G(vec![Group::new("Group3")]),
-                                GroupingStatement::S(SmoothingGroup::new(1)),
-                            ]),
-                            ((9, 9), vec![]),
-                        ]
-                    )),
-                    expected: CompositorInstructions::new(FromIterator::from_iter(
-                        vec![
-                            ((1, 4), vec![
-                                GroupingStatement::G(vec![Group::new("Group0")]),
-                                GroupingStatement::S(SmoothingGroup::new(0)),
-                            ]),
-                            ((4, 8), vec![
-                                GroupingStatement::G(vec![Group::new("Group1")]),
-                                GroupingStatement::G(vec![Group::new("Group2")]),
-                            ]),
-                            ((8, 9), vec![
-                                GroupingStatement::G(vec![Group::new("Group3")]),
-                                GroupingStatement::S(SmoothingGroup::new(1)),
-                            ]),
-                            ((9, 9), vec![]),
-                        ]
-                    )),
-                },
-            ]
-        }
-    }
-
-    #[test]
-    fn test_compositor_instructions() {
-        let tests = test_cases();
-
-        for test in tests.iter() {
-            let result_missing_groups = CompositorInstructions::generate_missing_groups(&test.object);
-            let result_found_groups = CompositorInstructions::generate_found_groups(&test.object);
-            let result = CompositorInstructions::generate(&test.object);
-
-            assert_eq!(result_missing_groups, test.expected_missing_groups);
-            assert_eq!(result_found_groups, test.expected_found_groups);
-            assert_eq!(result, test.expected);
-        }
-    }
-
-    #[test]
-    fn test_compositor_instructions_with_s_zero_declared() {
-        let tests = test_cases2();
-
-        for test in tests.iter() {
-            let result_missing_groups = CompositorInstructions::generate_missing_groups(&test.object);
-            let result_found_groups = CompositorInstructions::generate_found_groups(&test.object);
-            let result = CompositorInstructions::generate(&test.object);
-
-            assert_eq!(result_missing_groups, test.expected_missing_groups);
-            assert_eq!(result_found_groups, test.expected_found_groups);
-            assert_eq!(result, test.expected);
-        }
-    }
-
-}
-
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ErrorKind {
     EndOfFile,
@@ -1890,6 +1558,338 @@ impl<'a> Parser<'a> {
     pub fn parse(&mut self) -> Result<ObjectSet, ParseError> {
         self.parse_objects().map(|objs| ObjectSet::new(objs))
     }
+}
+
+
+#[cfg(test)]
+mod compositor_tests {
+    use super::*;
+    use std::iter::{
+        FromIterator
+    };
+
+
+    struct Test {
+        object: Object,
+        expected_missing_groups: BTreeMap<(usize, usize), Vec<GroupingStatement>>, 
+        expected_found_groups: BTreeMap<(usize, usize), Vec<GroupingStatement>>,
+        expected: CompositorInstructions,
+    }
+
+    struct TestSet { 
+        data: Vec<Test>,
+    }
+
+    impl TestSet {
+        fn iter(&self) -> TestSetIter {
+            TestSetIter {
+                inner: self.data.iter(),
+            }
+        }
+    }
+
+    struct TestSetIter<'a> {
+        inner: slice::Iter<'a, Test>,
+    }
+
+    impl<'a> Iterator for TestSetIter<'a> {
+        type Item = &'a Test;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.inner.next()
+        }
+    }
+
+    fn test_cases() -> TestSet {
+        TestSet { 
+            data: vec![ 
+                Test {
+                    /* 
+                    #### Original object file text.
+                    o  Object1
+                    v  -36.84435  -31.289864  -23.619797  -8.21862 
+                    # 1 vertex
+
+                    vt  -44.275238  28.583176  -23.780418
+                    # 1 texture vertex
+
+                    vn  93.94331  -61.460472  -32.00753 
+                    # 1 normal vertex
+
+                    g  Group0
+                    g  Group1
+                    # ### Equivalently,
+                    # ### g Group2,
+                    # ### s  0
+                    s  0
+                    g  Group2
+                    s  1
+                    g  Group3
+                    f 1/1/1 1/1/1 1/1/1
+                    # 1 element
+
+                    g  Group4
+                    s  2 
+                    # ### End Object 1
+                    */
+                    object: Object::new(
+                        String::from("Object1"),
+                        vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
+                        vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
+                        vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
+                        vec![
+                            Group::new("Group0"), Group::new("Group1"), 
+                            Group::new("Group2"), Group::new("Group3"), Group::new("Group4")
+                        ],
+                        vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
+                        vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
+                        vec![ShapeEntry::new(1, &vec![4], 2)],
+                    ),
+                    expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::G(vec![Group::new("Group1")]),
+                                GroupingStatement::G(vec![Group::new("Group2")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),
+                            ]),
+                            ((2, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group4")]),
+                                GroupingStatement::S(SmoothingGroup::new(2)),
+                            ]),
+                        ]
+                    )),
+                    expected_found_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group3")]),
+                                GroupingStatement::S(SmoothingGroup::new(1)),
+                            ]),
+                            ((2, 2), vec![]),
+
+                        ]
+                    )),
+                    expected: CompositorInstructions::new(FromIterator::from_iter(
+                        vec![
+                            ((1, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::G(vec![Group::new("Group1")]),
+                                GroupingStatement::G(vec![Group::new("Group2")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),
+                                GroupingStatement::G(vec![Group::new("Group3")]),
+                                GroupingStatement::S(SmoothingGroup::new(1))
+                            ]),
+                            ((2, 2), vec![
+                                GroupingStatement::G(vec![Group::new("Group4")]),
+                                GroupingStatement::S(SmoothingGroup::new(2))
+                            ]),
+                        ]    
+                    )),
+                },
+            ]
+        }
+    }
+
+    fn test_cases2() -> TestSet {
+        TestSet { 
+            data: vec![ 
+                Test {
+                    /* 
+                    #### BEGIN Object 1
+                    o  Object1 
+                    v  -81.75473  49.89659  50.217773  -0.21859932 
+                    v  58.582382  40.18698  20.389153  -0.8563268 
+                    v  20.67199  -32.264946  -43.075634  -0.8146236 
+                    v  -0.51555634  -61.86371  -63.40442  -0.816622 
+                    v  64.52879  5.6848984  82.95958  -0.8919699 
+                    v  -22.82035  26.620651  98.339966  0.47607088 
+                    v  74.063614  -72.82653  16.68911  0.57268834 
+                    v  36.223984  40.50911  -46.372032  -0.27578998 
+                    # 8 vertices
+
+                    vt  -31.56221  -66.285965  85.67 
+                    vt  -94.91446  -32.6334  -76.25124 
+                    vt  74.14935  -93.767525  -95.665504 
+                    vt  58.248764  -77.56836  -90.145615 
+                    vt  -23.581291  -45.771004  -2.3966064 
+                    vt  47.556717  -94.74621  -95.27831 
+                    vt  -40.32562  -28.224586  -69.58597 
+                    vt  18.032005  41.304443  83.784836 
+                    # 8 texture vertices
+
+                    vn  37.12401  65.5159  -67.49673 
+                    vn  -27.513626  68.86371  -40.72206 
+                    vn  -2.038643  -48.640347  65.63937 
+                    vn  93.694565  63.53665  52.100876 
+                    vn  40.664124  55.000015  -45.83249 
+                    vn  30.624634  31.461197  -93.17193 
+                    vn  25.595596  30.777481  79.21614 
+                    vn  -36.078453  1.8164139  21.209381 
+                    # 8 normal vertices
+
+                    # 0 elements
+
+                    g  Group0
+                    s  off
+                    f  7/1/4  2/7/1  4/1/7
+                    # 1 element
+
+                    s  off
+                    f  7/5/7  5/8/5  2/7/4
+                    f  8/2/7  8/1/1  7/8/4
+                    # 2 elements
+
+                    g  Group1
+                    g  Group2
+                    f  8/5/2  7/1/1  5/6/3
+                    f  4/7/8  7/7/7  6/8/5
+                    f  5/8/2  6/7/2  3/2/5
+                    f  6/3/6  3/5/4  6/5/1
+                    # 4 elements
+
+                    g  Group3  
+                    s  1 
+                    f  2/5/1  4/6/5  8/1/6
+                    # 1 element
+
+                    # 0 elements
+
+                    #### END Object 1
+                    */
+                    object: Object::new(
+                        String::from("Object1"),
+                        vec![
+                            Vertex::new(-81.75473,    49.89659,   50.217773, -0.21859932),
+                            Vertex::new( 58.582382,   40.18698,   20.389153, -0.8563268 ),
+                            Vertex::new( 20.67199,   -32.264946, -43.075634, -0.8146236 ),
+                            Vertex::new(-0.51555634, -61.86371,  -63.40442,  -0.816622  ),
+                            Vertex::new( 64.52879,    5.6848984,  82.95958,  -0.8919699 ),
+                            Vertex::new(-22.82035,    26.620651,  98.339966,  0.47607088),
+                            Vertex::new( 74.063614,  -72.82653,   16.68911,   0.57268834),
+                            Vertex::new( 36.223984,   40.50911,  -46.372032, -0.27578998),
+                        ],
+                        vec![
+                            TextureVertex::new(-31.56221,  -66.285965,  85.67    ),
+                            TextureVertex::new(-94.91446,  -32.6334,   -76.25124 ),
+                            TextureVertex::new( 74.14935,  -93.767525, -95.665504),
+                            TextureVertex::new( 58.248764, -77.56836,  -90.145615),
+                            TextureVertex::new(-23.581291, -45.771004, -2.3966064), 
+                            TextureVertex::new( 47.556717, -94.74621,  -95.27831 ),
+                            TextureVertex::new(-40.32562,  -28.224586, -69.58597 ), 
+                            TextureVertex::new( 18.032005,  41.304443,  83.784836),
+                        ],
+                        vec![
+                            NormalVertex::new( 37.12401,   65.5159,   -67.49673 ),
+                            NormalVertex::new(-27.513626,  68.86371,  -40.72206 ),
+                            NormalVertex::new(-2.038643,  -48.640347,  65.63937 ),
+                            NormalVertex::new( 93.694565,  63.53665,   52.100876),
+                            NormalVertex::new( 40.664124,  55.000015, -45.83249 ),
+                            NormalVertex::new( 30.624634,  31.461197, -93.17193 ),
+                            NormalVertex::new( 25.595596,  30.777481,  79.21614 ),
+                            NormalVertex::new(-36.078453,  1.8164139,  21.209381),
+                        ],
+                        vec![
+                            Group::new("Group0"), Group::new("Group1"), 
+                            Group::new("Group2"), Group::new("Group3"),
+                        ],
+                        vec![
+                            SmoothingGroup::new(0), SmoothingGroup::new(1),
+                        ],
+                        vec![
+                            Element::Face(VTNIndex::VTN(7, 1, 4), VTNIndex::VTN(2, 7, 1), VTNIndex::VTN(4, 1, 7)),
+                            Element::Face(VTNIndex::VTN(7, 5, 7), VTNIndex::VTN(5, 8, 5), VTNIndex::VTN(2, 7, 4)),
+                            Element::Face(VTNIndex::VTN(8, 2, 7), VTNIndex::VTN(8, 1, 1), VTNIndex::VTN(7, 8, 4)),
+                            Element::Face(VTNIndex::VTN(8, 5, 2), VTNIndex::VTN(7, 1, 1), VTNIndex::VTN(5, 6, 3)),
+                            Element::Face(VTNIndex::VTN(4, 7, 8), VTNIndex::VTN(7, 7, 7), VTNIndex::VTN(6, 8, 5)),
+                            Element::Face(VTNIndex::VTN(5, 8, 2), VTNIndex::VTN(6, 7, 2), VTNIndex::VTN(3, 2, 5)),
+                            Element::Face(VTNIndex::VTN(6, 3, 6), VTNIndex::VTN(3, 5, 4), VTNIndex::VTN(6, 5, 1)),
+                            Element::Face(VTNIndex::VTN(2, 5, 1), VTNIndex::VTN(4, 6, 5), VTNIndex::VTN(8, 1, 6)),
+                        ], 
+                        vec![
+                            ShapeEntry::new(1, &vec![1], 1), ShapeEntry::new(2, &vec![1], 1),
+                            ShapeEntry::new(3, &vec![1], 1), ShapeEntry::new(4, &vec![3], 1),
+                            ShapeEntry::new(5, &vec![3], 1), ShapeEntry::new(6, &vec![3], 1),
+                            ShapeEntry::new(7, &vec![3], 1), ShapeEntry::new(8, &vec![4], 2),
+                        ],
+                    ),
+                    expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 4), vec![]),
+                            ((4, 8), vec![
+                                GroupingStatement::G(vec![Group::new("Group1")]),
+                            ]),
+                            ((8, 9), vec![]),
+                            ((9, 9), vec![]),
+                        ]                        
+                    )),
+                    expected_found_groups: BTreeMap::from(FromIterator::from_iter(
+                        vec![
+                            ((1, 4), vec![
+                                GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),
+                            ]),
+                            ((4, 8), vec![
+                                GroupingStatement::G(vec![Group::new("Group2")]),
+                            ]),
+                            ((8, 9), vec![
+                                GroupingStatement::G(vec![Group::new("Group3")]),
+                                GroupingStatement::S(SmoothingGroup::new(1)),
+                            ]),
+                            ((9, 9), vec![]),
+                        ]
+                    )),
+                    expected: CompositorInstructions::new(FromIterator::from_iter(
+                        vec![
+                            ((1, 4), vec![
+                                GroupingStatement::G(vec![Group::new("Group0")]),
+                                GroupingStatement::S(SmoothingGroup::new(0)),
+                            ]),
+                            ((4, 8), vec![
+                                GroupingStatement::G(vec![Group::new("Group1")]),
+                                GroupingStatement::G(vec![Group::new("Group2")]),
+                            ]),
+                            ((8, 9), vec![
+                                GroupingStatement::G(vec![Group::new("Group3")]),
+                                GroupingStatement::S(SmoothingGroup::new(1)),
+                            ]),
+                            ((9, 9), vec![]),
+                        ]
+                    )),
+                },
+            ]
+        }
+    }
+
+    #[test]
+    fn test_compositor_instructions() {
+        let tests = test_cases();
+
+        for test in tests.iter() {
+            let result_missing_groups = CompositorInstructions::generate_missing_groups(&test.object);
+            let result_found_groups = CompositorInstructions::generate_found_groups(&test.object);
+            let result = CompositorInstructions::generate(&test.object);
+
+            assert_eq!(result_missing_groups, test.expected_missing_groups);
+            assert_eq!(result_found_groups, test.expected_found_groups);
+            assert_eq!(result, test.expected);
+        }
+    }
+
+    #[test]
+    fn test_compositor_instructions_with_s_zero_declared() {
+        let tests = test_cases2();
+
+        for test in tests.iter() {
+            let result_missing_groups = CompositorInstructions::generate_missing_groups(&test.object);
+            let result_found_groups = CompositorInstructions::generate_found_groups(&test.object);
+            let result = CompositorInstructions::generate(&test.object);
+
+            assert_eq!(result_missing_groups, test.expected_missing_groups);
+            assert_eq!(result_found_groups, test.expected_found_groups);
+            assert_eq!(result, test.expected);
+        }
+    }
+
 }
 
 
