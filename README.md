@@ -9,7 +9,7 @@ elements will be rejected. For specific details on the grammar, see the
 `GRAMMAR.md` file. For information on the file format, the `docs` directory 
 contains a copy of the format specification.
 
-## What Is The Wavefront OBJ Format For?
+### What Is The Wavefront OBJ Format For?
 The Wavefront OBJ format's purpose is to load and store geometry assets for 
 computer graphics applications such as computer aided design, 3D modeling 
 software, games, and scientific visualization. It is a text based format 
@@ -19,7 +19,7 @@ format into your asset pipeline by producing your assets in a program such as
 Blender, serializing your assets use in the OBJ format, and then loading them 
 into the end user application. The library supports this workflow.
 
-## Usage
+## Getting Started
 Add the following line to your `Cargo.toml` file
 
 ```toml
@@ -33,14 +33,19 @@ to import the library. Include the line
 extern crate wavefront_obj;
 ```
 
-in your main file. This is all you need to use the it. The library loads all 
-the geometry data into memory which you can then use in rendering. 
+in your `main.rs` or `lib.rs` file. This is all you need to use the it.
+
+## Usage
+The library parses both **mtl** and **obj** files. In order to load a wavefront obj
+file along with its modules, you need to import both the `mtl` and `obj` modules
+separately.
 
 ```rust
-use wavefront_obj as obj;
+use wavefront_obj::obj;
+use wavefront_obj::mtl;
 ```
 
-to shorten scope resolution.
+Each module has a top-level parsing function to parse a each file type.
 
 ## Notes
 * The Wavefront OBJ format does not contain information about how polygons of 
