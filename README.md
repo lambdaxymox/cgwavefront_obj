@@ -35,7 +35,6 @@ extern crate wavefront_obj;
 
 in your main file. This is all you need to use the it. The library loads all 
 the geometry data into memory which you can then use in rendering. 
-Optionally, we recommend aliasing the module with something like
 
 ```rust
 use wavefront_obj as obj;
