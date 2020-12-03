@@ -1069,7 +1069,8 @@ impl<'a> Parser<'a> {
         match self.next() {
             None => error(self.line_number, ErrorKind::EndOfFile),
             Some(st) if st != tag => error(
-                self.line_number, ErrorKind::ExpectedStatementButGot(tag.into(), st.into())
+                self.line_number, 
+                ErrorKind::ExpectedStatementButGot(tag.into(), st.into())
             ),
             _ => Ok(())
         }
@@ -1079,7 +1080,10 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<f64>() {
             Ok(val) => Ok(val),
-            Err(_) => error(self.line_number, ErrorKind::ExpectedFloatButGot(st.into())),
+            Err(_) => error(
+                self.line_number, 
+                ErrorKind::ExpectedFloatButGot(st.into())
+            ),
         }
     }
 
@@ -1087,7 +1091,10 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<usize>() {
             Ok(val) => Ok(val),
-            Err(_) => error(self.line_number, ErrorKind::ExpectedIntegerButGot(st.into())),
+            Err(_) => error(
+                self.line_number, 
+                ErrorKind::ExpectedIntegerButGot(st.into())
+            ),
         }
     }
 
@@ -1183,7 +1190,10 @@ impl<'a> Parser<'a> {
             .transpose()?;
     
         if split1.is_none() || splits_iter.next().is_some() {
-            return error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into()));
+            return error(
+                self.line_number, 
+                ErrorKind::ExpectedVTNIndexButGot(st.into())
+            );
         }
         
         match (split1, split2, split3) {
@@ -1191,7 +1201,10 @@ impl<'a> Parser<'a> {
             (Some(v), None, Some(n)) => Ok(VTNIndex::VN(v, n)),
             (Some(v), Some(t), None) => Ok(VTNIndex::VT(v, t)),
             (Some(v), Some(t), Some(n)) => Ok(VTNIndex::VTN(v, t, n)),
-            _ => return error(self.line_number, ErrorKind::ExpectedVTNIndexButGot(st.into())),
+            _ => return error(
+                self.line_number, 
+                ErrorKind::ExpectedVTNIndexButGot(st.into())
+            ),
         }
     }
 
@@ -1219,7 +1232,10 @@ impl<'a> Parser<'a> {
                         elements_parsed += 1;
                     }
                     Err(_) => {
-                        return error(self.line_number,ErrorKind::ExpectedIntegerButGot(st.into()))
+                        return error(
+                            self.line_number,
+                            ErrorKind::ExpectedIntegerButGot(st.into())
+                        )
                     }
                 }
                 _ => break,
@@ -1327,10 +1343,16 @@ impl<'a> Parser<'a> {
             } else if let Ok(number) = name.parse::<usize>() {
                 smoothing_groups.push(SmoothingGroup::new(number));
             } else {
-                return error(self.line_number, ErrorKind::SmoothingGroupNameMustBeOffOrInteger(name.into()));
+                return error(
+                    self.line_number, 
+                    ErrorKind::SmoothingGroupNameMustBeOffOrInteger(name.into())
+                );
             }
         } else {
-            return error(self.line_number, ErrorKind::SmoothingGroupDeclarationHasNoName);
+            return error(
+                self.line_number, 
+                ErrorKind::SmoothingGroupDeclarationHasNoName
+            );
         }
 
         Ok(1)
