@@ -1572,7 +1572,10 @@ impl<'a> Parser<'a> {
         // Verify that each VTN index has the same type and if of a valid form.
         for i in 1..vtn_indices.len() {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
-                return error(self.line_number, ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement);
+                return error(
+                    self.line_number, 
+                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement
+                );
             }
         }
 
@@ -1592,19 +1595,26 @@ impl<'a> Parser<'a> {
 
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
-            return error(self.line_number, ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices);
+            return error(
+                self.line_number, 
+                ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices
+            );
         }
 
         // Verify that each VTN index has the same type and if of a valid form.
         for i in 1..vtn_indices.len() {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
-                return error(self.line_number, ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement);
+                return error(
+                    self.line_number, 
+                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement
+                );
             }
         }
 
-        // Triangulate the polygon with a triangle fan. Note that the OBJ specification
-        // assumes that polygons are coplanar, and consequently the parser does not check
-        // this. It is up to the model creator to ensure this.
+        // Triangulate the polygon with a triangle fan. Note that the OBJ 
+        // specification assumes that polygons are coplanar, and consequently 
+        // the parser does not check this. It is up to the model creator to 
+        // ensure this.
         let vertex0 = vtn_indices[0];
         for i in 0..vtn_indices.len()-2 {
             elements.push(Element::Face(vertex0, vtn_indices[i+1], vtn_indices[i+2]));
@@ -1815,7 +1825,10 @@ impl<'a> Parser<'a> {
                     break;
                 }
                 Some(other_st) => {
-                    return error(self.line_number, ErrorKind::InvalidElementDeclaration(other_st.into()));
+                    return error(
+                        self.line_number, 
+                        ErrorKind::InvalidElementDeclaration(other_st.into())
+                    );
                 }
             }
         }
