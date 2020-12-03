@@ -141,9 +141,15 @@ pub enum Element {
 impl fmt::Display for Element {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
-            Element::Point(vtn) => write!(f, "p  {}", vtn),
-            Element::Line(vtn1, vtn2) => write!(f, "l  {}  {}", vtn1, vtn2),
-            Element::Face(vtn1, vtn2, vtn3) => write!(f, "f  {}  {}  {}", vtn1, vtn2, vtn3),
+            Element::Point(vtn) => {
+                write!(f, "p  {}", vtn)
+            },
+            Element::Line(vtn1, vtn2) => {
+                write!(f, "l  {}  {}", vtn1, vtn2)
+            },
+            Element::Face(vtn1, vtn2, vtn3) => {
+                write!(f, "f  {}  {}  {}", vtn1, vtn2, vtn3)
+            },
         }
     }
 }
@@ -1632,7 +1638,8 @@ impl<'a> Parser<'a> {
         Ok(groups_parsed)
     }
 
-    fn parse_smoothing_group(&mut self, 
+    fn parse_smoothing_group(
+        &mut self, 
         smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<usize, ParseError> {
 
         self.expect_tag("s")?;
@@ -1678,9 +1685,12 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_object(&mut self,
-        min_vertex_index:  &mut usize,  max_vertex_index:  &mut usize,
-        min_texture_index: &mut usize,  max_texture_index: &mut usize,
-        min_normal_index:  &mut usize,  max_normal_index:  &mut usize) -> Result<Object, ParseError> {
+        min_vertex_index:  &mut usize,  
+        max_vertex_index:  &mut usize,
+        min_texture_index: &mut usize,  
+        max_texture_index: &mut usize,
+        min_normal_index:  &mut usize,  
+        max_normal_index:  &mut usize) -> Result<Object, ParseError> {
         
         let object_name = self.parse_object_name()?;
 
@@ -1851,9 +1861,12 @@ impl<'a> Parser<'a> {
         self.skip_zero_or_more_newlines();
         while let Some(_) = self.peek() {
             result.push(self.parse_object(
-                &mut min_vertex_index, &mut max_vertex_index,
-                &mut min_tex_index,    &mut max_tex_index,
-                &mut min_normal_index, &mut max_normal_index
+                &mut min_vertex_index, 
+                &mut max_vertex_index,
+                &mut min_tex_index,    
+                &mut max_tex_index,
+                &mut min_normal_index, 
+                &mut max_normal_index
             )?);
             self.skip_zero_or_more_newlines();
         }
@@ -2345,7 +2358,7 @@ mod objectset_tests {
 
 
     fn test_case() -> (Result<ObjectSet, super::ParseError>, Result<ObjectSet, super::ParseError>){
-        let obj_file =r"                      \
+        let obj_file =r"                 \
             o object1                         \
             g cube                            \
             v  0.0  0.0  0.0                  \

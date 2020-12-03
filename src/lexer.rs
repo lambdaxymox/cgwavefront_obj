@@ -1,7 +1,7 @@
 use std::str;
 
 
-/// A lexer tokenizes an input character stream.
+/// A tokenizer tokenizes an input character stream.
 #[derive(Clone)]
 pub struct Tokenizer<'a> {
     /// The current line position in the token stream.
