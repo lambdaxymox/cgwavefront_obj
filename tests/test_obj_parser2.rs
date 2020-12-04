@@ -90,7 +90,7 @@ fn test_cases() -> TestSet {
                         ],
                         vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
                         vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
-                        vec![ShapeEntry::new(0, &vec![4], 2)],
+                        vec![ShapeEntry::new(0, &vec![3], 2)],
                     )
                 ])
             },
@@ -121,7 +121,7 @@ fn test_cases() -> TestSet {
                         vec![Group::new("default")],
                         vec![SmoothingGroup::new(0)],
                         vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
-                        vec![ShapeEntry::new(0, &vec![1], 1)],
+                        vec![ShapeEntry::new(0, &vec![0], 1)],
                     )
                 ])
             },
@@ -172,11 +172,11 @@ fn test_cases() -> TestSet {
                             Element::Face(VTNIndex::V(5), VTNIndex::V(0), VTNIndex::V(4)),
                         ], 
                         vec![
-                            ShapeEntry::new(0, &vec![1], 1), ShapeEntry::new(1, &vec![1], 1),
-                            ShapeEntry::new(2, &vec![1], 1), ShapeEntry::new(3, &vec![1], 1),
-                            ShapeEntry::new(4, &vec![1], 1), ShapeEntry::new(5, &vec![1], 1),
-                            ShapeEntry::new(6, &vec![1], 1), ShapeEntry::new(7, &vec![1], 1),
-                            ShapeEntry::new(8, &vec![1], 1),
+                            ShapeEntry::new(0, &vec![0], 1), ShapeEntry::new(1, &vec![0], 1),
+                            ShapeEntry::new(2, &vec![0], 1), ShapeEntry::new(3, &vec![0], 1),
+                            ShapeEntry::new(4, &vec![0], 1), ShapeEntry::new(5, &vec![0], 1),
+                            ShapeEntry::new(6, &vec![0], 1), ShapeEntry::new(7, &vec![0], 1),
+                            ShapeEntry::new(8, &vec![0], 1),
                         ],
                     )
                 ])
@@ -406,8 +406,8 @@ fn test_parse_object_set_should_parse_shape_entries() {
                 expected.shape_set.len(), 
                 "Length mismatch."
             );
-            for (result_sh, expected_sh) in 
-                result.shape_set.iter().zip(expected.shape_set.iter()) {
+            for (result_sh, expected_sh) 
+                in result.shape_set.iter().zip(expected.shape_set.iter()) {
                 
                 assert_eq!(result_sh, expected_sh);
             }
@@ -467,8 +467,7 @@ fn test_parse_object_every_element_group_exists() {
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
                 assert!(shape.groups.iter().all(|&group_index| {
-                    group_index > 0 &&
-                    group_index <= result.group_set.len()
+                    group_index < result.group_set.len()
                 }));
             }
         }
