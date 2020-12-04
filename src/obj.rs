@@ -115,10 +115,10 @@ impl VTNIndex {
 impl fmt::Display for VTNIndex {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
-            VTNIndex::V(v) => write!(f, "{}", v),
-            VTNIndex::VT(v, vt) => write!(f, "{}/{}", v ,vt),
-            VTNIndex::VN(v, vn) => write!(f, "{}//{}", v, vn),
-            VTNIndex::VTN(v, vt, vn) => write!(f, "{}/{}/{}", v, vt, vn),
+            VTNIndex::V(v) => write!(f, "{}", v + 1),
+            VTNIndex::VT(v, vt) => write!(f, "{}/{}", v + 1 ,vt + 1),
+            VTNIndex::VN(v, vn) => write!(f, "{}//{}", v + 1, vn + 1),
+            VTNIndex::VTN(v, vt, vn) => write!(f, "{}/{}/{}", v + 1, vt + 1, vn + 1),
         }
     }
 }
