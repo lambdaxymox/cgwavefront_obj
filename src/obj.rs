@@ -1415,8 +1415,6 @@ impl<'a> Parser<'a> {
         loop {
             match self.peek() {
                 Some("g") if groups.is_empty() => {
-                    //min_element_group_index = 1;
-                    //max_element_group_index = 1;
                     min_group_index = 1;
                     max_group_index = 1;
 
@@ -1441,9 +1439,6 @@ impl<'a> Parser<'a> {
                     min_element_group_index = max_element_group_index;
                 }
                 Some("s") if smoothing_groups.is_empty() => {
-                    //min_element_smoothing_group_index = 1;
-                    //max_element_smoothing_group_index = 1;
-
                     // Fetch the next smoothing group.
                     self.parse_smoothing_group(&mut smoothing_groups)?;
                     // Update the smoothing group index.
@@ -1478,16 +1473,12 @@ impl<'a> Parser<'a> {
                 Some("p") | Some("l") | Some("f") => {
                     if groups.is_empty() {
                         groups.push(Default::default());
-                        //min_element_group_index = 1;
-                        //max_element_group_index = 1;
                         min_group_index = 1;
                         max_group_index = 2;
                     }
 
                     if smoothing_groups.is_empty() {
                         smoothing_groups.push(Default::default());
-                        //min_element_smoothing_group_index = 1;
-                        //max_element_smoothing_group_index = 1;
                         smoothing_group_index = 1;
                     }
 
