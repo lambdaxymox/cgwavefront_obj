@@ -89,8 +89,8 @@ fn test_cases() -> TestSet {
                             Group::new("Group2"), Group::new("Group3"), Group::new("Group4")
                         ],
                         vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
-                        vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
-                        vec![ShapeEntry::new(1, &vec![4], 2)],
+                        vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
+                        vec![ShapeEntry::new(0, &vec![4], 2)],
                     )
                 ])
             },
@@ -120,8 +120,8 @@ fn test_cases() -> TestSet {
                         vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
                         vec![Group::new("default")],
                         vec![SmoothingGroup::new(0)],
-                        vec![Element::Face(VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1), VTNIndex::VTN(1, 1, 1))], 
-                        vec![ShapeEntry::new(1, &vec![1], 1)],
+                        vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
+                        vec![ShapeEntry::new(0, &vec![1], 1)],
                     )
                 ])
             },
@@ -161,22 +161,22 @@ fn test_cases() -> TestSet {
                         vec![Group::new("Object001")],
                         vec![SmoothingGroup::new(0)],
                         vec![
-                            Element::Face(VTNIndex::V(1), VTNIndex::V(2), VTNIndex::V(3)),
-                            Element::Face(VTNIndex::V(1), VTNIndex::V(3), VTNIndex::V(4)),
-                            Element::Face(VTNIndex::V(1), VTNIndex::V(4), VTNIndex::V(5)),
-                            Element::Face(VTNIndex::V(1), VTNIndex::V(5), VTNIndex::V(2)),
-                            Element::Face(VTNIndex::V(6), VTNIndex::V(5), VTNIndex::V(4)),
-                            Element::Face(VTNIndex::V(6), VTNIndex::V(4), VTNIndex::V(3)),
-                            Element::Face(VTNIndex::V(6), VTNIndex::V(3), VTNIndex::V(2)),
-                            Element::Face(VTNIndex::V(6), VTNIndex::V(2), VTNIndex::V(1)),
-                            Element::Face(VTNIndex::V(6), VTNIndex::V(1), VTNIndex::V(5)),
+                            Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
+                            Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
+                            Element::Face(VTNIndex::V(0), VTNIndex::V(3), VTNIndex::V(4)),
+                            Element::Face(VTNIndex::V(0), VTNIndex::V(4), VTNIndex::V(1)),
+                            Element::Face(VTNIndex::V(5), VTNIndex::V(4), VTNIndex::V(3)),
+                            Element::Face(VTNIndex::V(5), VTNIndex::V(3), VTNIndex::V(2)),
+                            Element::Face(VTNIndex::V(5), VTNIndex::V(2), VTNIndex::V(1)),
+                            Element::Face(VTNIndex::V(5), VTNIndex::V(1), VTNIndex::V(0)),
+                            Element::Face(VTNIndex::V(5), VTNIndex::V(0), VTNIndex::V(4)),
                         ], 
                         vec![
-                            ShapeEntry::new(1, &vec![1], 1), ShapeEntry::new(2, &vec![1], 1),
-                            ShapeEntry::new(3, &vec![1], 1), ShapeEntry::new(4, &vec![1], 1),
-                            ShapeEntry::new(5, &vec![1], 1), ShapeEntry::new(6, &vec![1], 1),
-                            ShapeEntry::new(7, &vec![1], 1), ShapeEntry::new(8, &vec![1], 1),
-                            ShapeEntry::new(9, &vec![1], 1),
+                            ShapeEntry::new(0, &vec![1], 1), ShapeEntry::new(1, &vec![1], 1),
+                            ShapeEntry::new(2, &vec![1], 1), ShapeEntry::new(3, &vec![1], 1),
+                            ShapeEntry::new(4, &vec![1], 1), ShapeEntry::new(5, &vec![1], 1),
+                            ShapeEntry::new(6, &vec![1], 1), ShapeEntry::new(7, &vec![1], 1),
+                            ShapeEntry::new(8, &vec![1], 1),
                         ],
                     )
                 ])

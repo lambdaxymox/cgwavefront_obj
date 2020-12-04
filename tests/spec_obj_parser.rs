@@ -354,8 +354,8 @@ impl<G> ObjectSetGen<G> where G: RngCore {
     }
 
     fn generate(&self, g: &mut G) -> ObjectSet {
-        // We want one-object sets to appear frequently since that is the most
-        // commonly encountered case in the wild.
+        // We want one-object sets to appear frequently since they frequently
+        // appear in the wild.
         let object_gen = ObjectGenerator::new();
         let one_obj = g.gen::<bool>();
         let object_count = if one_obj { 1 } else { g.gen_range(2, 6) };
@@ -530,8 +530,8 @@ fn prop_parse_object_set_should_parse_elements() {
 
         result_set.iter().zip(expected_set.iter()).all(|(result, expected)| {
             assert_eq!(
-                result.element_set, expected.element_set, "{}",
-                format!("\nOBJECT FILE GENERATED: \n\n{}\n", oracle.model())
+                result.element_set, expected.element_set, /*"{}",
+                format!("\nOBJECT FILE GENERATED: \n\n{}\n", oracle.model())*/
             );
             result.element_set == expected.element_set
         })
@@ -661,7 +661,7 @@ fn prop_every_shape_entry_element_exists() {
 
         result_set.iter().all(|result| { 
             result.shape_set.iter().all(|shape_entry| { 
-                result.element_set.get(shape_entry.element - 1).is_some()
+                result.element_set.get(shape_entry.element).is_some()
             })
         })
     }

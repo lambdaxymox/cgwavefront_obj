@@ -284,26 +284,26 @@ impl Object {
     pub fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
-                let vertex = self.vertex_set.get(v_index - 1)?;
+                let vertex = self.vertex_set.get(v_index)?;
 
                 Some(VTNTriple::V(vertex))
             }
             VTNIndex::VT(v_index, vt_index) => { 
-                let vertex = self.vertex_set.get(v_index - 1)?;
-                let texture_vertex = self.texture_vertex_set.get(vt_index - 1)?;
+                let vertex = self.vertex_set.get(v_index)?;
+                let texture_vertex = self.texture_vertex_set.get(vt_index)?;
 
                 Some(VTNTriple::VT(vertex, texture_vertex))
             }
             VTNIndex::VN(v_index, vn_index) => {
-                let vertex = self.vertex_set.get(v_index - 1)?;
-                let normal_vertex = self.normal_vertex_set.get(vn_index - 1)?;
+                let vertex = self.vertex_set.get(v_index)?;
+                let normal_vertex = self.normal_vertex_set.get(vn_index)?;
 
                 Some(VTNTriple::VN(vertex, normal_vertex))
             }
             VTNIndex::VTN(v_index, vt_index, vn_index) => {
-                let vertex = self.vertex_set.get(v_index - 1)?;
-                let texture_vertex = self.texture_vertex_set.get(vt_index - 1)?;
-                let normal_vertex = self.normal_vertex_set.get(vn_index - 1)?;
+                let vertex = self.vertex_set.get(v_index)?;
+                let texture_vertex = self.texture_vertex_set.get(vt_index)?;
+                let normal_vertex = self.normal_vertex_set.get(vn_index)?;
 
                 Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
             }
@@ -555,8 +555,8 @@ impl CompositorInstructions {
         // to know which groups and smoothing groups are occupied in the object. 
         // After that, we can determine which groups are missing and fill them in.
         let mut current_entry = &object.shape_set[0];
-        let mut min_element_index = 1;
-        let mut max_element_index = 1;
+        let mut min_element_index = 0;
+        let mut max_element_index = 0;
         for shape_entry in object.shape_set.iter() {
             if shape_entry.groups != current_entry.groups || 
                 shape_entry.smoothing_group != current_entry.smoothing_group {
@@ -622,7 +622,7 @@ impl CompositorInstructions {
         // final groups and smoothing groups in the shape set. We must calculate
         // these last one for otherwise they would get lost when passing the 
         // text to the parser.
-        let final_shape_entry = &object.shape_set[(min_element_index - 1) - 1];
+        let final_shape_entry = &object.shape_set[min_element_index - 1];
         let final_group = final_shape_entry.groups[final_shape_entry.groups.len() - 1];
         let final_smoothing_group = final_shape_entry.smoothing_group;
         let mut final_statements = vec![];
@@ -648,8 +648,8 @@ impl CompositorInstructions {
     /// Place the grouping statements for the groups that contain elements.
     fn generate_found_groups(object: &Object) -> BTreeMap<(usize, usize), Vec<GroupingStatement>> {
         let mut found_groups = BTreeMap::new();
-        let mut min_element_index = 1;
-        let mut max_element_index = 1;
+        let mut min_element_index = 0;
+        let mut max_element_index = 0;
         let mut current_statements = vec![];
         let mut current_entry = &object.shape_set[0];
 
@@ -793,7 +793,7 @@ impl TextObjectCompositor {
 
     fn compose_elements(&self, object: &Object, interval: (usize, usize)) -> String {
         let string = (interval.0..interval.1).fold(String::new(), |acc, i| {
-            acc + &format!("{}\n", object.element_set[i - 1])
+            acc + &format!("{}\n", object.element_set[i])
         });
         format!("{}", string)
     }
@@ -1197,10 +1197,10 @@ impl<'a> Parser<'a> {
         }
         
         match (split1, split2, split3) {
-            (Some(v), None, None) => Ok(VTNIndex::V(v)),
-            (Some(v), None, Some(n)) => Ok(VTNIndex::VN(v, n)),
-            (Some(v), Some(t), None) => Ok(VTNIndex::VT(v, t)),
-            (Some(v), Some(t), Some(n)) => Ok(VTNIndex::VTN(v, t, n)),
+            (Some(v), None, None) => Ok(VTNIndex::V(v - 1)),
+            (Some(v), None, Some(n)) => Ok(VTNIndex::VN(v - 1, n - 1)),
+            (Some(v), Some(t), None) => Ok(VTNIndex::VT(v - 1, t - 1)),
+            (Some(v), Some(t), Some(n)) => Ok(VTNIndex::VTN(v - 1, t - 1, n - 1)),
             _ => return error(
                 self.line_number, 
                 ErrorKind::ExpectedVTNIndexButGot(st.into())
@@ -1222,13 +1222,13 @@ impl<'a> Parser<'a> {
         self.expect_tag("p")?;
 
         let v_index = self.parse_usize()?;
-        elements.push(Element::Point(VTNIndex::V(v_index)));
+        elements.push(Element::Point(VTNIndex::V(v_index - 1)));
         let mut elements_parsed = 1;
         loop {
             match self.next() {
                 Some(st) if st != "\n" => match st.parse::<usize>() {
                     Ok(v_index) => { 
-                        elements.push(Element::Point(VTNIndex::V(v_index)));
+                        elements.push(Element::Point(VTNIndex::V(v_index - 1)));
                         elements_parsed += 1;
                     }
                     Err(_) => {
@@ -1378,7 +1378,7 @@ impl<'a> Parser<'a> {
                smoothing_group_index) in smoothing_group_entry_table {
  
             for i in min_element_index..max_element_index {
-                shape_entry_table[i - 1].smoothing_group = smoothing_group_index;
+                shape_entry_table[i].smoothing_group = smoothing_group_index;
             }
         }
         debug_assert!(shape_entry_table.len() == elements.len());
@@ -1415,8 +1415,8 @@ impl<'a> Parser<'a> {
         loop {
             match self.peek() {
                 Some("g") if groups.is_empty() => {
-                    min_element_group_index = 1;
-                    max_element_group_index = 1;
+                    //min_element_group_index = 1;
+                    //max_element_group_index = 1;
                     min_group_index = 1;
                     max_group_index = 1;
 
@@ -1441,8 +1441,8 @@ impl<'a> Parser<'a> {
                     min_element_group_index = max_element_group_index;
                 }
                 Some("s") if smoothing_groups.is_empty() => {
-                    min_element_smoothing_group_index = 1;
-                    max_element_smoothing_group_index = 1;
+                    //min_element_smoothing_group_index = 1;
+                    //max_element_smoothing_group_index = 1;
 
                     // Fetch the next smoothing group.
                     self.parse_smoothing_group(&mut smoothing_groups)?;
@@ -1478,16 +1478,16 @@ impl<'a> Parser<'a> {
                 Some("p") | Some("l") | Some("f") => {
                     if groups.is_empty() {
                         groups.push(Default::default());
-                        min_element_group_index = 1;
-                        max_element_group_index = 1;
+                        //min_element_group_index = 1;
+                        //max_element_group_index = 1;
                         min_group_index = 1;
                         max_group_index = 2;
                     }
 
                     if smoothing_groups.is_empty() {
                         smoothing_groups.push(Default::default());
-                        min_element_smoothing_group_index = 1;
-                        max_element_smoothing_group_index = 1;
+                        //min_element_smoothing_group_index = 1;
+                        //max_element_smoothing_group_index = 1;
                         smoothing_group_index = 1;
                     }
 
@@ -1554,12 +1554,12 @@ impl<'a> Parser<'a> {
     fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
         let mut result = Vec::new();
 
-        let mut min_vertex_index = 1;
-        let mut max_vertex_index = 1;
-        let mut min_tex_index    = 1;
-        let mut max_tex_index    = 1;
-        let mut min_normal_index = 1;
-        let mut max_normal_index = 1;
+        let mut min_vertex_index = 0;
+        let mut max_vertex_index = 0;
+        let mut min_tex_index    = 0;
+        let mut max_tex_index    = 0;
+        let mut min_normal_index = 0;
+        let mut max_normal_index = 0;
 
         self.skip_zero_or_more_newlines();
         while let Some(_) = self.peek() {
@@ -1669,13 +1669,13 @@ mod compositor_tests {
                     ),
                     expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 2), vec![
+                            ((0, 1), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::G(vec![Group::new("Group1")]),
                                 GroupingStatement::G(vec![Group::new("Group2")]),
                                 GroupingStatement::S(SmoothingGroup::new(0)),
                             ]),
-                            ((2, 2), vec![
+                            ((1, 1), vec![
                                 GroupingStatement::G(vec![Group::new("Group4")]),
                                 GroupingStatement::S(SmoothingGroup::new(2)),
                             ]),
@@ -1683,17 +1683,17 @@ mod compositor_tests {
                     )),
                     expected_found_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 2), vec![
+                            ((0, 1), vec![
                                 GroupingStatement::G(vec![Group::new("Group3")]),
                                 GroupingStatement::S(SmoothingGroup::new(1)),
                             ]),
-                            ((2, 2), vec![]),
+                            ((1, 1), vec![]),
 
                         ]
                     )),
                     expected: CompositorInstructions::new(FromIterator::from_iter(
                         vec![
-                            ((1, 2), vec![
+                            ((0, 1), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::G(vec![Group::new("Group1")]),
                                 GroupingStatement::G(vec![Group::new("Group2")]),
@@ -1701,7 +1701,7 @@ mod compositor_tests {
                                 GroupingStatement::G(vec![Group::new("Group3")]),
                                 GroupingStatement::S(SmoothingGroup::new(1))
                             ]),
-                            ((2, 2), vec![
+                            ((1, 1), vec![
                                 GroupingStatement::G(vec![Group::new("Group4")]),
                                 GroupingStatement::S(SmoothingGroup::new(2))
                             ]),
@@ -1836,45 +1836,45 @@ mod compositor_tests {
                     ),
                     expected_missing_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 4), vec![]),
-                            ((4, 8), vec![
+                            ((0, 3), vec![]),
+                            ((3, 7), vec![
                                 GroupingStatement::G(vec![Group::new("Group1")]),
                             ]),
-                            ((8, 9), vec![]),
-                            ((9, 9), vec![]),
+                            ((7, 8), vec![]),
+                            ((8, 8), vec![]),
                         ]                        
                     )),
                     expected_found_groups: BTreeMap::from(FromIterator::from_iter(
                         vec![
-                            ((1, 4), vec![
+                            ((0, 3), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::S(SmoothingGroup::new(0)),
                             ]),
-                            ((4, 8), vec![
+                            ((3, 7), vec![
                                 GroupingStatement::G(vec![Group::new("Group2")]),
                             ]),
-                            ((8, 9), vec![
+                            ((7, 8), vec![
                                 GroupingStatement::G(vec![Group::new("Group3")]),
                                 GroupingStatement::S(SmoothingGroup::new(1)),
                             ]),
-                            ((9, 9), vec![]),
+                            ((8, 8), vec![]),
                         ]
                     )),
                     expected: CompositorInstructions::new(FromIterator::from_iter(
                         vec![
-                            ((1, 4), vec![
+                            ((0, 3), vec![
                                 GroupingStatement::G(vec![Group::new("Group0")]),
                                 GroupingStatement::S(SmoothingGroup::new(0)),
                             ]),
-                            ((4, 8), vec![
+                            ((3, 7), vec![
                                 GroupingStatement::G(vec![Group::new("Group1")]),
                                 GroupingStatement::G(vec![Group::new("Group2")]),
                             ]),
-                            ((8, 9), vec![
+                            ((7, 8), vec![
                                 GroupingStatement::G(vec![Group::new("Group3")]),
                                 GroupingStatement::S(SmoothingGroup::new(1)),
                             ]),
-                            ((9, 9), vec![]),
+                            ((8, 8), vec![]),
                         ]
                     )),
                 },
@@ -2109,10 +2109,10 @@ mod vtn_index_tests {
             };
 
             let string = match vtn_index {
-                VTNIndex::V(v) => format!("{}", v),
-                VTNIndex::VT(v, tv) => format!("{}/{}", v, tv),
-                VTNIndex::VN(v, nv) => format!("{}//{}", v, nv),
-                VTNIndex::VTN(v, tv, nv) => format!("{}/{}/{}", v, tv, nv),
+                VTNIndex::V(v) => format!("{}", v + 1),
+                VTNIndex::VT(v, tv) => format!("{}/{}", v + 1, tv + 1),
+                VTNIndex::VN(v, nv) => format!("{}//{}", v + 1, nv + 1),
+                VTNIndex::VTN(v, tv, nv) => format!("{}/{}/{}", v + 1, tv + 1, nv + 1),
             };
 
             VTNIndexParserModel::new(vtn_index, string)
@@ -2135,7 +2135,7 @@ mod vtn_index_tests {
     #[test]
     fn test_parse_vtn_index1() {
         let mut parser = super::Parser::new("1291");
-        let expected = VTNIndex::V(1291);
+        let expected = VTNIndex::V(1290);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -2143,7 +2143,7 @@ mod vtn_index_tests {
     #[test]
     fn test_parse_vtn_index2() {
         let mut parser = super::Parser::new("1291/1315");
-        let expected = VTNIndex::VT(1291, 1315);
+        let expected = VTNIndex::VT(1290, 1314);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -2151,7 +2151,7 @@ mod vtn_index_tests {
     #[test]
     fn test_parse_vtn_index3() {
         let mut parser = super::Parser::new("1291/1315/1314");
-        let expected = VTNIndex::VTN(1291, 1315, 1314);
+        let expected = VTNIndex::VTN(1290, 1314, 1313);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -2159,7 +2159,7 @@ mod vtn_index_tests {
     #[test]
     fn test_parse_vtn_index4() {
         let mut parser = super::Parser::new("1291//1315");
-        let expected = VTNIndex::VN(1291, 1315);
+        let expected = VTNIndex::VN(1290, 1314);
         let result = parser.parse_vtn_index();
         assert_eq!(result, Ok(expected));
     }
@@ -2179,8 +2179,8 @@ mod element_tests {
         let mut parser = super::Parser::new("p 1 2 3 4 \n");
         let mut result = vec![];
         let expected = vec![
-            Element::Point(VTNIndex::V(1)), Element::Point(VTNIndex::V(2)),
-            Element::Point(VTNIndex::V(3)), Element::Point(VTNIndex::V(4)),
+            Element::Point(VTNIndex::V(0)), Element::Point(VTNIndex::V(1)),
+            Element::Point(VTNIndex::V(2)), Element::Point(VTNIndex::V(3)),
         ];
         assert!(parser.parse_elements(&mut result).is_ok());
         assert_eq!(result, expected);
@@ -2198,9 +2198,9 @@ mod element_tests {
         let mut parser = super::Parser::new("l 297 38 118 108 \n");
         let mut result = vec![];
         let expected = vec![
-            Element::Line(VTNIndex::V(297), VTNIndex::V(38)), 
-            Element::Line(VTNIndex::V(38),  VTNIndex::V(118)),
-            Element::Line(VTNIndex::V(118), VTNIndex::V(108)),
+            Element::Line(VTNIndex::V(296), VTNIndex::V(37)), 
+            Element::Line(VTNIndex::V(37),  VTNIndex::V(117)),
+            Element::Line(VTNIndex::V(117), VTNIndex::V(107)),
         ];
         assert!(parser.parse_elements(&mut result).is_ok());
         assert_eq!(result, expected);
@@ -2211,7 +2211,7 @@ mod element_tests {
         let mut parser = super::Parser::new("l 297/38 118/108 \n");
         let mut result = vec![];
         let expected = vec![
-            Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
+            Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
         ];
         assert!(parser.parse_elements(&mut result).is_ok());
         assert_eq!(result, expected);
@@ -2222,8 +2222,8 @@ mod element_tests {
         let mut parser = super::Parser::new("l 297/38 118/108 324/398 \n");
         let mut result = vec![];
         let expected = vec![
-            Element::Line(VTNIndex::VT(297, 38), VTNIndex::VT(118, 108)),
-            Element::Line(VTNIndex::VT(118, 108), VTNIndex::VT(324, 398)),
+            Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
+            Element::Line(VTNIndex::VT(117, 107), VTNIndex::VT(323, 397)),
         ];
         assert!(parser.parse_elements(&mut result).is_ok());
         assert_eq!(result, expected);
@@ -2248,7 +2248,7 @@ mod element_tests {
         let mut parser = super::Parser::new("f 297 118 108\n");
         let mut result = vec![];
         let expected = vec![
-            Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
+            Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
         ];
         assert!(parser.parse_elements(&mut result).is_ok());
         assert_eq!(result, expected);
@@ -2259,8 +2259,8 @@ mod element_tests {
         let mut parser = super::Parser::new("f 297 118 108 324\n");
         let mut result = vec![];
         let expected = vec![
-            Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
-            Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
+            Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
+            Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
         ];
         assert!(parser.parse_elements(&mut result).is_ok());
         assert_eq!(result, expected);
@@ -2271,9 +2271,9 @@ mod element_tests {
         let mut parser = super::Parser::new("f 297 118 108 324 398 \n");
         let mut result = vec![];
         let expected = vec![
-            Element::Face(VTNIndex::V(297), VTNIndex::V(118), VTNIndex::V(108)),
-            Element::Face(VTNIndex::V(297), VTNIndex::V(108), VTNIndex::V(324)),
-            Element::Face(VTNIndex::V(297), VTNIndex::V(324), VTNIndex::V(398)),
+            Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
+            Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
+            Element::Face(VTNIndex::V(296), VTNIndex::V(323), VTNIndex::V(397)),
         ];
         assert!(parser.parse_elements(&mut result).is_ok());
         assert_eq!(result, expected);
@@ -2293,10 +2293,10 @@ mod element_tests {
         );
         let mut result = vec![];
         let expected = vec![
-            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34088,34088), VTNIndex::VN(34079,34079)),
-            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34079,34079), VTNIndex::VN(34084,34084)),
-            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34084,34084), VTNIndex::VN(34091,34091)),
-            Element::Face(VTNIndex::VN(34184,34184), VTNIndex::VN(34091,34091), VTNIndex::VN(34076,34076)),
+            Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34087, 34087), VTNIndex::VN(34078, 34078)),
+            Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34078, 34078), VTNIndex::VN(34083, 34083)),
+            Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34083, 34083), VTNIndex::VN(34090, 34090)),
+            Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34090, 34090), VTNIndex::VN(34075, 34075)),
         ];
         parser.parse_elements(&mut result).unwrap();
         assert_eq!(result, expected);
@@ -2437,18 +2437,18 @@ mod objectset_tests {
                 Vertex { x: 1.0,  y: 1.0, z: 1.0, w: 1.0 },
             ],
             vec![
-                Element::Face(VTNIndex::VN(1,2), VTNIndex::VN(7,2), VTNIndex::VN(5,2)),
-                Element::Face(VTNIndex::VN(1,2), VTNIndex::VN(3,2), VTNIndex::VN(7,2)),
-                Element::Face(VTNIndex::VN(1,6), VTNIndex::VN(4,6), VTNIndex::VN(3,6)),
-                Element::Face(VTNIndex::VN(1,6), VTNIndex::VN(2,6), VTNIndex::VN(4,6)),
-                Element::Face(VTNIndex::VN(3,3), VTNIndex::VN(8,3), VTNIndex::VN(7,3)),
-                Element::Face(VTNIndex::VN(3,3), VTNIndex::VN(4,3), VTNIndex::VN(8,3)),
-                Element::Face(VTNIndex::VN(5,5), VTNIndex::VN(7,5), VTNIndex::VN(8,5)),
-                Element::Face(VTNIndex::VN(5,5), VTNIndex::VN(8,5), VTNIndex::VN(6,5)),
-                Element::Face(VTNIndex::VN(1,4), VTNIndex::VN(5,4), VTNIndex::VN(6,4)),
-                Element::Face(VTNIndex::VN(1,4), VTNIndex::VN(6,4), VTNIndex::VN(2,4)),
-                Element::Face(VTNIndex::VN(2,1), VTNIndex::VN(6,1), VTNIndex::VN(8,1)),
-                Element::Face(VTNIndex::VN(2,1), VTNIndex::VN(8,1), VTNIndex::VN(4,1)),
+                Element::Face(VTNIndex::VN(0, 1), VTNIndex::VN(6, 1), VTNIndex::VN(4, 1)),
+                Element::Face(VTNIndex::VN(0, 1), VTNIndex::VN(2, 1), VTNIndex::VN(6, 1)),
+                Element::Face(VTNIndex::VN(0, 5), VTNIndex::VN(3, 5), VTNIndex::VN(2, 5)),
+                Element::Face(VTNIndex::VN(0, 5), VTNIndex::VN(1, 5), VTNIndex::VN(3, 5)),
+                Element::Face(VTNIndex::VN(2, 2), VTNIndex::VN(7, 2), VTNIndex::VN(6, 2)),
+                Element::Face(VTNIndex::VN(2, 2), VTNIndex::VN(3, 2), VTNIndex::VN(7, 2)),
+                Element::Face(VTNIndex::VN(4, 4), VTNIndex::VN(6, 4), VTNIndex::VN(7, 4)),
+                Element::Face(VTNIndex::VN(4, 4), VTNIndex::VN(7, 4), VTNIndex::VN(5, 4)),
+                Element::Face(VTNIndex::VN(0, 3), VTNIndex::VN(4, 3), VTNIndex::VN(5, 3)),
+                Element::Face(VTNIndex::VN(0, 3), VTNIndex::VN(5, 3), VTNIndex::VN(1, 3)),
+                Element::Face(VTNIndex::VN(1, 0), VTNIndex::VN(5, 0), VTNIndex::VN(7, 0)),
+                Element::Face(VTNIndex::VN(1, 0), VTNIndex::VN(7, 0), VTNIndex::VN(3, 0)),
             ],
         );
         builder
@@ -2464,6 +2464,7 @@ mod objectset_tests {
         .with_group_set(vec![Group::new("cube")])
         .with_smoothing_group_set(vec![SmoothingGroup::new(0)])
         .with_shape_set(vec![
+            ShapeEntry { element: 0,  groups: vec![1], smoothing_group: 1 },
             ShapeEntry { element: 1,  groups: vec![1], smoothing_group: 1 },
             ShapeEntry { element: 2,  groups: vec![1], smoothing_group: 1 },
             ShapeEntry { element: 3,  groups: vec![1], smoothing_group: 1 },
@@ -2475,7 +2476,6 @@ mod objectset_tests {
             ShapeEntry { element: 9,  groups: vec![1], smoothing_group: 1 },
             ShapeEntry { element: 10, groups: vec![1], smoothing_group: 1 },
             ShapeEntry { element: 11, groups: vec![1], smoothing_group: 1 },
-            ShapeEntry { element: 12, groups: vec![1], smoothing_group: 1 },
         ]);
         let expected = ObjectSet::new(vec![builder.build()]);
         let mut parser = super::Parser::new(obj_file);
