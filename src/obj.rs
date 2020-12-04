@@ -1512,15 +1512,16 @@ impl<'a> Parser<'a> {
         *min_normal_index  += normal_vertices.len();
         *max_normal_index  += normal_vertices.len();
 
-        let mut builder = ObjectBuilder::new(vertices, elements);
-        builder.with_name(object_name.into())
-               .with_texture_vertex_set(texture_vertices)
-               .with_normal_vertex_set(normal_vertices)
-               .with_group_set(groups)
-               .with_smoothing_group_set(smoothing_groups)
-               .with_shape_set(shape_entries);
-
-        Ok(builder.build())
+        Ok(Object {
+            name: object_name.into(),
+            vertex_set: vertices,
+            texture_vertex_set: texture_vertices,
+            normal_vertex_set: normal_vertices,
+            group_set: groups,
+            smoothing_group_set: smoothing_groups,
+            element_set: elements,
+            shape_set: shape_entries,
+        })
     }
 
     fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
