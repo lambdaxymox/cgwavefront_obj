@@ -4,6 +4,8 @@ use crate::lexer::{
 };
 use std::error;
 use std::fmt;
+use std::slice;
+use std::ops;
 
 
 pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
@@ -90,7 +92,46 @@ impl Material {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MaterialSet {
-    pub materials: Vec<Material>,
+    materials: Vec<Material>,
+}
+
+impl MaterialSet {
+    pub fn new(materials: Vec<Material>) -> MaterialSet {
+        MaterialSet {
+            materials: materials,
+        }    
+    }
+
+    pub fn iter(&self) -> MaterialSetIter {
+        MaterialSetIter {
+            inner: self.materials.iter(),
+        }
+    }
+
+    pub fn len(&self) -> usize { 
+        self.materials.len()
+    }
+}
+
+pub struct MaterialSetIter<'a> {
+    inner: slice::Iter<'a, Material>,   
+}
+
+impl<'a> Iterator for MaterialSetIter<'a> {
+    type Item = &'a Material;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next()
+    }
+}
+
+impl ops::Index<usize> for MaterialSet {
+    type Output = Material;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.materials[index]
+    }
 }
 
 
@@ -1006,9 +1047,7 @@ mod mtlset_parser_tests {
         assert!(result.is_ok());
         let result = result.unwrap();
 
-        for (result_i, expected_i) 
-            in result.materials.iter().zip(expected.materials.iter()) {
-        
+        for (result_i, expected_i) in result.iter().zip(expected.iter()) {
             assert_eq!(result_i, expected_i);
         }
     }
