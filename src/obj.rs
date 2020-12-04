@@ -128,7 +128,6 @@ type VertexIndex = usize;
 type TextureVertexIndex = usize;
 type NormalVertexIndex = usize;
 type GroupIndex = usize;
-type ShapeIndex = usize;
 type SmoothingGroupIndex = usize;
 
 #[derive(Clone, Debug, PartialEq)]
