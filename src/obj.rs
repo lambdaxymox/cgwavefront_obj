@@ -242,7 +242,7 @@ pub enum VTNTriple<'a> {
     VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Object {
     pub name: String,
     pub vertex_set: Vec<Vertex>,
@@ -308,13 +308,6 @@ impl Object {
                 Some(VTNTriple::VTN(vertex, texture_vertex, normal_vertex))
             }
         }
-    }
-}
-
-impl fmt::Debug for Object {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let string = DisplayObjectCompositor::new().compose(self);
-        write!(f, "{}", string)
     }
 }
 
