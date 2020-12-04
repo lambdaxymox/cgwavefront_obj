@@ -2296,7 +2296,7 @@ mod smoothing_group_tests {
 mod objectset_tests {
     use crate::obj::{
         ObjectSet, 
-        ObjectBuilder,
+        Object,
         Vertex, 
         NormalVertex, 
         Element, 
@@ -2340,45 +2340,43 @@ mod objectset_tests {
             f  2//1  6//1  8//1               \
             f  2//1  8//1  4//1               \
         ";
-        let mut builder = ObjectBuilder::new(
-            vec![
-                Vertex { x: 0.0,  y: 0.0, z: 0.0, w: 1.0 },
-                Vertex { x: 0.0,  y: 0.0, z: 1.0, w: 1.0 },
-                Vertex { x: 0.0,  y: 1.0, z: 0.0, w: 1.0 },
-                Vertex { x: 0.0,  y: 1.0, z: 1.0, w: 1.0 },
-                Vertex { x: 1.0,  y: 0.0, z: 0.0, w: 1.0 },
-                Vertex { x: 1.0,  y: 0.0, z: 1.0, w: 1.0 },
-                Vertex { x: 1.0,  y: 1.0, z: 0.0, w: 1.0 },
-                Vertex { x: 1.0,  y: 1.0, z: 1.0, w: 1.0 },
-            ],
-            vec![
-                Element::Face(VTNIndex::VN(0, 1), VTNIndex::VN(6, 1), VTNIndex::VN(4, 1)),
-                Element::Face(VTNIndex::VN(0, 1), VTNIndex::VN(2, 1), VTNIndex::VN(6, 1)),
-                Element::Face(VTNIndex::VN(0, 5), VTNIndex::VN(3, 5), VTNIndex::VN(2, 5)),
-                Element::Face(VTNIndex::VN(0, 5), VTNIndex::VN(1, 5), VTNIndex::VN(3, 5)),
-                Element::Face(VTNIndex::VN(2, 2), VTNIndex::VN(7, 2), VTNIndex::VN(6, 2)),
-                Element::Face(VTNIndex::VN(2, 2), VTNIndex::VN(3, 2), VTNIndex::VN(7, 2)),
-                Element::Face(VTNIndex::VN(4, 4), VTNIndex::VN(6, 4), VTNIndex::VN(7, 4)),
-                Element::Face(VTNIndex::VN(4, 4), VTNIndex::VN(7, 4), VTNIndex::VN(5, 4)),
-                Element::Face(VTNIndex::VN(0, 3), VTNIndex::VN(4, 3), VTNIndex::VN(5, 3)),
-                Element::Face(VTNIndex::VN(0, 3), VTNIndex::VN(5, 3), VTNIndex::VN(1, 3)),
-                Element::Face(VTNIndex::VN(1, 0), VTNIndex::VN(5, 0), VTNIndex::VN(7, 0)),
-                Element::Face(VTNIndex::VN(1, 0), VTNIndex::VN(7, 0), VTNIndex::VN(3, 0)),
-            ],
-        );
-        builder
-        .with_name(String::from("object1"))
-        .with_normal_vertex_set(vec![
+        let vertex_set = vec![
+            Vertex { x: 0.0,  y: 0.0, z: 0.0, w: 1.0 },
+            Vertex { x: 0.0,  y: 0.0, z: 1.0, w: 1.0 },
+            Vertex { x: 0.0,  y: 1.0, z: 0.0, w: 1.0 },
+            Vertex { x: 0.0,  y: 1.0, z: 1.0, w: 1.0 },
+            Vertex { x: 1.0,  y: 0.0, z: 0.0, w: 1.0 },
+            Vertex { x: 1.0,  y: 0.0, z: 1.0, w: 1.0 },
+            Vertex { x: 1.0,  y: 1.0, z: 0.0, w: 1.0 },
+            Vertex { x: 1.0,  y: 1.0, z: 1.0, w: 1.0 },
+        ];
+        let texture_vertex_set = vec![];
+        let element_set = vec![
+            Element::Face(VTNIndex::VN(0, 1), VTNIndex::VN(6, 1), VTNIndex::VN(4, 1)),
+            Element::Face(VTNIndex::VN(0, 1), VTNIndex::VN(2, 1), VTNIndex::VN(6, 1)),
+            Element::Face(VTNIndex::VN(0, 5), VTNIndex::VN(3, 5), VTNIndex::VN(2, 5)),
+            Element::Face(VTNIndex::VN(0, 5), VTNIndex::VN(1, 5), VTNIndex::VN(3, 5)),
+            Element::Face(VTNIndex::VN(2, 2), VTNIndex::VN(7, 2), VTNIndex::VN(6, 2)),
+            Element::Face(VTNIndex::VN(2, 2), VTNIndex::VN(3, 2), VTNIndex::VN(7, 2)),
+            Element::Face(VTNIndex::VN(4, 4), VTNIndex::VN(6, 4), VTNIndex::VN(7, 4)),
+            Element::Face(VTNIndex::VN(4, 4), VTNIndex::VN(7, 4), VTNIndex::VN(5, 4)),
+            Element::Face(VTNIndex::VN(0, 3), VTNIndex::VN(4, 3), VTNIndex::VN(5, 3)),
+            Element::Face(VTNIndex::VN(0, 3), VTNIndex::VN(5, 3), VTNIndex::VN(1, 3)),
+            Element::Face(VTNIndex::VN(1, 0), VTNIndex::VN(5, 0), VTNIndex::VN(7, 0)),
+            Element::Face(VTNIndex::VN(1, 0), VTNIndex::VN(7, 0), VTNIndex::VN(3, 0)),
+        ];
+        let name = String::from("object1");
+        let normal_vertex_set = vec![
             NormalVertex { i:  0.0, j:  0.0, k:  1.0 },
             NormalVertex { i:  0.0, j:  0.0, k: -1.0 },
             NormalVertex { i:  0.0, j:  1.0, k:  0.0 },
             NormalVertex { i:  0.0, j: -1.0, k:  0.0 },
             NormalVertex { i:  1.0, j:  0.0, k:  0.0 },
             NormalVertex { i: -1.0, j:  0.0, k:  0.0 },
-        ])
-        .with_group_set(vec![Group::new("cube")])
-        .with_smoothing_group_set(vec![SmoothingGroup::new(0)])
-        .with_shape_set(vec![
+        ];
+        let group_set = vec![Group::new("cube")];
+        let smoothing_group_set = vec![SmoothingGroup::new(0)];
+        let shape_set = vec![
             ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
             ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
             ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 0 },
@@ -2391,8 +2389,18 @@ mod objectset_tests {
             ShapeEntry { element: 9,  groups: vec![0], smoothing_group: 0 },
             ShapeEntry { element: 10, groups: vec![0], smoothing_group: 0 },
             ShapeEntry { element: 11, groups: vec![0], smoothing_group: 0 },
-        ]);
-        let expected = ObjectSet::new(vec![builder.build()]);
+        ];
+        let object = Object {
+            name: name,
+            vertex_set: vertex_set,
+            texture_vertex_set: texture_vertex_set,
+            normal_vertex_set: normal_vertex_set,
+            group_set: group_set,
+            smoothing_group_set: smoothing_group_set,
+            element_set: element_set,
+            shape_set: shape_set,
+        };
+        let expected = ObjectSet::new(vec![object]);
         let mut parser = super::Parser::new(obj_file);
         let result = parser.parse();
 
