@@ -2063,64 +2063,6 @@ mod vtn_index_tests {
     use crate::obj::{
         VTNIndex,
     };
-    use super::{
-        Parser, 
-        ParseError
-    };
-    use quickcheck;
-    use rand::Rng;
-
-
-    #[derive(Clone, Debug)]
-    struct VTNIndexParserModel(VTNIndex, String);
-
-    impl VTNIndexParserModel {
-        fn new(vtn_index: VTNIndex, string: String) -> VTNIndexParserModel {
-            VTNIndexParserModel(vtn_index, string)
-        }
-
-        fn parse(&self) -> Result<VTNIndex, ParseError> { 
-            Ok(self.0) 
-        }
-    }
-
-    impl quickcheck::Arbitrary for VTNIndexParserModel {
-        fn arbitrary<G: quickcheck::Gen>(g: &mut G) -> Self {
-            use quickcheck::Arbitrary;
-
-            let mut rng = rand::thread_rng();
-            let vtn_index_type = rng.gen_range(0, 4);
-            let vtn_index = match vtn_index_type {
-                0 => VTNIndex::V(Arbitrary::arbitrary(g)),
-                1 => VTNIndex::VT(Arbitrary::arbitrary(g), Arbitrary::arbitrary(g)),
-                2 => VTNIndex::VN(Arbitrary::arbitrary(g), Arbitrary::arbitrary(g)),
-                _ => VTNIndex::VTN(
-                    Arbitrary::arbitrary(g), Arbitrary::arbitrary(g), Arbitrary::arbitrary(g)
-                ),
-            };
-
-            let string = match vtn_index {
-                VTNIndex::V(v) => format!("{}", v + 1),
-                VTNIndex::VT(v, tv) => format!("{}/{}", v + 1, tv + 1),
-                VTNIndex::VN(v, nv) => format!("{}//{}", v + 1, nv + 1),
-                VTNIndex::VTN(v, tv, nv) => format!("{}/{}/{}", v + 1, tv + 1, nv + 1),
-            };
-
-            VTNIndexParserModel::new(vtn_index, string)
-        }
-    }
-
-
-    #[test]
-    fn prop_parser_vertex_encode_decode_inverses() {
-        fn property(vtn_model: VTNIndexParserModel) -> bool {
-            let result = Parser::new(&vtn_model.1).parse_vtn_index();
-            let expected = vtn_model.parse();
-
-            result == expected
-        }
-        quickcheck::quickcheck(property as fn(VTNIndexParserModel) -> bool);
-    }
 
 
     #[test]
