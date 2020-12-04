@@ -3178,7 +3178,7 @@ fn test_case(file_path: &str) -> Test {
 fn test_parse_object_set() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result = parser.parse().unwrap();
+    let result = parser.parse_objset().unwrap();
 
     assert_eq!(result, test.expected);
 }
@@ -3190,7 +3190,7 @@ fn test_parse_object_set_should_parse_objects() {
     let test = test_case(SAMPLE_DATA);
 
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
 
@@ -3210,7 +3210,7 @@ fn test_parse_object_set_should_parse_objects() {
 fn test_parse_object_set_should_parse_object_names() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
         
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
@@ -3224,7 +3224,7 @@ fn test_parse_object_set_should_parse_object_names() {
 fn test_parse_object_set_should_parse_vertices() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {  
@@ -3246,7 +3246,7 @@ fn test_parse_object_set_should_parse_vertices() {
 fn test_parse_object_set_should_parse_texture_vertices() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
@@ -3268,7 +3268,7 @@ fn test_parse_object_set_should_parse_texture_vertices() {
 fn test_parse_object_set_should_parse_normal_vertices() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
@@ -3295,7 +3295,7 @@ fn test_parse_object_set_should_parse_normal_vertices() {
 fn test_parse_object_set_should_parse_groups() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
@@ -3317,7 +3317,7 @@ fn test_parse_object_set_should_parse_groups() {
 fn test_parse_object_set_should_parse_smoothing_groups() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
@@ -3339,7 +3339,7 @@ fn test_parse_object_set_should_parse_smoothing_groups() {
 fn test_parse_object_set_should_parse_elements() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
@@ -3362,7 +3362,7 @@ fn test_parse_object_set_should_parse_elements() {
 fn test_parse_object_set_should_parse_shape_entries() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
     
     for (result, expected) 
         in result_set.iter().zip(test.expected.iter()) {
@@ -3387,7 +3387,7 @@ fn test_parse_object_set_should_parse_shape_entries() {
 fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for result in result_set.iter() { 
         for (shape, next_shape) 
@@ -3405,7 +3405,7 @@ fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
 fn test_parse_object_every_element_belongs_to_a_group() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for result in result_set.iter() { 
         for shape in result.shape_set.iter() {
@@ -3421,7 +3421,7 @@ fn test_parse_object_every_element_belongs_to_a_group() {
 fn test_parse_object_every_element_group_exists() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for result in result_set.iter() { 
         for shape in result.shape_set.iter() {
@@ -3439,7 +3439,7 @@ fn test_parse_object_every_element_group_exists() {
 fn test_parse_object_every_element_smoothing_group_exists() {
     let test = test_case(SAMPLE_DATA);
     let mut parser = Parser::new(&test.data);
-    let result_set = parser.parse().unwrap();
+    let result_set = parser.parse_objset().unwrap();
 
     for result in result_set.iter() { 
         for shape in result.shape_set.iter() {

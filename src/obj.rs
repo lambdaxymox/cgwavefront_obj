@@ -14,7 +14,7 @@ use std::ops;
 
 /// Parse a wavefront object file from a string.
 pub fn parse<T: AsRef<str>>(input: T) -> Result<ObjectSet, ParseError> {
-    Parser::new(input.as_ref()).parse()
+    Parser::new(input.as_ref()).parse_objset()
 }
 
 
@@ -1095,7 +1095,7 @@ impl<'a> Parser<'a> {
         Ok(result)
     }
 
-    pub fn parse(&mut self) -> Result<ObjectSet, ParseError> {
+    pub fn parse_objset(&mut self) -> Result<ObjectSet, ParseError> {
         self.parse_objects().map(|objs| ObjectSet::new(objs))
     }
 }
@@ -1615,7 +1615,7 @@ mod objectset_tests {
         };
         let expected = ObjectSet::new(vec![object]);
         let mut parser = super::Parser::new(obj_file);
-        let result = parser.parse();
+        let result = parser.parse_objset();
 
         (result, Ok(expected))
     }

@@ -190,7 +190,7 @@ fn test_parse_object_set() {
     
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result = parser.parse().unwrap();
+        let result = parser.parse_objset().unwrap();
 
         assert_eq!(result, test.expected);
     }
@@ -204,7 +204,7 @@ fn test_parse_object_set_should_parse_objects() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {
 
@@ -227,7 +227,7 @@ fn test_parse_object_set_should_parse_object_names() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap(); 
+        let result_set = parser.parse_objset().unwrap(); 
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {
 
@@ -243,7 +243,7 @@ fn test_parse_object_set_should_parse_vertices() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(
@@ -267,7 +267,7 @@ fn test_parse_object_set_should_parse_texture_vertices() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {         
             assert_eq!(
@@ -292,7 +292,7 @@ fn test_parse_object_set_should_parse_normal_vertices() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(
@@ -322,7 +322,7 @@ fn test_parse_object_set_should_parse_groups() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(
@@ -346,7 +346,7 @@ fn test_parse_object_set_should_parse_smoothing_groups() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(
@@ -371,7 +371,7 @@ fn test_parse_object_set_should_parse_elements() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) {
             assert_eq!(
@@ -396,7 +396,7 @@ fn test_parse_object_set_should_parse_shape_entries() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for (result, expected) 
             in result_set.iter().zip(test.expected.iter()) { 
             assert_eq!(
@@ -423,7 +423,7 @@ fn test_parse_object_set_every_element_set_should_be_monotone_increasing() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for result in result_set.iter() { 
             for (shape, next_shape) 
                 in result.shape_set.iter().zip(result.shape_set[1..].iter()) {
@@ -443,7 +443,7 @@ fn test_parse_object_every_element_belongs_to_a_group() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
                 assert!(!shape.groups.is_empty());
@@ -461,7 +461,7 @@ fn test_parse_object_every_element_group_exists() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
                 assert!(shape.groups.iter().all(|&group_index| {
@@ -481,7 +481,7 @@ fn test_parse_object_every_element_smoothing_group_exists() {
 
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
-        let result_set = parser.parse().unwrap();
+        let result_set = parser.parse_objset().unwrap();
         for result in result_set.iter() { 
             for shape in result.shape_set.iter() {
                 assert!(
