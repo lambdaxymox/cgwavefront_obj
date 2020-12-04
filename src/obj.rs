@@ -1419,7 +1419,6 @@ impl<'a> Parser<'a> {
                     let amount_parsed = self.parse_groups(&mut groups)?;
                     // Update range of group indices.
                     max_group_index += amount_parsed;
-                    eprintln!("{:?}", (min_group_index, max_group_index));
                 }
                 Some("g") => {
                     // Save the shape entry ranges for the current group.
@@ -1435,13 +1434,12 @@ impl<'a> Parser<'a> {
                     max_group_index += amount_parsed;
                     // Update the element indices.
                     min_element_group_index = max_element_group_index;
-                    eprintln!("{:?}", (min_group_index, max_group_index));
                 }
                 Some("s") if smoothing_groups.is_empty() => {
                     // Fetch the next smoothing group.
                     self.parse_smoothing_group(&mut smoothing_groups)?;
                     // Update the smoothing group index.
-                    smoothing_group_index = 1;
+                    smoothing_group_index = 0;
                 }
                 Some("s") => {
                     // Save the shape entry ranges for the current smoothing group.
@@ -1478,7 +1476,7 @@ impl<'a> Parser<'a> {
 
                     if smoothing_groups.is_empty() {
                         smoothing_groups.push(Default::default());
-                        smoothing_group_index = 1;
+                        smoothing_group_index = 0;
                     }
 
                     let amount_parsed = self.parse_elements(&mut elements)?;
@@ -2396,18 +2394,18 @@ mod objectset_tests {
         .with_group_set(vec![Group::new("cube")])
         .with_smoothing_group_set(vec![SmoothingGroup::new(0)])
         .with_shape_set(vec![
-            ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 4,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 5,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 6,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 7,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 8,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 9,  groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 10, groups: vec![0], smoothing_group: 1 },
-            ShapeEntry { element: 11, groups: vec![0], smoothing_group: 1 },
+            ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 4,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 5,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 6,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 7,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 8,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 9,  groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 10, groups: vec![0], smoothing_group: 0 },
+            ShapeEntry { element: 11, groups: vec![0], smoothing_group: 0 },
         ]);
         let expected = ObjectSet::new(vec![builder.build()]);
         let mut parser = super::Parser::new(obj_file);
