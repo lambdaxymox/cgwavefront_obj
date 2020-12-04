@@ -1415,9 +1415,6 @@ impl<'a> Parser<'a> {
         loop {
             match self.peek() {
                 Some("g") if groups.is_empty() => {
-                    //min_group_index = 1;
-                    //max_group_index = 1;
-
                     // Fetch the new groups.
                     let amount_parsed = self.parse_groups(&mut groups)?;
                     // Update range of group indices.
