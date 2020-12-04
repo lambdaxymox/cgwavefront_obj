@@ -54,29 +54,28 @@ fn test_cases() -> TestSet {
         data: vec![
             Test {
                 data: String::from(r"
-                    o  Object0
-                    v  -36.84435  -31.289864  -23.619797  -8.21862 
-                    # 1 vertices
-
-                    vt  -44.275238  28.583176  -23.780418
-                    # 1 texture vertices
-
-                    vn  93.94331  -61.460472  -32.00753 
-                    # 1 normal vertices
-
-                    g  Group0
-                    g  Group1
-                    s  0
-                    g  Group2
-                    s  1
-                    g  Group3
-                    f 1/1/1 1/1/1 1/1/1
-                    # 1 elements
-
-                    g  Group4                    
-                    s  2 
-                    #### End Object 0
-
+                    o  Object0                                      \
+                    v  -36.84435  -31.289864  -23.619797  -8.21862  \
+                    # 1 vertices                                    \
+                                                                    \
+                    vt  -44.275238  28.583176  -23.780418           \
+                    # 1 texture vertices                            \
+                                                                    \
+                    vn  93.94331  -61.460472  -32.00753             \
+                    # 1 normal vertices                             \
+                                                                    \
+                    g  Group0                                       \
+                    g  Group1                                       \
+                    s  0                                            \
+                    g  Group2                                       \
+                    s  1                                            \
+                    g  Group3                                       \
+                    f 1/1/1 1/1/1 1/1/1                             \
+                    # 1 elements                                    \
+                                                                    \
+                    g  Group4                                       \
+                    s  2                                            \
+                    #### End Object 0                               \
                 "),
                 expected: ObjectSet::new(vec![
                     Object::new(
@@ -96,21 +95,20 @@ fn test_cases() -> TestSet {
             },
             Test {
                 data: String::from(r"
-                    o  Object0
-                    v  -36.84435  -31.289864  -23.619797  -8.21862 
-                    # 1 vertices
-
-                    vt  -44.275238  28.583176  -23.780418
-                    # 1 texture vertices
-
-                    vn  93.94331  -61.460472  -32.00753 
-                    # 1 normal vertices
-
-                    f 1/1/1 1/1/1 1/1/1
-                    # 1 elements
-
-                    #### End Object 0
-
+                    o  Object0                                     \
+                    v  -36.84435  -31.289864  -23.619797  -8.21862 \
+                    # 1 vertices                                   \
+                                                                   \
+                    vt  -44.275238  28.583176  -23.780418          \
+                    # 1 texture vertices                           \
+                                                                   \
+                    vn  93.94331  -61.460472  -32.00753            \
+                    # 1 normal vertices                            \
+                                                                   \
+                    f 1/1/1 1/1/1 1/1/1                            \
+                    # 1 elements                                   \
+                                                                   \
+                    #### End Object 0                              \
                 "),
                 expected: ObjectSet::new(vec![
                     Object::new(
@@ -127,26 +125,26 @@ fn test_cases() -> TestSet {
             },
             Test {
                 data: String::from(r"
-                    # diamond.obj
-
-                    g Object001
-
-                    v 0.000000E+00 0.000000E+00 78.0000
-                    v 45.0000 45.0000 0.000000E+00
-                    v 45.0000 -45.0000 0.000000E+00
-                    v -45.0000 -45.0000 0.000000E+00
-                    v -45.0000 45.0000 0.000000E+00
-                    v 0.000000E+00 0.000000E+00 -78.0000
-
-                    f     1 2 3
-                    f     1 3 4
-                    f     1 4 5
-                    f     1 5 2
-                    f     6 5 4
-                    f     6 4 3
-                    f     6 3 2
-                    f     6 2 1
-                    f     6 1 5
+                    # diamond.obj                           \
+                                                            \
+                    g Object001                             \
+                                                            \
+                    v 0.000000E+00 0.000000E+00 78.0000     \
+                    v 45.0000 45.0000 0.000000E+00          \
+                    v 45.0000 -45.0000 0.000000E+00         \
+                    v -45.0000 -45.0000 0.000000E+00        \
+                    v -45.0000 45.0000 0.000000E+00         \
+                    v 0.000000E+00 0.000000E+00 -78.0000    \
+                                                            \
+                    f     1 2 3                             \
+                    f     1 3 4                             \
+                    f     1 4 5                             \
+                    f     1 5 2                             \
+                    f     6 5 4                             \
+                    f     6 4 3                             \
+                    f     6 3 2                             \
+                    f     6 2 1                             \
+                    f     6 1 5                             \
                 "),
                 expected: ObjectSet::new(vec![
                     Object::new(
