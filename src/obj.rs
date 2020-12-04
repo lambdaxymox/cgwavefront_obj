@@ -341,7 +341,7 @@ impl Default for Object {
 }
 
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ObjectSet {
     objects: Vec<Object>,
 }
@@ -382,13 +382,6 @@ impl ops::Index<usize> for ObjectSet {
     #[inline]
     fn index(&self, index: usize) -> &Self::Output {
         &self.objects[index]
-    }
-}
-
-impl fmt::Debug for ObjectSet {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let string = DisplayObjectSetCompositor::new().compose(self);
-        write!(f, "{}", string)
     }
 }
 
