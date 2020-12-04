@@ -1410,7 +1410,6 @@ impl<'a> Parser<'a> {
                 Some("g") if groups.is_empty() => {
                     // Fetch the new groups.
                     let amount_parsed = self.parse_groups(&mut groups)?;
-                    // Update range of group indices.
                     max_group_index += amount_parsed;
                 }
                 Some("g") => {
@@ -1420,18 +1419,13 @@ impl<'a> Parser<'a> {
                         (min_group_index, max_group_index)
                     ));
 
-                    // Fetch the new groups.
                     let amount_parsed = self.parse_groups(&mut groups)?;
-                    // Update range of group indices.
                     min_group_index = max_group_index;
                     max_group_index += amount_parsed;
-                    // Update the element indices.
                     min_element_group_index = max_element_group_index;
                 }
                 Some("s") if smoothing_groups.is_empty() => {
-                    // Fetch the next smoothing group.
                     self.parse_smoothing_group(&mut smoothing_groups)?;
-                    // Update the smoothing group index.
                     smoothing_group_index = 0;
                 }
                 Some("s") => {
@@ -1441,11 +1435,8 @@ impl<'a> Parser<'a> {
                         smoothing_group_index
                     ));
 
-                    // Fetch the next smoothing group.
                     self.parse_smoothing_group(&mut smoothing_groups)?;
-                    // Update the smoothing group index.
                     smoothing_group_index += 1;
-                    //Update the element indices.
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
                 }
                 Some("v")  => {
