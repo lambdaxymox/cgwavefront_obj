@@ -791,7 +791,7 @@ impl<'a> Parser<'a> {
         vtn_indices.push(self.parse_vtn_index()?);
         self.parse_vtn_indices(&mut vtn_indices)?;
 
-        // Verify that each VTN index has the same type and if of a valid form.
+        // Verify that each VTN index has the same type and has a valid form.
         for i in 1..vtn_indices.len() {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
                 return error(
@@ -823,7 +823,7 @@ impl<'a> Parser<'a> {
             );
         }
 
-        // Verify that each VTN index has the same type and if of a valid form.
+        // Verify that each VTN index has the same type and has a valid form.
         for i in 1..vtn_indices.len() {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
                 return error(
@@ -838,8 +838,8 @@ impl<'a> Parser<'a> {
         // the parser does not check this. It is up to the model creator to 
         // ensure this.
         let vertex0 = vtn_indices[0];
-        for i in 0..vtn_indices.len()-2 {
-            elements.push(Element::Face(vertex0, vtn_indices[i+1], vtn_indices[i+2]));
+        for i in 0..(vtn_indices.len() - 2) {
+            elements.push(Element::Face(vertex0, vtn_indices[i + 1], vtn_indices[i + 2]));
         }
 
         Ok(vtn_indices.len() - 2)
@@ -953,7 +953,6 @@ impl<'a> Parser<'a> {
         loop {
             match self.peek() {
                 Some("g") if groups.is_empty() => {
-                    // Fetch the new groups.
                     let amount_parsed = self.parse_groups(&mut groups)?;
                     max_group_index += amount_parsed;
                 }
