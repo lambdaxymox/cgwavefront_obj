@@ -7,9 +7,6 @@ use std::fmt;
 use std::default::{
     Default,
 };
-use std::slice;
-use std::ops;
-
 
 
 /// Parse a wavefront object file from a string.
@@ -332,7 +329,7 @@ impl Default for Object {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ObjectSet {
-    objects: Vec<Object>,
+    pub objects: Vec<Object>,
 }
 
 impl ObjectSet {
@@ -341,7 +338,7 @@ impl ObjectSet {
             objects: objects,
         }    
     }
-
+/*
     pub fn iter(&self) -> ObjectSetIter {
         ObjectSetIter {
             inner: self.objects.iter(),
@@ -351,8 +348,9 @@ impl ObjectSet {
     pub fn len(&self) -> usize { 
         self.objects.len()
     }
+    */
 }
-
+/*
 pub struct ObjectSetIter<'a> {
     inner: slice::Iter<'a, Object>,   
 }
@@ -373,7 +371,7 @@ impl ops::Index<usize> for ObjectSet {
         &self.objects[index]
     }
 }
-
+*/
 impl fmt::Display for ObjectSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let string = DisplayObjectSetCompositor::new().compose(self);
@@ -428,7 +426,7 @@ impl DisplayObjectSetCompositor {
         let compositor = DisplayObjectCompositor::new();
         let mut string = String::from("ObjectSet {\n");
         
-        for object in object_set.iter() {
+        for object in object_set.objects.iter() {
             string += &compositor.compose(&object);
             string += &"\n";
         }
@@ -1095,7 +1093,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_objset(&mut self) -> Result<ObjectSet, ParseError> {
-        self.parse_objects().map(|objs| ObjectSet::new(objs))
+        self.parse_objects().map(|objects| ObjectSet::new(objects))
     }
 }
 
@@ -1631,7 +1629,7 @@ mod objectset_tests {
         let result_set = result_set.unwrap();
         let expected_set = expected_set.unwrap();
 
-        for (result, expected) in result_set.iter().zip(expected_set.iter()) {
+        for (result, expected) in result_set.objects.iter().zip(expected_set.objects.iter()) {
             assert_eq!(result.name, expected.name);
             assert_eq!(result.vertex_set, expected.vertex_set);
             assert_eq!(result.texture_vertex_set, expected.texture_vertex_set);
