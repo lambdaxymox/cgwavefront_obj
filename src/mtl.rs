@@ -4,8 +4,6 @@ use crate::lexer::{
 };
 use std::error;
 use std::fmt;
-use std::slice;
-use std::ops;
 
 
 pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
@@ -103,40 +101,8 @@ impl MaterialSet {
             materials: materials,
         }    
     }
-/*
-    pub fn iter(&self) -> MaterialSetIter {
-        MaterialSetIter {
-            inner: self.materials.iter(),
-        }
-    }
-
-    pub fn len(&self) -> usize { 
-        self.materials.len()
-    }
-*/
-}
-/*
-pub struct MaterialSetIter<'a> {
-    inner: slice::Iter<'a, Material>,   
 }
 
-impl<'a> Iterator for MaterialSetIter<'a> {
-    type Item = &'a Material;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
-}
-
-impl ops::Index<usize> for MaterialSet {
-    type Output = Material;
-
-    #[inline]
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.materials[index]
-    }
-}
-*/
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ErrorKind {
