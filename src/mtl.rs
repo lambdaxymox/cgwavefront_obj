@@ -64,6 +64,7 @@ pub struct Material {
     pub map_bump: Option<String>,
     pub map_displacement: Option<String>,
     pub map_dissolve: Option<String>,
+    pub map_decal: Option<String>,
 }
 
 impl Material {
@@ -86,6 +87,7 @@ impl Material {
             map_bump: None,
             map_displacement: None,
             map_dissolve: None,
+            map_decal: None,
         }
     }
 }
@@ -405,6 +407,23 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_map_decal(&mut self) -> Result<Option<&'a str>, ParseError> {
+        match self.peek() {
+            Some("decal") => {}
+            _ => return Ok(None)
+        }
+
+        self.expect_tag("decal")?;
+        match self.next() {
+            Some(st) => Ok(Some(st)),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile, 
+                format!("Expected texture map name but got end of input.")
+            ),
+        }
+    }
+
     fn parse_map_specular_exponent(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ns") => {}
@@ -532,6 +551,10 @@ impl<'a> Parser<'a> {
                 Some("map_d") => {
                     let map_dissolve = self.parse_map_dissolve()?;
                     material.map_dissolve = map_dissolve.map(|name| String::from(name));
+                }
+                Some("decal") => {
+                    let map_decal = self.parse_map_decal()?;
+                    material.map_decal = map_decal.map(|name| String::from(name));
                 }
                 Some("newmtl") | None => {
                     break;
@@ -853,6 +876,7 @@ mod mtlset_parser_tests {
                     map_bump: Some(String::from("normal.png")),
                     map_displacement: Some(String::from("roughness.jpg")),
                     map_dissolve: None,
+                    map_decal: None,
                 },
             ],
         });
@@ -929,6 +953,7 @@ mod mtlset_parser_tests {
                     map_bump: Some(String::from("normal.png")),
                     map_displacement: Some(String::from("roughness.jpg")),
                     map_dissolve: None,
+                    map_decal: None,
                 },
                 Material {
                     name: String::from("neon_green"),
@@ -948,6 +973,7 @@ mod mtlset_parser_tests {
                     map_bump: None,
                     map_displacement: None,
                     map_dissolve: None,
+                    map_decal: None,
                 },
                 Material {
                     name: String::from("flat_green"),
@@ -967,6 +993,7 @@ mod mtlset_parser_tests {
                     map_bump: None,
                     map_displacement: None,
                     map_dissolve: None,
+                    map_decal: None,
                 },
                 Material {
                     name: String::from("diss_green"),
@@ -986,6 +1013,7 @@ mod mtlset_parser_tests {
                     map_bump: None,
                     map_displacement: None,
                     map_dissolve: None,
+                    map_decal: None,
                 },
                 Material {
                     name: String::from("shiny_green"),
@@ -1005,6 +1033,7 @@ mod mtlset_parser_tests {
                     map_bump: None,
                     map_displacement: None,
                     map_dissolve: None,
+                    map_decal: None,
                 },
             ],
         };
