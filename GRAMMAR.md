@@ -90,6 +90,7 @@ Ni                  ::= "Ni"
 Tf                  ::= "Tf"
 Illum               ::= "illum"
 Dissolve            ::= "d"
+Decal               ::= "decal"
 Bump                ::= "bump"
 Disp                ::= "disp"
 MapKa               ::= "map_Ka"
@@ -118,6 +119,7 @@ SpecularExponentMap ::= MapNs String
 BumpMap             ::= MapBump String | Bump String
 DisplacementMap     ::= Disp String
 DissolveMap         ::= MapDissolve String
+DecalMap            ::= Decal String
 
 MtlName             ::= NewMtl String
 MaterialProperties  ::= 
@@ -137,6 +139,7 @@ MaterialProperties  ::=
                       | BumpMap
                       | DisplacementMap
                       | DissolveMap
+                      | DecalMap
                       }*
 Material            ::= MtlName MaterialProperties
 MtlSet              ::= [Material]*
