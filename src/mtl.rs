@@ -21,6 +21,7 @@ pub struct Color {
 }
 
 impl Color {
+    #[inline]
     const fn new(r: f64, g: f64, b: f64) -> Color {
         Color { 
             r: r,
@@ -29,6 +30,7 @@ impl Color {
         }
     }
 
+    #[inline]
     const fn zero() -> Color {
         Color {
             r: 0_f64,
@@ -275,11 +277,7 @@ impl<'a> Parser<'a> {
         let g = self.parse_f64()?;
         let b = self.parse_f64()?;
 
-        Ok(Color { 
-            r: r, 
-            g: g, 
-            b: b
-        })
+        Ok(Color::new(r, g, b))
     }
 
     fn parse_ambient_component(&mut self) -> Result<Color, ParseError> {
@@ -649,7 +647,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_ambient_component() {
         let mut parser = Parser::new("Ka 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
         let result = parser.parse_ambient_component();
 
         assert_eq!(result, expected);      
@@ -658,7 +656,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_diffuse_component() {
         let mut parser = Parser::new("Kd 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
         let result = parser.parse_diffuse_component();
 
         assert_eq!(result, expected);  
@@ -667,7 +665,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_specular_component() {
         let mut parser = Parser::new("Ks 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
         let result = parser.parse_specular_component();
 
         assert_eq!(result, expected);  
@@ -676,7 +674,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_emissive_component() {
         let mut parser = Parser::new("Ke 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
         let result = parser.parse_emissive_component();
 
         assert_eq!(result, expected); 
