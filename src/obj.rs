@@ -329,12 +329,14 @@ impl Default for Object {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ObjectSet {
+    pub material_libraries: Vec<String>,
     pub objects: Vec<Object>,
 }
 
 impl ObjectSet {
-    pub fn new(objects: Vec<Object>) -> ObjectSet {
+    pub fn new(material_libraries: Vec<String>, objects: Vec<Object>) -> ObjectSet {
         ObjectSet {
+            material_libraries: material_libraries,
             objects: objects,
         }    
     }
@@ -1034,6 +1036,39 @@ impl<'a> Parser<'a> {
         })
     }
 
+    fn parse_material_library_line(&mut self, material_libraries: &mut Vec<String>) -> Result<usize, ParseError> {
+        self.expect_tag("mtllib")?;
+        let mut number_of_libraries_found = 0;
+        loop {
+            match self.peek() {
+                Some(st) if st != "\n" => {
+                    material_libraries.push(String::from(st));
+                    number_of_libraries_found += 1;
+                }
+                None => {
+                    return error(
+                        self.line_number,
+                        ErrorKind::EndOfFile
+                    )
+                }
+                _ => break,
+            }
+        }
+
+        Ok(number_of_libraries_found)
+    }
+
+    fn parse_material_libraries(&mut self) -> Result<Vec<String>, ParseError> {
+        let mut material_libraries = vec![];
+        self.skip_zero_or_more_newlines();
+        while let Some("mtllib") = self.peek() {
+            self.parse_material_library_line(&mut material_libraries)?;
+            self.skip_zero_or_more_newlines();
+        }
+
+        Ok(material_libraries)
+    }
+
     fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
         let mut result = Vec::new();
 
@@ -1061,7 +1096,10 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_objset(&mut self) -> Result<ObjectSet, ParseError> {
-        self.parse_objects().map(|objects| ObjectSet::new(objects))
+        let material_libraries = self.parse_material_libraries()?;
+        let objects = self.parse_objects()?;
+
+        Ok(ObjectSet::new(material_libraries, objects))
     }
 }
 
@@ -1578,7 +1616,7 @@ mod objectset_tests {
             element_set: element_set,
             shape_set: shape_set,
         };
-        let expected = ObjectSet::new(vec![object]);
+        let expected = ObjectSet::new(vec![], vec![object]);
         let mut parser = super::Parser::new(obj_file);
         let result = parser.parse_objset();
 

@@ -77,7 +77,7 @@ fn test_cases() -> TestSet {
                     s  2                                            \
                     #### End Object 0                               \
                 "),
-                expected: ObjectSet::new(vec![
+                expected: ObjectSet::new(vec![], vec![
                     Object::new(
                         String::from("Object0"),
                         vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
@@ -110,7 +110,7 @@ fn test_cases() -> TestSet {
                                                                    \
                     #### End Object 0                              \
                 "),
-                expected: ObjectSet::new(vec![
+                expected: ObjectSet::new(vec![], vec![
                     Object::new(
                         String::from("Object0"),
                         vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
@@ -146,7 +146,7 @@ fn test_cases() -> TestSet {
                     f     6 2 1                             \
                     f     6 1 5                             \
                 "),
-                expected: ObjectSet::new(vec![
+                expected: ObjectSet::new(vec![], vec![
                     Object::new(
                         String::from(""),
                         vec![

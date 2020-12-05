@@ -3165,7 +3165,7 @@ fn test_case(file_path: &str) -> Test {
         element_set: element_set,
         shape_set: shape_set,
     };
-    let expected = ObjectSet::new(vec![object]);
+    let expected = ObjectSet::new(vec![], vec![object]);
 
     Test {
         data: data,
