@@ -338,40 +338,8 @@ impl ObjectSet {
             objects: objects,
         }    
     }
-/*
-    pub fn iter(&self) -> ObjectSetIter {
-        ObjectSetIter {
-            inner: self.objects.iter(),
-        }
-    }
-
-    pub fn len(&self) -> usize { 
-        self.objects.len()
-    }
-    */
-}
-/*
-pub struct ObjectSetIter<'a> {
-    inner: slice::Iter<'a, Object>,   
 }
 
-impl<'a> Iterator for ObjectSetIter<'a> {
-    type Item = &'a Object;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
-    }
-}
-
-impl ops::Index<usize> for ObjectSet {
-    type Output = Object;
-
-    #[inline]
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.objects[index]
-    }
-}
-*/
 impl fmt::Display for ObjectSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let string = DisplayObjectSetCompositor::new().compose(self);
