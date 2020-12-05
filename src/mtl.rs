@@ -94,7 +94,7 @@ impl Material {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MaterialSet {
-    materials: Vec<Material>,
+    pub materials: Vec<Material>,
 }
 
 impl MaterialSet {
@@ -103,7 +103,7 @@ impl MaterialSet {
             materials: materials,
         }    
     }
-
+/*
     pub fn iter(&self) -> MaterialSetIter {
         MaterialSetIter {
             inner: self.materials.iter(),
@@ -113,8 +113,9 @@ impl MaterialSet {
     pub fn len(&self) -> usize { 
         self.materials.len()
     }
+*/
 }
-
+/*
 pub struct MaterialSetIter<'a> {
     inner: slice::Iter<'a, Material>,   
 }
@@ -135,7 +136,7 @@ impl ops::Index<usize> for MaterialSet {
         &self.materials[index]
     }
 }
-
+*/
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ErrorKind {
@@ -1045,7 +1046,8 @@ mod mtlset_parser_tests {
         assert!(result.is_ok());
         let result = result.unwrap();
 
-        for (result_i, expected_i) in result.iter().zip(expected.iter()) {
+        for (result_i, expected_i) 
+            in result.materials.iter().zip(expected.materials.iter()) {
             assert_eq!(result_i, expected_i);
         }
     }
