@@ -1040,16 +1040,10 @@ impl<'a> Parser<'a> {
         self.expect_tag("mtllib")?;
         let mut number_of_libraries_found = 0;
         loop {
-            match self.peek() {
+            match self.next() {
                 Some(st) if st != "\n" => {
                     material_libraries.push(String::from(st));
                     number_of_libraries_found += 1;
-                }
-                None => {
-                    return error(
-                        self.line_number,
-                        ErrorKind::EndOfFile
-                    )
                 }
                 _ => break,
             }
@@ -1507,6 +1501,49 @@ mod smoothing_group_tests {
     }
 }
 
+#[cfg(test)]
+mod mtllib_tests {
+    #[test]
+    fn test_mtllib_empty() {
+        let mut parser = super::Parser::new("mtllib       ");
+        let expected: Vec<String> = vec![];
+        let expected_count = Ok(0);
+        let mut result = vec![];
+        let result_count = parser.parse_material_library_line(&mut result);
+
+        assert_eq!(result, expected);
+        assert_eq!(result_count, expected_count);
+    }
+
+    #[test]
+    fn test_mtllib1() {
+        let mut parser = super::Parser::new("mtllib library1.mtl");
+        let expected: Vec<String> = vec![String::from("library1.mtl")];
+        let expected_count = Ok(1);
+        let mut result = vec![];
+        let result_count = parser.parse_material_library_line(&mut result);
+
+        assert_eq!(result, expected);
+        assert_eq!(result_count, expected_count);
+    }
+
+    #[test]
+    fn test_mtllib2() {
+        let mut parser = super::Parser::new("mtllib library1.mtl library2.mtl library3.mtl");
+        let expected: Vec<String> = vec![
+            String::from("library1.mtl"),
+            String::from("library2.mtl"),
+            String::from("library3.mtl"),
+        ];
+        let expected_count = Ok(3);
+        let mut result = vec![];
+        let result_count = parser.parse_material_library_line(&mut result);
+
+        assert_eq!(result, expected);
+        assert_eq!(result_count, expected_count);
+    }
+}
+
 
 #[cfg(test)]
 mod objectset_tests {
@@ -1616,7 +1653,9 @@ mod objectset_tests {
             element_set: element_set,
             shape_set: shape_set,
         };
-        let expected = ObjectSet::new(vec![], vec![object]);
+        let material_libraries = vec![];
+        let objects = vec![object];
+        let expected = ObjectSet::new(material_libraries, objects);
         let mut parser = super::Parser::new(obj_file);
         let result = parser.parse_objset();
 
