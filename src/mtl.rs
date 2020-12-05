@@ -770,6 +770,15 @@ mod mtl_illumination_statement_tests {
     }
 
     #[test]
+    fn test_parse_map_decal() {
+        let mut parser = Parser::new("decal decal.png");
+        let expected = Ok(Some("decal.png"));
+        let result = parser.parse_map_decal();
+
+        assert_eq!(result, expected);
+    }
+
+    #[test]
     fn test_parse_illumination_model0() {
         let mut parser = Parser::new("illum 0");
         let expected = Ok(IlluminationModel::Ambient);
@@ -904,6 +913,7 @@ mod mtlset_parser_tests {
         map_Bump normal.png                                                    \
         map_Ks specular.jpg                                                    \
         disp roughness.jpg                                                     \
+        decal decal.jpg                                                        \
                                                                                \        
         # This is a bright green material.  When applied to an object, it will \ 
         # remain bright green regardless of any lighting in the scene.         \
@@ -953,7 +963,7 @@ mod mtlset_parser_tests {
                     map_bump: Some(String::from("normal.png")),
                     map_displacement: Some(String::from("roughness.jpg")),
                     map_dissolve: None,
-                    map_decal: None,
+                    map_decal: Some(String::from("decal.jpg")),
                 },
                 Material {
                     name: String::from("neon_green"),
