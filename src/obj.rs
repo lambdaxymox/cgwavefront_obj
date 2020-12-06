@@ -44,14 +44,14 @@ impl fmt::Display for TextureVertex {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct NormalVertex {
-    pub i: f64,
-    pub j: f64,
-    pub k: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl fmt::Display for NormalVertex {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "vn  {}  {}  {}", self.i, self.j, self.k)
+        write!(f, "vn  {}  {}  {}", self.x, self.y, self.z)
     }
 }
 
@@ -558,11 +558,11 @@ impl<'a> Parser<'a> {
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
         self.expect_tag("vn")?;
 
-        let i = self.parse_f64()?;
-        let j = self.parse_f64()?;
-        let k = self.parse_f64()?;
+        let x = self.parse_f64()?;
+        let y = self.parse_f64()?;
+        let z = self.parse_f64()?;
 
-        Ok(NormalVertex { i: i, j: j, k: k })
+        Ok(NormalVertex { x: x, y: y, z: z })
     }
 
     fn skip_zero_or_more_newlines(&mut self) {
@@ -1229,7 +1229,7 @@ mod normal_vertex_tests {
     #[test]
     fn test_parse_normal_vertex1() {
         let mut parser = super::Parser::new("vn  -0.966742  -0.255752  9.97231e-09");
-        let vn = NormalVertex { i: -0.966742, j: -0.255752, k: 9.97231e-09 };
+        let vn = NormalVertex { x: -0.966742, y: -0.255752, z: 9.97231e-09 };
         assert_eq!(parser.parse_normal_vertex(), Ok(vn));
     }
 
@@ -1241,12 +1241,12 @@ mod normal_vertex_tests {
         );
         assert_eq!(
             parser.parse_normal_vertex(), 
-            Ok(NormalVertex { i: -1.929448, j: 13.329624, k: -5.221914 })
+            Ok(NormalVertex { x: -1.929448, y: 13.329624, z: -5.221914 })
         );
         assert_eq!(parser.next(), Some("\n"));
         assert_eq!(
             parser.parse_normal_vertex(),
-            Ok(NormalVertex { i: -27.6068, j: 31.1438, k: 27.2099 })
+            Ok(NormalVertex { x: -27.6068, y: 31.1438, z: 27.2099 })
         );        
     }
 }
@@ -1637,12 +1637,12 @@ mod objectset_tests {
         ];
         let name = String::from("object1");
         let normal_vertex_set = vec![
-            NormalVertex { i:  0.0, j:  0.0, k:  1.0 },
-            NormalVertex { i:  0.0, j:  0.0, k: -1.0 },
-            NormalVertex { i:  0.0, j:  1.0, k:  0.0 },
-            NormalVertex { i:  0.0, j: -1.0, k:  0.0 },
-            NormalVertex { i:  1.0, j:  0.0, k:  0.0 },
-            NormalVertex { i: -1.0, j:  0.0, k:  0.0 },
+            NormalVertex { x:  0.0, y:  0.0, z:  1.0 },
+            NormalVertex { x:  0.0, y:  0.0, z: -1.0 },
+            NormalVertex { x:  0.0, y:  1.0, z:  0.0 },
+            NormalVertex { x:  0.0, y: -1.0, z:  0.0 },
+            NormalVertex { x:  1.0, y:  0.0, z:  0.0 },
+            NormalVertex { x: -1.0, y:  0.0, z:  0.0 },
         ];
         let group_set = vec![Group::new("cube")];
         let smoothing_group_set = vec![SmoothingGroup::new(0)];

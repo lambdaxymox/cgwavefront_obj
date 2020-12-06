@@ -13,8 +13,6 @@ use wavefront_obj::obj::{
     SmoothingGroup, 
     ShapeEntry,
     Geometry,
-};
-use wavefront_obj::obj::{
     Parser,
 };
 
@@ -83,7 +81,7 @@ fn test_cases() -> TestSet {
                         String::from("Object0"),
                         vec![Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }],
                         vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
-                        vec![NormalVertex { i: 93.94331, j: -61.460472, k: -32.00753 }],
+                        vec![NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }],
                         vec![
                             Group::new("Group0"), 
                             Group::new("Group1"), 
@@ -126,7 +124,7 @@ fn test_cases() -> TestSet {
                         String::from("Object0"),
                         vec![Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }],
                         vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
-                        vec![NormalVertex { i: 93.94331, j: -61.460472, k: -32.00753 }],
+                        vec![NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }],
                         vec![Group::new("default")],
                         vec![SmoothingGroup::new(0)],
                         vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
