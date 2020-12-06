@@ -2129,7 +2129,7 @@ fn test_case(file_path: &str) -> Test {
         Group(String::from("Object002")), 
         Group(String::from("Object003"))
     ];
-    let smoothing_group_set = vec![SmoothingGroup::new(0)];
+    let smoothing_group_set = vec![SmoothingGroup(0)];
     let shape_set = vec![
         ShapeEntry { element: 0,    groups: vec![0, 1, 2], smoothing_group: 0 },
         ShapeEntry { element: 1,    groups: vec![0, 1, 2], smoothing_group: 0 },

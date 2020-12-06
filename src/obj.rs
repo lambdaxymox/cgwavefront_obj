@@ -133,14 +133,9 @@ impl Default for Group {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct SmoothingGroup(usize);
+pub struct SmoothingGroup(pub usize);
 
 impl SmoothingGroup {
-    #[inline]
-    pub const fn new(name: usize) -> SmoothingGroup { 
-        SmoothingGroup(name)
-    }
-
     #[inline]
     pub fn as_usize(&self) -> usize { 
         self.0 
@@ -149,7 +144,7 @@ impl SmoothingGroup {
 
 impl Default for SmoothingGroup {
     fn default() -> SmoothingGroup { 
-        SmoothingGroup::new(0) 
+        SmoothingGroup(0) 
     }
 }
 
@@ -773,9 +768,9 @@ impl<'a> Parser<'a> {
         self.expect_tag("s")?;
         if let Some(name) = self.next() {
             if name == "off" {
-                smoothing_groups.push(SmoothingGroup::new(0));
+                smoothing_groups.push(SmoothingGroup(0));
             } else if let Ok(number) = name.parse::<usize>() {
-                smoothing_groups.push(SmoothingGroup::new(number));
+                smoothing_groups.push(SmoothingGroup(number));
             } else {
                 return self.error(
                     ErrorKind::SmoothingGroupNameMustBeOffOrInteger,
@@ -1484,7 +1479,7 @@ mod smoothing_group_tests {
         let mut parser = super::Parser::new("s off");
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
-        let expected = vec![SmoothingGroup::new(0)];
+        let expected = vec![SmoothingGroup(0)];
 
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
@@ -1495,7 +1490,7 @@ mod smoothing_group_tests {
         let mut parser = super::Parser::new("s 0");
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
-        let expected = vec![SmoothingGroup::new(0)];
+        let expected = vec![SmoothingGroup(0)];
         
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
@@ -1506,7 +1501,7 @@ mod smoothing_group_tests {
         let mut parser = super::Parser::new("s 3434");
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
-        let expected = vec![SmoothingGroup::new(3434)];
+        let expected = vec![SmoothingGroup(3434)];
         
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
@@ -1641,7 +1636,7 @@ mod objectset_tests {
             NormalVertex { x: -1.0, y:  0.0, z:  0.0 },
         ];
         let group_set = vec![Group(String::from("cube"))];
-        let smoothing_group_set = vec![SmoothingGroup::new(0)];
+        let smoothing_group_set = vec![SmoothingGroup(0)];
         let shape_set = vec![
             ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
             ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },

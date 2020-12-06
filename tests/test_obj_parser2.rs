@@ -90,9 +90,9 @@ fn test_cases() -> TestSet {
                             Group(String::from("Group4"))
                         ],
                         vec![
-                            SmoothingGroup::new(0), 
-                            SmoothingGroup::new(1), 
-                            SmoothingGroup::new(2)
+                            SmoothingGroup(0), 
+                            SmoothingGroup(1), 
+                            SmoothingGroup(2)
                         ],
                         vec![
                             Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))
@@ -126,7 +126,7 @@ fn test_cases() -> TestSet {
                         vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
                         vec![NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }],
                         vec![Group(String::from("default"))],
-                        vec![SmoothingGroup::new(0)],
+                        vec![SmoothingGroup(0)],
                         vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
                         vec![ShapeEntry::new(0, vec![0], 0)],
                         vec![Geometry::new(None, vec![0])]
@@ -170,7 +170,7 @@ fn test_cases() -> TestSet {
                         vec![],
                         vec![],
                         vec![Group(String::from("Object001"))],
-                        vec![SmoothingGroup::new(0)],
+                        vec![SmoothingGroup(0)],
                         vec![
                             Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
                             Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
@@ -258,7 +258,7 @@ fn test_cases() -> TestSet {
                                 Group(String::from("left")),
                                 Group(String::from("bottom"))
                             ],
-                            vec![SmoothingGroup::new(0)],
+                            vec![SmoothingGroup(0)],
                             vec![
                                 Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
                                 Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
