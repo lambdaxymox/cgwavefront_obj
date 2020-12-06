@@ -123,6 +123,7 @@ type TextureVertexIndex = usize;
 type NormalVertexIndex = usize;
 type GroupIndex = usize;
 type SmoothingGroupIndex = usize;
+type ShapeEntryIndex = usize;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Element {
@@ -209,12 +210,12 @@ pub struct ShapeEntry {
 impl ShapeEntry {
     pub fn new(
         element: ElementIndex, 
-        groups: &[GroupIndex], 
+        groups: Vec<GroupIndex>, 
         smoothing_group: SmoothingGroupIndex) -> ShapeEntry {
 
         ShapeEntry {
             element: element,
-            groups: Vec::from(groups),
+            groups: groups,
             smoothing_group: smoothing_group,
         }
     }
@@ -225,6 +226,21 @@ pub struct Shape {
     element: Element,
     groups: Vec<Group>,
     smoothing_groups: Vec<SmoothingGroup>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Geometry {
+    pub material_name: Option<String>,
+    pub shapes: Vec<ShapeEntryIndex>,
+}
+
+impl Geometry {
+    pub fn new(material_name: Option<String>, shapes: Vec<ShapeEntryIndex>) -> Geometry {
+        Geometry {
+            material_name: material_name,
+            shapes: shapes,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -245,6 +261,7 @@ pub struct Object {
     pub smoothing_group_set: Vec<SmoothingGroup>,
     pub element_set: Vec<Element>,
     pub shape_set: Vec<ShapeEntry>,
+    pub geometry_set: Vec<Geometry>,
 }
 
 impl Object {
@@ -256,7 +273,8 @@ impl Object {
         group_set: Vec<Group>, 
         smoothing_group_set: Vec<SmoothingGroup>, 
         element_set: Vec<Element>,
-        shape_set: Vec<ShapeEntry>) -> Object {
+        shape_set: Vec<ShapeEntry>,
+        geometry_set: Vec<Geometry>) -> Object {
         
         Object {
             name: name,
@@ -267,6 +285,7 @@ impl Object {
             smoothing_group_set: smoothing_group_set,
             element_set: element_set,
             shape_set: shape_set,
+            geometry_set: geometry_set
         }
     }
 
@@ -321,7 +340,8 @@ impl Default for Object {
             Default::default(), 
             Default::default(), 
             Default::default(),
-            Default::default()
+            Default::default(),
+            Default::default(),
         )
     }
 }
@@ -425,6 +445,7 @@ pub enum ErrorKind {
     ElementMustBeAPointLineOrFace,
     SmoothingGroupNameMustBeOffOrInteger(String),
     SmoothingGroupDeclarationHasNoName,
+    MaterialStatementHasNoName,
 }
 
 impl fmt::Display for ErrorKind {
@@ -493,6 +514,9 @@ impl fmt::Display for ErrorKind {
             }
             &SmoothingGroupDeclarationHasNoName => {
                 write!(f, "Got a smoothing group declaration without a smoothing group name.")
+            }
+            &MaterialStatementHasNoName => {
+                write!(f, "Got a `usemtl` material declaration without a material name.")
             }
         }
     }
@@ -864,7 +888,25 @@ impl<'a> Parser<'a> {
         Ok(1)
     }
 
-    fn parse_shape_entries(&self,
+    fn parse_material_name(
+        &mut self, 
+        material_names: &mut Vec<Option<&'a str>>) -> Result<usize, ParseError> {
+
+        self.expect_tag("usemtl")?;
+        if let Some(name) = self.next() {
+            material_names.push(Some(name));
+        } else {
+            return error(
+                self.line_number,
+                ErrorKind::MaterialStatementHasNoName
+            )
+        }
+
+        Ok(1)
+    }
+
+    fn parse_shape_entries(
+        &self,
         shape_entry_table: &mut Vec<ShapeEntry>,
         elements: &[Element],
         group_entry_table: &[((usize, usize), (usize, usize))],
@@ -875,7 +917,7 @@ impl<'a> Parser<'a> {
             
             let groups: Vec<usize> = (min_group_index..max_group_index).collect();
             for i in min_element_index..max_element_index {
-                shape_entry_table.push(ShapeEntry::new(i, &groups, 1));
+                shape_entry_table.push(ShapeEntry::new(i, groups.clone(), 0));
             }
         }
         debug_assert!(shape_entry_table.len() == elements.len());
@@ -888,6 +930,22 @@ impl<'a> Parser<'a> {
             }
         }
         debug_assert!(shape_entry_table.len() == elements.len());
+    }
+
+    fn parse_geometries(
+        &self, 
+        geometries: &mut Vec<Geometry>, 
+        material_name_entry_table: &[((usize, usize), usize)], 
+        material_names: &[Option<&'a str>]) {
+
+        for &((min_element_index, max_element_index), material_name_index) 
+            in material_name_entry_table {
+            
+            let shapes: Vec<ShapeEntryIndex> = (min_element_index..max_element_index).collect();
+            let material_name = material_names[material_name_index].map(String::from);
+            let geometry = Geometry::new(material_name, shapes);
+            geometries.push(geometry);
+        }
     }
 
     fn parse_object(&mut self,
@@ -917,6 +975,12 @@ impl<'a> Parser<'a> {
         let mut min_element_smoothing_group_index = 0;
         let mut max_element_smoothing_group_index = 0;
         let mut smoothing_group_index = 0;
+
+        let mut material_name_entry_table = vec![];
+        let mut material_names = vec![];
+        let mut min_element_material_name_index = 0;
+        let mut max_element_material_name_index = 0;
+        let mut material_name_index = 0;
 
         loop {
             match self.peek() {
@@ -951,6 +1015,17 @@ impl<'a> Parser<'a> {
                     smoothing_group_index += 1;
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
                 }
+                Some("usemtl") => {
+                    // Save the element ranges for the current material.
+                    material_name_entry_table.push((
+                        (min_element_material_name_index, max_element_material_name_index),
+                        material_name_index
+                    ));
+
+                    self.parse_material_name(&mut material_names)?;
+                    material_name_index += 1;
+                    min_element_material_name_index = max_element_material_name_index;
+                }
                 Some("v")  => {
                     let vertex = self.parse_vertex()?;
                     vertices.push(vertex);
@@ -975,9 +1050,15 @@ impl<'a> Parser<'a> {
                         smoothing_group_index = 0;
                     }
 
+                    if material_names.is_empty() {
+                        material_names.push(None);
+                        material_name_index = 0;
+                    }
+
                     let amount_parsed = self.parse_elements(&mut elements)?;
                     max_element_group_index += amount_parsed;
                     max_element_smoothing_group_index += amount_parsed;
+                    max_element_material_name_index += amount_parsed;
                 }
                 Some("\n") => {
                     self.skip_one_or_more_newlines()?;
@@ -996,6 +1077,12 @@ impl<'a> Parser<'a> {
                     ));
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
 
+                    material_name_entry_table.push((
+                        (min_element_material_name_index, max_element_material_name_index),
+                        material_name_index
+                    ));
+                    min_element_material_name_index = max_element_material_name_index;
+
                     break;
                 }
                 Some(other_st) => {
@@ -1007,8 +1094,6 @@ impl<'a> Parser<'a> {
             }
         }
 
-        // At the end of file, collect any remaining shapes.
-        // Fill in the shape entries for the current group.
         let mut shape_entries = vec![];
         self.parse_shape_entries(
             &mut shape_entries, 
@@ -1016,6 +1101,9 @@ impl<'a> Parser<'a> {
             &group_entry_table, 
             &smoothing_group_entry_table
         );
+
+        let mut geometries = vec![];
+        self.parse_geometries(&mut geometries, &material_name_entry_table, &material_names);
 
         *min_vertex_index  += vertices.len();
         *max_vertex_index  += vertices.len();
@@ -1033,6 +1121,7 @@ impl<'a> Parser<'a> {
             smoothing_group_set: smoothing_groups,
             element_set: elements,
             shape_set: shape_entries,
+            geometry_set: geometries,
         })
     }
 
@@ -1557,6 +1646,7 @@ mod objectset_tests {
         Group, 
         SmoothingGroup, 
         ShapeEntry,
+        Geometry,
     };
 
 
@@ -1643,6 +1733,9 @@ mod objectset_tests {
             ShapeEntry { element: 10, groups: vec![0], smoothing_group: 0 },
             ShapeEntry { element: 11, groups: vec![0], smoothing_group: 0 },
         ];
+        let geometry_set = vec![
+            Geometry::new(None, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+        ];
         let object = Object {
             name: name,
             vertex_set: vertex_set,
@@ -1652,6 +1745,7 @@ mod objectset_tests {
             smoothing_group_set: smoothing_group_set,
             element_set: element_set,
             shape_set: shape_set,
+            geometry_set: geometry_set,
         };
         let material_libraries = vec![];
         let objects = vec![object];
