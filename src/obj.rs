@@ -36,16 +36,6 @@ pub struct TextureVertex {
     pub w: f64,
 }
 
-impl TextureVertex {
-    pub fn new(u: f64, v: f64, w: f64) -> TextureVertex {
-        TextureVertex { 
-            u: u, 
-            v: v, 
-            w: w 
-        }
-    }
-}
-
 impl fmt::Display for TextureVertex {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "vt  {}  {}  {}", self.u, self.v, self.w)
@@ -57,16 +47,6 @@ pub struct NormalVertex {
     pub i: f64,
     pub j: f64,
     pub k: f64,
-}
-
-impl NormalVertex {
-    pub fn new(i: f64, j: f64, k: f64) -> NormalVertex {
-        NormalVertex { 
-            i: i, 
-            j: j, 
-            k: k 
-        }
-    }
 }
 
 impl fmt::Display for NormalVertex {
