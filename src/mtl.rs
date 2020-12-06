@@ -20,15 +20,6 @@ pub struct Color {
 
 impl Color {
     #[inline]
-    const fn new(r: f64, g: f64, b: f64) -> Color {
-        Color { 
-            r: r,
-            g: g,
-            b: b
-        }
-    }
-
-    #[inline]
     const fn zero() -> Color {
         Color {
             r: 0_f64,
@@ -239,7 +230,7 @@ impl<'a> Parser<'a> {
         let g = self.parse_f64()?;
         let b = self.parse_f64()?;
 
-        Ok(Color::new(r, g, b))
+        Ok(Color { r: r, g: g, b: b })
     }
 
     fn parse_ambient_component(&mut self) -> Result<Color, ParseError> {
@@ -615,7 +606,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_ambient_component() {
         let mut parser = Parser::new("Ka 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
+        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
         let result = parser.parse_ambient_component();
 
         assert_eq!(result, expected);      
@@ -624,7 +615,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_diffuse_component() {
         let mut parser = Parser::new("Kd 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
+        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
         let result = parser.parse_diffuse_component();
 
         assert_eq!(result, expected);  
@@ -633,7 +624,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_specular_component() {
         let mut parser = Parser::new("Ks 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
+        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
         let result = parser.parse_specular_component();
 
         assert_eq!(result, expected);  
@@ -642,7 +633,7 @@ mod mtl_illumination_statement_tests {
     #[test]
     fn test_parse_emissive_component() {
         let mut parser = Parser::new("Ke 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color::new(0.1345345, 0.63453, 0.982430));
+        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
         let result = parser.parse_emissive_component();
 
         assert_eq!(result, expected); 
@@ -847,10 +838,10 @@ mod mtlset_parser_tests {
             materials: vec![
                 Material {
                     name: String::from("Scene_-_Root"),
-                    color_ambient: Color::new(1_f64, 1_f64, 1_f64),
-                    color_diffuse: Color::new(0.8_f64, 0.8_f64, 0.8_f64),
-                    color_specular: Color::new(0.5_f64, 0.5_f64, 0.5_f64),
-                    color_emissive: Color::new(0_f64, 0_f64, 0_f64),
+                    color_ambient: Color { r: 1_f64, g: 1_f64, b: 1_f64 },
+                    color_diffuse: Color { r: 0.8_f64, g: 0.8_f64, b: 0.8_f64 },
+                    color_specular: Color { r: 0.5_f64, g: 0.5_f64, b: 0.5_f64 },
+                    color_emissive: Color { r: 0_f64, g: 0_f64, b: 0_f64 },
                     specular_exponent: 225_f64,
                     dissolve: 1_f64,
                     optical_density: Some(1.45_f64),
@@ -925,10 +916,10 @@ mod mtlset_parser_tests {
             materials: vec![
                 Material {
                     name: String::from("Scene_-_Root"),
-                    color_ambient: Color::new(1_f64, 1_f64, 1_f64),
-                    color_diffuse: Color::new(0.8_f64, 0.8_f64, 0.8_f64),
-                    color_specular: Color::new(0.5_f64, 0.5_f64, 0.5_f64),
-                    color_emissive: Color::new(0_f64, 0_f64, 0_f64),
+                    color_ambient: Color { r: 1_f64, g: 1_f64, b: 1_f64 },
+                    color_diffuse: Color { r: 0.8_f64, g: 0.8_f64, b: 0.8_f64 },
+                    color_specular: Color { r: 0.5_f64, g: 0.5_f64, b: 0.5_f64 },
+                    color_emissive: Color { r: 0_f64, g: 0_f64, b: 0_f64 },
                     specular_exponent: 225_f64,
                     dissolve: 1_f64,
                     optical_density: Some(1.45_f64),
@@ -946,7 +937,7 @@ mod mtlset_parser_tests {
                 Material {
                     name: String::from("neon_green"),
                     color_ambient: Color::zero(),
-                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
+                    color_diffuse: Color { r: 0_f64, g: 1_f64, b: 0_f64 },
                     color_specular: Color::zero(),
                     color_emissive: Color::zero(),
                     specular_exponent: 0_f64,
@@ -965,8 +956,8 @@ mod mtlset_parser_tests {
                 },
                 Material {
                     name: String::from("flat_green"),
-                    color_ambient: Color::new(0_f64, 1_f64, 0_f64),
-                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
+                    color_ambient: Color { r: 0_f64, g: 1_f64, b: 0_f64 },
+                    color_diffuse: Color { r: 0_f64, g: 1_f64, b: 0_f64 },
                     color_specular: Color::zero(),
                     color_emissive: Color::zero(),
                     specular_exponent: 0_f64,
@@ -985,8 +976,8 @@ mod mtlset_parser_tests {
                 },
                 Material {
                     name: String::from("diss_green"),
-                    color_ambient: Color::new(0_f64, 1_f64, 0_f64),
-                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
+                    color_ambient: Color { r: 0_f64, g: 1_f64, b: 0_f64 },
+                    color_diffuse: Color { r: 0_f64, g: 1_f64, b: 0_f64 },
                     color_specular: Color::zero(),
                     color_emissive: Color::zero(),
                     specular_exponent: 0_f64,
@@ -1005,9 +996,9 @@ mod mtlset_parser_tests {
                 },
                 Material {
                     name: String::from("shiny_green"),
-                    color_ambient: Color::new(0_f64, 1_f64, 0_f64),
-                    color_diffuse: Color::new(0_f64, 1_f64, 0_f64),
-                    color_specular: Color::new(1_f64, 1_f64, 1_f64),
+                    color_ambient: Color { r: 0_f64, g: 1_f64, b: 0_f64 },
+                    color_diffuse: Color { r: 0_f64, g: 1_f64, b: 0_f64 },
+                    color_specular: Color { r: 1_f64, g: 1_f64, b: 1_f64 },
                     color_emissive: Color::zero(),
                     specular_exponent: 200_f64,
                     dissolve: 0_f64,
