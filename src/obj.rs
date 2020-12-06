@@ -1,6 +1,6 @@
 use crate::lexer::{
-    Tokenizer,
     Lexer,
+    PeekableLexer,
 };
 use std::error;
 use std::fmt;
@@ -373,14 +373,14 @@ impl error::Error for ParseError {}
 /// A Wavefront OBJ file parser.
 pub struct Parser<'a> {
     line_number: usize,
-    lexer: Lexer<'a>,
+    lexer: PeekableLexer<'a>,
 }
 
 impl<'a> Parser<'a> {
     pub fn new(input: &'a str) -> Parser<'a> {
         Parser {
             line_number: 1,
-            lexer: Lexer::new(Tokenizer::new(input)),
+            lexer: PeekableLexer::new(Lexer::new(input)),
         }
     }
 

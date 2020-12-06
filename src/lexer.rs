@@ -3,7 +3,7 @@ use std::str;
 
 /// A tokenizer tokenizes an input character stream.
 #[derive(Clone)]
-pub struct Tokenizer<'a> {
+pub struct Lexer<'a> {
     /// The current line position in the token stream.
     current_line_number: usize,
     /// The cursor position in the character stream.
@@ -27,10 +27,10 @@ fn is_whitespace_or_newline(ch: u8) -> bool {
     is_whitespace(ch) || is_newline(ch)
 }
 
-impl<'a> Tokenizer<'a> {
+impl<'a> Lexer<'a> {
     /// Construct a new tokenizer.
-    pub fn new(stream: &'a str) -> Tokenizer<'a> {
-        Tokenizer {
+    pub fn new(stream: &'a str) -> Lexer<'a> {
+        Lexer {
             current_line_number: 1,
             stream_position: 0,
             stream: stream.as_bytes(),
@@ -133,7 +133,7 @@ impl<'a> Tokenizer<'a> {
     }
 }
 
-impl<'a> Iterator for Tokenizer<'a> {
+impl<'a> Iterator for Lexer<'a> {
     type Item = &'a [u8];
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -143,17 +143,17 @@ impl<'a> Iterator for Tokenizer<'a> {
 
 /// A lexical analyzer that caches tokens from the tokenizer to supports
 /// peeking into the steam without advancing the stream, and lookahead.
-pub struct Lexer<'a> {
+pub struct PeekableLexer<'a> {
     /// The tokenizer for the input byte stream.
-    inner: Tokenizer<'a>,
+    inner: Lexer<'a>,
     /// The lookahead cache for the lexer.
     cache: Option<Option<&'a str>>,
 }
 
-impl<'a> Lexer<'a> {
+impl<'a> PeekableLexer<'a> {
     /// Construct a new lexical analyzer.
-    pub fn new(lexer: Tokenizer<'a>) -> Lexer<'a> {
-        Lexer {
+    pub fn new(lexer: Lexer<'a>) -> PeekableLexer<'a> {
+        PeekableLexer {
             inner: lexer,
             cache: None,
         }
@@ -191,7 +191,7 @@ impl<'a> Lexer<'a> {
     }
 }
 
-impl<'a> Iterator for Lexer<'a> {
+impl<'a> Iterator for PeekableLexer<'a> {
     type Item = &'a str;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -203,8 +203,8 @@ impl<'a> Iterator for Lexer<'a> {
 #[cfg(test)]
 mod tests {
     use super::{
-        Tokenizer, 
-        Lexer,
+        Lexer, 
+        PeekableLexer,
     };
     use std::slice;
 
@@ -433,7 +433,7 @@ mod tests {
     #[test]
     fn test_lexer() {
         for test_case in test_cases().iter() {
-            let lexer = Lexer::new(Tokenizer::new(&test_case.data));
+            let lexer = PeekableLexer::new(Lexer::new(&test_case.data));
             let result = lexer.map(|token| token.into()).collect::<Vec<String>>();
             assert_eq!(result, test_case.expected);
         }
@@ -442,7 +442,7 @@ mod tests {
     #[test]
     fn test_lexer_tokenwise() {
         for test_case in test_cases().iter() {
-            let lexer = Lexer::new(Tokenizer::new(&test_case.data));
+            let lexer = PeekableLexer::new(Lexer::new(&test_case.data));
         
             for (result, expected) in lexer.zip(test_case.expected.iter()) {
                 assert_eq!(
