@@ -150,14 +150,6 @@ impl fmt::Display for ParseError {
 
 impl error::Error for ParseError {}
 
-#[inline]
-fn error<T>(
-    line_number: usize, 
-    kind: ErrorKind, 
-    message: String) -> Result<T, ParseError> {
-    
-    Err(ParseError::new(line_number, kind, message))
-}
 
 /// A Wavefront MTL file parser.
 pub struct Parser<'a> {
@@ -171,6 +163,10 @@ impl<'a> Parser<'a> {
             line_number: 1,
             lexer: Lexer::new(Tokenizer::new(input)),
         }
+    }
+
+    fn error<T>(&self, kind: ErrorKind, message: String) -> Result<T, ParseError> {
+        Err(ParseError::new(self.line_number, kind, message))
     }
 
     fn peek(&mut self) -> Option<&'a str> {
@@ -195,15 +191,14 @@ impl<'a> Parser<'a> {
     fn next_string(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
-            None => error(self.line_number, ErrorKind::EndOfFile, format!(""))
+            None => self.error(ErrorKind::EndOfFile, format!(""))
         }
     }
 
     fn expect_tag(&mut self, tag: &str) -> Result<(), ParseError> {
         match self.next() {
-            None => error(self.line_number, ErrorKind::EndOfFile, format!("")),
-            Some(st) if st != tag => error(
-                self.line_number, 
+            None => self.error(ErrorKind::EndOfFile, format!("")),
+            Some(st) if st != tag => self.error(
                 ErrorKind::ExpectedTag,
                 format!("Expected statement {} but got statement {}", tag, st)
             ),
@@ -221,8 +216,7 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<f64>() {
             Ok(val) => Ok(val),
-            Err(_) => error(
-                self.line_number, 
+            Err(_) => self.error( 
                 ErrorKind::ExpectedFloat, 
                 format!("Expected floating point number but got {}", st)
             ),
@@ -233,8 +227,7 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<usize>() {
             Ok(val) => Ok(val),
-            Err(_) => error(
-                self.line_number, 
+            Err(_) => self.error( 
                 ErrorKind::ExpectedInteger,
                 format!("Expected integer but got {}", st)
             )
@@ -293,8 +286,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("map_Ka")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -310,8 +302,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("map_Kd")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -327,8 +318,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("map_Ks")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -344,8 +334,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("map_Ke")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -365,8 +354,7 @@ impl<'a> Parser<'a> {
 
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -382,8 +370,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("disp")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -399,8 +386,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("map_d")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -416,8 +402,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("decal")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -433,8 +418,7 @@ impl<'a> Parser<'a> {
         self.expect_tag("map_Ns")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
-            None => error(
-                self.line_number, 
+            None => self.error(
                 ErrorKind::EndOfFile, 
                 format!("Expected texture map name but got end of input.")
             ),
@@ -448,8 +432,7 @@ impl<'a> Parser<'a> {
             0 => Ok(IlluminationModel::Ambient),
             1 => Ok(IlluminationModel::AmbientDiffuse),
             2 => Ok(IlluminationModel::AmbientDiffuseSpecular),
-            n => error(
-                self.line_number, 
+            n => self.error(
                 ErrorKind::UnknownIlluminationModel,
                 format!("Unknown illumination model: {}.", n)
             )
@@ -460,15 +443,13 @@ impl<'a> Parser<'a> {
         match self.next() {
             Some("newmtl") => {}
             Some(st) => {
-                return error(
-                    self.line_number,
+                return self.error(
                     ErrorKind::ExpectedTag,
                     format!("Expected `newmtl` but got {}.", st)
                 )
             }
             None => {
-                return error(
-                    self.line_number,
+                return self.error(
                     ErrorKind::EndOfFile,
                     format!("Expected `newmtl` but got end of input.")
                 )
@@ -478,8 +459,7 @@ impl<'a> Parser<'a> {
         match self.next() {
             Some(st) => Ok(st),
             None => {
-                return error(
-                    self.line_number,
+                return self.error(
                     ErrorKind::EndOfFile,
                     format!("Expected material name but got end of input.")
                 )
@@ -560,8 +540,7 @@ impl<'a> Parser<'a> {
                     break;
                 }
                 Some(other_st) => {
-                    return error(
-                        self.line_number, 
+                    return self.error(
                         ErrorKind::ErrorParsingMaterial,
                         format!("Could not parse the token `{}`.", other_st) 
                     );
@@ -590,8 +569,7 @@ impl<'a> Parser<'a> {
         
         match self.peek() {
             Some(st) => {
-                return error(
-                    self.line_number,
+                return self.error(
                     ErrorKind::ExpectedEndOfInput,
                     format!("Expeted end of input but got `{}`.", st)
                 )
