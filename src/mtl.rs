@@ -88,15 +88,6 @@ pub struct MaterialSet {
     pub materials: Vec<Material>,
 }
 
-impl MaterialSet {
-    pub fn new(materials: Vec<Material>) -> MaterialSet {
-        MaterialSet {
-            materials: materials,
-        }    
-    }
-}
-
-
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ErrorKind {
     EndOfFile,
