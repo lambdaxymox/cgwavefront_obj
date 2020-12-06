@@ -1016,7 +1016,6 @@ impl<'a> Parser<'a> {
                     min_element_smoothing_group_index = max_element_smoothing_group_index;
                 }
                 Some("usemtl") => {
-                    // Save the element ranges for the current material.
                     if min_element_material_name_index == max_element_material_name_index {
                         if material_names.is_empty() {
                             self.parse_material_name(&mut material_names)?;
@@ -1139,6 +1138,32 @@ impl<'a> Parser<'a> {
         })
     }
 
+    fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
+        let mut result = Vec::new();
+
+        let mut min_vertex_index = 0;
+        let mut max_vertex_index = 0;
+        let mut min_tex_index    = 0;
+        let mut max_tex_index    = 0;
+        let mut min_normal_index = 0;
+        let mut max_normal_index = 0;
+
+        self.skip_zero_or_more_newlines();
+        while let Some(_) = self.peek() {
+            result.push(self.parse_object(
+                &mut min_vertex_index, 
+                &mut max_vertex_index,
+                &mut min_tex_index,    
+                &mut max_tex_index,
+                &mut min_normal_index, 
+                &mut max_normal_index
+            )?);
+            self.skip_zero_or_more_newlines();
+        }
+
+        Ok(result)
+    }
+
     fn parse_material_library_line(&mut self, material_libraries: &mut Vec<String>) -> Result<usize, ParseError> {
         self.expect_tag("mtllib")?;
         let mut number_of_libraries_found = 0;
@@ -1164,32 +1189,6 @@ impl<'a> Parser<'a> {
         }
 
         Ok(material_libraries)
-    }
-
-    fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
-        let mut result = Vec::new();
-
-        let mut min_vertex_index = 0;
-        let mut max_vertex_index = 0;
-        let mut min_tex_index    = 0;
-        let mut max_tex_index    = 0;
-        let mut min_normal_index = 0;
-        let mut max_normal_index = 0;
-
-        self.skip_zero_or_more_newlines();
-        while let Some(_) = self.peek() {
-            result.push(self.parse_object(
-                &mut min_vertex_index, 
-                &mut max_vertex_index,
-                &mut min_tex_index,    
-                &mut max_tex_index,
-                &mut min_normal_index, 
-                &mut max_normal_index
-            )?);
-            self.skip_zero_or_more_newlines();
-        }
-
-        Ok(result)
     }
 
     pub fn parse_objset(&mut self) -> Result<ObjectSet, ParseError> {
