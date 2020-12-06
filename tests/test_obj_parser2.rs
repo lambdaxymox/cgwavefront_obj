@@ -81,15 +81,24 @@ fn test_cases() -> TestSet {
                 expected: ObjectSet::new(vec![], vec![
                     Object::new(
                         String::from("Object0"),
-                        vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
-                        vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
-                        vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
+                        vec![Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }],
+                        vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
+                        vec![NormalVertex { i: 93.94331, j: -61.460472, k: -32.00753 }],
                         vec![
-                            Group::new("Group0"), Group::new("Group1"), 
-                            Group::new("Group2"), Group::new("Group3"), Group::new("Group4")
+                            Group::new("Group0"), 
+                            Group::new("Group1"), 
+                            Group::new("Group2"), 
+                            Group::new("Group3"), 
+                            Group::new("Group4")
                         ],
-                        vec![SmoothingGroup::new(0), SmoothingGroup::new(1), SmoothingGroup::new(2)],
-                        vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
+                        vec![
+                            SmoothingGroup::new(0), 
+                            SmoothingGroup::new(1), 
+                            SmoothingGroup::new(2)
+                        ],
+                        vec![
+                            Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))
+                        ], 
                         vec![ShapeEntry::new(0, vec![3], 1)],
                         vec![Geometry::new(None, vec![0])]
                     )
@@ -115,9 +124,9 @@ fn test_cases() -> TestSet {
                 expected: ObjectSet::new(vec![], vec![
                     Object::new(
                         String::from("Object0"),
-                        vec![Vertex::new(-36.84435, -31.289864, -23.619797, -8.21862)],
-                        vec![TextureVertex::new(-44.275238, 28.583176, -23.780418)],
-                        vec![NormalVertex::new(93.94331, -61.460472, -32.00753)],
+                        vec![Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }],
+                        vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
+                        vec![NormalVertex { i: 93.94331, j: -61.460472, k: -32.00753 }],
                         vec![Group::new("default")],
                         vec![SmoothingGroup::new(0)],
                         vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
@@ -153,9 +162,12 @@ fn test_cases() -> TestSet {
                     Object::new(
                         String::from(""),
                         vec![
-                            Vertex::new(  0.0,   0.0, 78.0, 1.0), Vertex::new( 45.0,  45.0,   0.0, 1.0),
-                            Vertex::new( 45.0, -45.0,  0.0, 1.0), Vertex::new(-45.0, -45.0,   0.0, 1.0),
-                            Vertex::new(-45.0,  45.0,  0.0, 1.0), Vertex::new(  0.0,   0.0, -78.0, 1.0),
+                            Vertex { x:  0.0,  y:  0.0,  z:  78.0, w: 1.0 }, 
+                            Vertex { x:  45.0, y:  45.0, z:  0.0,  w: 1.0 },
+                            Vertex { x:  45.0, y: -45.0, z:  0.0,  w: 1.0 }, 
+                            Vertex { x: -45.0, y: -45.0, z:  0.0,  w: 1.0 },
+                            Vertex { x: -45.0, y:  45.0, z:  0.0,  w: 1.0 }, 
+                            Vertex { x:  0.0,  y:  0.0,  z: -78.0, w: 1.0 },
                         ],
                         vec![],
                         vec![],
@@ -173,10 +185,14 @@ fn test_cases() -> TestSet {
                             Element::Face(VTNIndex::V(5), VTNIndex::V(0), VTNIndex::V(4)),
                         ], 
                         vec![
-                            ShapeEntry::new(0, vec![0], 0), ShapeEntry::new(1, vec![0], 0),
-                            ShapeEntry::new(2, vec![0], 0), ShapeEntry::new(3, vec![0], 0),
-                            ShapeEntry::new(4, vec![0], 0), ShapeEntry::new(5, vec![0], 0),
-                            ShapeEntry::new(6, vec![0], 0), ShapeEntry::new(7, vec![0], 0),
+                            ShapeEntry::new(0, vec![0], 0), 
+                            ShapeEntry::new(1, vec![0], 0),
+                            ShapeEntry::new(2, vec![0], 0), 
+                            ShapeEntry::new(3, vec![0], 0),
+                            ShapeEntry::new(4, vec![0], 0), 
+                            ShapeEntry::new(5, vec![0], 0),
+                            ShapeEntry::new(6, vec![0], 0), 
+                            ShapeEntry::new(7, vec![0], 0),
                             ShapeEntry::new(8, vec![0], 0),
                         ],
                         vec![Geometry::new(None, vec![0, 1, 2, 3, 4, 5, 6, 7, 8])]
@@ -225,14 +241,14 @@ fn test_cases() -> TestSet {
                         Object::new(
                             String::from("Object001"),
                             vec![
-                                Vertex::new(0.000000, 2.000000, 2.000000, 1.0), 
-                                Vertex::new(0.000000, 0.000000, 2.000000, 1.0),
-                                Vertex::new(2.000000, 0.000000, 2.000000, 1.0),
-                                Vertex::new(2.000000, 2.000000, 2.000000, 1.0),
-                                Vertex::new(0.000000, 2.000000, 0.000000, 1.0),
-                                Vertex::new(0.000000, 0.000000, 0.000000, 1.0),
-                                Vertex::new(2.000000, 0.000000, 0.000000, 1.0),
-                                Vertex::new(2.000000, 2.000000, 0.000000, 1.0),
+                                Vertex { x: 0.000000, y: 2.000000, z: 2.000000, w: 1.0 }, 
+                                Vertex { x: 0.000000, y: 0.000000, z: 2.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 0.000000, z: 2.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 2.000000, z: 2.000000, w: 1.0 },
+                                Vertex { x: 0.000000, y: 2.000000, z: 0.000000, w: 1.0 },
+                                Vertex { x: 0.000000, y: 0.000000, z: 0.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 0.000000, z: 0.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 2.000000, z: 0.000000, w: 1.0 },
                             ],
                             vec![],
                             vec![],

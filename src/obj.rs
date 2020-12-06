@@ -23,17 +23,6 @@ pub struct Vertex {
     pub w: f64,
 }
 
-impl Vertex {
-    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Vertex {
-        Vertex { 
-            x: x, 
-            y: y, 
-            z: z, 
-            w: w 
-        }
-    }
-}
-
 impl fmt::Display for Vertex {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "v  {}  {}  {}  {}", self.x, self.y, self.z, self.w)
