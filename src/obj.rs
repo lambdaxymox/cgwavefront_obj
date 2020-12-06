@@ -118,13 +118,7 @@ impl fmt::Display for Element {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Group(String);
-
-impl Group {
-    pub fn new(name: &str) -> Group { 
-        Group(String::from(name)) 
-    }
-}
+pub struct Group(pub String);
 
 impl fmt::Display for Group {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
@@ -134,7 +128,7 @@ impl fmt::Display for Group {
 
 impl Default for Group {
     fn default() -> Group { 
-        Group::new("default") 
+        Group(String::from("default"))
     }
 }
 
@@ -762,7 +756,7 @@ impl<'a> Parser<'a> {
         loop {
             match self.next() {
                 Some(name) if name != "\n" => {
-                    groups.push(Group::new(name));
+                    groups.push(Group(String::from(name)));
                     groups_parsed += 1;
                 }
                 _ => break,
@@ -1455,7 +1449,7 @@ mod group_tests {
     fn parse_group_name1() {
         let mut parser = super::Parser::new("g group");
         let mut result = vec![];
-        let expected = vec![Group::new("group")];
+        let expected = vec![Group(String::from("group"))];
         let parsed = parser.parse_groups(&mut result);
 
         assert!(parsed.is_ok());
@@ -1468,7 +1462,9 @@ mod group_tests {
         let mut result = vec![];
         let parsed = parser.parse_groups(&mut result);
         let expected = vec![
-            Group::new("group1"), Group::new("group2"), Group::new("group3")
+            Group(String::from("group1")), 
+            Group(String::from("group2")), 
+            Group(String::from("group3"))
         ];
 
         assert!(parsed.is_ok());
@@ -1644,7 +1640,7 @@ mod objectset_tests {
             NormalVertex { x:  1.0, y:  0.0, z:  0.0 },
             NormalVertex { x: -1.0, y:  0.0, z:  0.0 },
         ];
-        let group_set = vec![Group::new("cube")];
+        let group_set = vec![Group(String::from("cube"))];
         let smoothing_group_set = vec![SmoothingGroup::new(0)];
         let shape_set = vec![
             ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },

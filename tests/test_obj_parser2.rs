@@ -83,11 +83,11 @@ fn test_cases() -> TestSet {
                         vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
                         vec![NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }],
                         vec![
-                            Group::new("Group0"), 
-                            Group::new("Group1"), 
-                            Group::new("Group2"), 
-                            Group::new("Group3"), 
-                            Group::new("Group4")
+                            Group(String::from("Group0")), 
+                            Group(String::from("Group1")), 
+                            Group(String::from("Group2")), 
+                            Group(String::from("Group3")), 
+                            Group(String::from("Group4"))
                         ],
                         vec![
                             SmoothingGroup::new(0), 
@@ -125,7 +125,7 @@ fn test_cases() -> TestSet {
                         vec![Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }],
                         vec![TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }],
                         vec![NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }],
-                        vec![Group::new("default")],
+                        vec![Group(String::from("default"))],
                         vec![SmoothingGroup::new(0)],
                         vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
                         vec![ShapeEntry::new(0, vec![0], 0)],
@@ -169,7 +169,7 @@ fn test_cases() -> TestSet {
                         ],
                         vec![],
                         vec![],
-                        vec![Group::new("Object001")],
+                        vec![Group(String::from("Object001"))],
                         vec![SmoothingGroup::new(0)],
                         vec![
                             Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
@@ -251,12 +251,12 @@ fn test_cases() -> TestSet {
                             vec![],
                             vec![],
                             vec![
-                                Group::new("front"), 
-                                Group::new("back"), 
-                                Group::new("right"), 
-                                Group::new("top"),
-                                Group::new("left"),
-                                Group::new("bottom")
+                                Group(String::from("front")), 
+                                Group(String::from("back")), 
+                                Group(String::from("right")), 
+                                Group(String::from("top")),
+                                Group(String::from("left")),
+                                Group(String::from("bottom"))
                             ],
                             vec![SmoothingGroup::new(0)],
                             vec![

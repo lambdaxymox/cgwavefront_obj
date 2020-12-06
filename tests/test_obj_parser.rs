@@ -2125,7 +2125,9 @@ fn test_case(file_path: &str) -> Test {
         NormalVertex { x:  0.48559,     y:  0.850653,   z: -0.201474    },
     ];
     let group_set = vec![
-        Group::new("Object001"), Group::new("Object002"), Group::new("Object003")
+        Group(String::from("Object001")), 
+        Group(String::from("Object002")), 
+        Group(String::from("Object003"))
     ];
     let smoothing_group_set = vec![SmoothingGroup::new(0)];
     let shape_set = vec![
