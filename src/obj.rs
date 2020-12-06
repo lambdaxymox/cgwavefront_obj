@@ -260,15 +260,6 @@ pub struct ObjectSet {
     pub objects: Vec<Object>,
 }
 
-impl ObjectSet {
-    pub fn new(material_libraries: Vec<String>, objects: Vec<Object>) -> ObjectSet {
-        ObjectSet {
-            material_libraries: material_libraries,
-            objects: objects,
-        }    
-    }
-}
-
 impl fmt::Display for ObjectSet {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let string = DisplayObjectSetCompositor::new().compose(self);
@@ -1051,7 +1042,10 @@ impl<'a> Parser<'a> {
         let material_libraries = self.parse_material_libraries()?;
         let objects = self.parse_objects()?;
 
-        Ok(ObjectSet::new(material_libraries, objects))
+        Ok(ObjectSet { 
+            material_libraries: material_libraries, 
+            objects: objects 
+        })
     }
 }
 
@@ -1623,7 +1617,10 @@ mod objectset_tests {
         };
         let material_libraries = vec![];
         let objects = vec![object];
-        let expected = ObjectSet::new(material_libraries, objects);
+        let expected = ObjectSet { 
+            material_libraries: material_libraries, 
+            objects: objects
+        };
         let mut parser = super::Parser::new(obj_file);
         let result = parser.parse_objset();
 

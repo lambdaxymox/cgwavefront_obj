@@ -76,41 +76,44 @@ fn test_cases() -> TestSet {
                     s  2                                            \
                     #### End Object 0                               \
                 "),
-                expected: ObjectSet::new(vec![], vec![
-                    Object {
-                        name: String::from("Object0"),
-                        vertex_set: vec![
-                            Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }
-                        ],
-                        texture_vertex_set: vec![
-                            TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }
-                        ],
-                        normal_vertex_set: vec![
-                            NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }
-                        ],
-                        group_set: vec![
-                            Group(String::from("Group0")), 
-                            Group(String::from("Group1")), 
-                            Group(String::from("Group2")), 
-                            Group(String::from("Group3")), 
-                            Group(String::from("Group4"))
-                        ],
-                        smoothing_group_set: vec![
-                            SmoothingGroup(0), 
-                            SmoothingGroup(1), 
-                            SmoothingGroup(2)
-                        ],
-                        element_set: vec![
-                            Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))
-                        ], 
-                        shape_set: vec![
-                            ShapeEntry { element: 0, groups: vec![3], smoothing_group: 1 }
-                        ],
-                        geometry_set: vec![
-                            Geometry { material_name: None, shapes: vec![0] }
-                        ]
-                    }
-                ])
+                expected: ObjectSet { 
+                    material_libraries: vec![], 
+                    objects: vec![
+                        Object {
+                            name: String::from("Object0"),
+                            vertex_set: vec![
+                                Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }
+                            ],
+                            texture_vertex_set: vec![
+                                TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }
+                            ],
+                            normal_vertex_set: vec![
+                                NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }
+                            ],
+                            group_set: vec![
+                                Group(String::from("Group0")), 
+                                Group(String::from("Group1")), 
+                                Group(String::from("Group2")), 
+                                Group(String::from("Group3")), 
+                                Group(String::from("Group4"))
+                            ],
+                            smoothing_group_set: vec![
+                                SmoothingGroup(0), 
+                                SmoothingGroup(1), 
+                                SmoothingGroup(2)
+                            ],
+                            element_set: vec![
+                                Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))
+                            ], 
+                            shape_set: vec![
+                                ShapeEntry { element: 0, groups: vec![3], smoothing_group: 1 }
+                            ],
+                            geometry_set: vec![
+                                Geometry { material_name: None, shapes: vec![0] }
+                            ]
+                        }
+                    ]
+                }
             },
             Test {
                 data: String::from(r"
@@ -129,35 +132,38 @@ fn test_cases() -> TestSet {
                                                                    \
                     #### End Object 0                              \
                 "),
-                expected: ObjectSet::new(vec![], vec![
-                    Object {
-                        name: String::from("Object0"),
-                        vertex_set: vec![
-                            Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }
-                        ],
-                        texture_vertex_set: vec![
-                            TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }
-                        ],
-                        normal_vertex_set: vec![
-                            NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }
-                        ],
-                        group_set: vec![
-                            Group(String::from("default"))
-                        ],
-                        smoothing_group_set: vec![
-                            SmoothingGroup(0)
-                        ],
-                        element_set: vec![
-                            Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))
-                        ], 
-                        shape_set: vec![
-                            ShapeEntry { element: 0, groups: vec![0], smoothing_group: 0 }
-                        ],
-                        geometry_set: vec![
-                            Geometry { material_name: None, shapes: vec![0] }
-                        ]
-                    }
-                ])
+                expected: ObjectSet {
+                    material_libraries: vec![], 
+                    objects: vec![
+                        Object {
+                            name: String::from("Object0"),
+                            vertex_set: vec![
+                                Vertex { x: -36.84435, y: -31.289864, z: -23.619797, w: -8.21862 }
+                            ],
+                            texture_vertex_set: vec![
+                                TextureVertex { u: -44.275238, v: 28.583176, w: -23.780418 }
+                            ],
+                            normal_vertex_set: vec![
+                                NormalVertex { x: 93.94331, y: -61.460472, z: -32.00753 }
+                            ],
+                            group_set: vec![
+                                Group(String::from("default"))
+                            ],
+                            smoothing_group_set: vec![
+                                SmoothingGroup(0)
+                            ],
+                            element_set: vec![
+                                Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))
+                            ], 
+                            shape_set: vec![
+                                ShapeEntry { element: 0, groups: vec![0], smoothing_group: 0 }
+                            ],
+                            geometry_set: vec![
+                                Geometry { material_name: None, shapes: vec![0] }
+                            ]
+                        }
+                    ]
+                }
             },
             Test {
                 data: String::from(r"
@@ -182,52 +188,55 @@ fn test_cases() -> TestSet {
                     f     6 2 1                             \
                     f     6 1 5                             \
                 "),
-                expected: ObjectSet::new(vec![], vec![
-                    Object {
-                        name: String::from(""),
-                        vertex_set: vec![
-                            Vertex { x:  0.0,  y:  0.0,  z:  78.0, w: 1.0 }, 
-                            Vertex { x:  45.0, y:  45.0, z:  0.0,  w: 1.0 },
-                            Vertex { x:  45.0, y: -45.0, z:  0.0,  w: 1.0 }, 
-                            Vertex { x: -45.0, y: -45.0, z:  0.0,  w: 1.0 },
-                            Vertex { x: -45.0, y:  45.0, z:  0.0,  w: 1.0 }, 
-                            Vertex { x:  0.0,  y:  0.0,  z: -78.0, w: 1.0 },
-                        ],
-                        texture_vertex_set: vec![],
-                        normal_vertex_set: vec![],
-                        group_set: vec![
-                            Group(String::from("Object001"))
-                        ],
-                        smoothing_group_set: vec![
-                            SmoothingGroup(0)
-                        ],
-                        element_set: vec![
-                            Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
-                            Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
-                            Element::Face(VTNIndex::V(0), VTNIndex::V(3), VTNIndex::V(4)),
-                            Element::Face(VTNIndex::V(0), VTNIndex::V(4), VTNIndex::V(1)),
-                            Element::Face(VTNIndex::V(5), VTNIndex::V(4), VTNIndex::V(3)),
-                            Element::Face(VTNIndex::V(5), VTNIndex::V(3), VTNIndex::V(2)),
-                            Element::Face(VTNIndex::V(5), VTNIndex::V(2), VTNIndex::V(1)),
-                            Element::Face(VTNIndex::V(5), VTNIndex::V(1), VTNIndex::V(0)),
-                            Element::Face(VTNIndex::V(5), VTNIndex::V(0), VTNIndex::V(4)),
-                        ], 
-                        shape_set: vec![
-                            ShapeEntry { element: 0, groups: vec![0], smoothing_group: 0 }, 
-                            ShapeEntry { element: 1, groups: vec![0], smoothing_group: 0 },
-                            ShapeEntry { element: 2, groups: vec![0], smoothing_group: 0 }, 
-                            ShapeEntry { element: 3, groups: vec![0], smoothing_group: 0 },
-                            ShapeEntry { element: 4, groups: vec![0], smoothing_group: 0 },
-                            ShapeEntry { element: 5, groups: vec![0], smoothing_group: 0 },
-                            ShapeEntry { element: 6, groups: vec![0], smoothing_group: 0 }, 
-                            ShapeEntry { element: 7, groups: vec![0], smoothing_group: 0 },
-                            ShapeEntry { element: 8, groups: vec![0], smoothing_group: 0 },
-                        ],
-                        geometry_set: vec![
-                            Geometry { material_name: None, shapes: vec![0, 1, 2, 3, 4, 5, 6, 7, 8] },
-                        ]
-                    }
-                ])
+                expected: ObjectSet { 
+                    material_libraries: vec![], 
+                    objects: vec![
+                        Object {
+                            name: String::from(""),
+                            vertex_set: vec![
+                                Vertex { x:  0.0,  y:  0.0,  z:  78.0, w: 1.0 }, 
+                                Vertex { x:  45.0, y:  45.0, z:  0.0,  w: 1.0 },
+                                Vertex { x:  45.0, y: -45.0, z:  0.0,  w: 1.0 }, 
+                                Vertex { x: -45.0, y: -45.0, z:  0.0,  w: 1.0 },
+                                Vertex { x: -45.0, y:  45.0, z:  0.0,  w: 1.0 }, 
+                                Vertex { x:  0.0,  y:  0.0,  z: -78.0, w: 1.0 },
+                            ],
+                            texture_vertex_set: vec![],
+                            normal_vertex_set: vec![],
+                            group_set: vec![
+                                Group(String::from("Object001"))
+                            ],
+                            smoothing_group_set: vec![
+                                SmoothingGroup(0)
+                            ],
+                            element_set: vec![
+                                Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
+                                Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
+                                Element::Face(VTNIndex::V(0), VTNIndex::V(3), VTNIndex::V(4)),
+                                Element::Face(VTNIndex::V(0), VTNIndex::V(4), VTNIndex::V(1)),
+                                Element::Face(VTNIndex::V(5), VTNIndex::V(4), VTNIndex::V(3)),
+                                Element::Face(VTNIndex::V(5), VTNIndex::V(3), VTNIndex::V(2)),
+                                Element::Face(VTNIndex::V(5), VTNIndex::V(2), VTNIndex::V(1)),
+                                Element::Face(VTNIndex::V(5), VTNIndex::V(1), VTNIndex::V(0)),
+                                Element::Face(VTNIndex::V(5), VTNIndex::V(0), VTNIndex::V(4)),
+                            ], 
+                            shape_set: vec![
+                                ShapeEntry { element: 0, groups: vec![0], smoothing_group: 0 }, 
+                                ShapeEntry { element: 1, groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 2, groups: vec![0], smoothing_group: 0 }, 
+                                ShapeEntry { element: 3, groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 4, groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 5, groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 6, groups: vec![0], smoothing_group: 0 }, 
+                                ShapeEntry { element: 7, groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 8, groups: vec![0], smoothing_group: 0 },
+                            ],
+                            geometry_set: vec![
+                                Geometry { material_name: None, shapes: vec![0, 1, 2, 3, 4, 5, 6, 7, 8] },
+                            ]
+                        }
+                    ]
+                }
             },
             Test {
                 data: String::from(r"
@@ -263,11 +272,11 @@ fn test_cases() -> TestSet {
                     f 2 6 7 3                     \
                     # 6 elements                  \
                 "),
-                expected: ObjectSet::new(
-                    vec![
+                expected: ObjectSet {
+                    material_libraries: vec![
                         String::from("master.mtl"),
                     ],
-                    vec![
+                    objects: vec![
                         Object {
                             name: String::from("Object001"),
                             vertex_set: vec![
@@ -331,7 +340,7 @@ fn test_cases() -> TestSet {
                             ]
                         }
                     ],
-                )
+                }
             }
         ],
     }

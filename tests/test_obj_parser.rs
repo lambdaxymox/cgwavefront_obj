@@ -3235,7 +3235,10 @@ fn test_case(file_path: &str) -> Test {
         shape_set: shape_set,
         geometry_set: geometry_set,
     };
-    let expected = ObjectSet::new(vec![], vec![object]);
+    let expected = ObjectSet { 
+        material_libraries: vec![], 
+        objects: vec![object]
+    };
 
     Test {
         data: data,
