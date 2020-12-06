@@ -1017,13 +1017,27 @@ impl<'a> Parser<'a> {
                 }
                 Some("usemtl") => {
                     // Save the element ranges for the current material.
-                    material_name_entry_table.push((
-                        (min_element_material_name_index, max_element_material_name_index),
-                        material_name_index
-                    ));
+                    if min_element_material_name_index == max_element_material_name_index {
+                        if material_names.is_empty() {
+                            self.parse_material_name(&mut material_names)?;
+                        } else {
+                            self.parse_material_name(&mut material_names)?;
+                            material_name_index += 1;
+                        }
+                    } else {
+                        material_name_entry_table.push((
+                            (min_element_material_name_index, max_element_material_name_index),
+                            material_name_index
+                        ));
 
-                    self.parse_material_name(&mut material_names)?;
-                    material_name_index += 1;
+                        if material_names.is_empty() {
+                            self.parse_material_name(&mut material_names)?;
+                        } else {
+                            self.parse_material_name(&mut material_names)?;
+                            material_name_index += 1;
+                        }
+                    }
+
                     min_element_material_name_index = max_element_material_name_index;
                 }
                 Some("v")  => {

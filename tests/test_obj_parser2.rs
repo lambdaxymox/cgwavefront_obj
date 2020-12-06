@@ -183,6 +183,108 @@ fn test_cases() -> TestSet {
                     )
                 ])
             },
+            Test {
+                data: String::from(r"
+                    mtllib master.mtl             \
+                    o Object001                   \
+                    v 0.000000 2.000000 2.000000  \
+                    v 0.000000 0.000000 2.000000  \
+                    v 2.000000 0.000000 2.000000  \
+                    v 2.000000 2.000000 2.000000  \
+                    v 0.000000 2.000000 0.000000  \
+                    v 0.000000 0.000000 0.000000  \
+                    v 2.000000 0.000000 0.000000  \
+                    v 2.000000 2.000000 0.000000  \
+                    # 8 vertices                  \
+                                                  \
+                    g front                       \
+                    usemtl red                    \
+                    f 1 2 3 4                     \
+                    g back                        \
+                    usemtl blue                   \
+                    f 8 7 6 5                     \
+                    g right                       \
+                    usemtl green                  \
+                    f 4 3 7 8                     \
+                    g top                         \
+                    usemtl gold                   \
+                    f 5 1 4 8                     \
+                    g left                        \
+                    usemtl orange                 \
+                    f 5 6 2 1                     \
+                    g bottom                      \
+                    usemtl purple                 \
+                    f 2 6 7 3                     \
+                    # 6 elements                  \
+                "),
+                expected: ObjectSet::new(
+                    vec![
+                        String::from("master.mtl"),
+                    ],
+                    vec![
+                        Object::new(
+                            String::from("Object001"),
+                            vec![
+                                Vertex::new(0.000000, 2.000000, 2.000000, 1.0), 
+                                Vertex::new(0.000000, 0.000000, 2.000000, 1.0),
+                                Vertex::new(2.000000, 0.000000, 2.000000, 1.0),
+                                Vertex::new(2.000000, 2.000000, 2.000000, 1.0),
+                                Vertex::new(0.000000, 2.000000, 0.000000, 1.0),
+                                Vertex::new(0.000000, 0.000000, 0.000000, 1.0),
+                                Vertex::new(2.000000, 0.000000, 0.000000, 1.0),
+                                Vertex::new(2.000000, 2.000000, 0.000000, 1.0),
+                            ],
+                            vec![],
+                            vec![],
+                            vec![
+                                Group::new("front"), 
+                                Group::new("back"), 
+                                Group::new("right"), 
+                                Group::new("top"),
+                                Group::new("left"),
+                                Group::new("bottom")
+                            ],
+                            vec![SmoothingGroup::new(0)],
+                            vec![
+                                Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
+                                Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
+                                Element::Face(VTNIndex::V(7), VTNIndex::V(6), VTNIndex::V(5)),
+                                Element::Face(VTNIndex::V(7), VTNIndex::V(5), VTNIndex::V(4)),
+                                Element::Face(VTNIndex::V(3), VTNIndex::V(2), VTNIndex::V(6)),
+                                Element::Face(VTNIndex::V(3), VTNIndex::V(6), VTNIndex::V(7)),
+                                Element::Face(VTNIndex::V(4), VTNIndex::V(0), VTNIndex::V(3)),
+                                Element::Face(VTNIndex::V(4), VTNIndex::V(3), VTNIndex::V(7)),
+                                Element::Face(VTNIndex::V(4), VTNIndex::V(5), VTNIndex::V(1)),
+                                Element::Face(VTNIndex::V(4), VTNIndex::V(1), VTNIndex::V(0)),
+                                Element::Face(VTNIndex::V(1), VTNIndex::V(5), VTNIndex::V(6)),
+                                Element::Face(VTNIndex::V(1), VTNIndex::V(6), VTNIndex::V(2)),
+                            ],
+                            vec![
+                                ShapeEntry::new(0,  vec![0], 0),
+                                ShapeEntry::new(1,  vec![0], 0),
+                                ShapeEntry::new(2,  vec![1], 0),
+                                ShapeEntry::new(3,  vec![1], 0),
+                                ShapeEntry::new(4,  vec![2], 0),
+                                ShapeEntry::new(5,  vec![2], 0),
+                                ShapeEntry::new(6,  vec![3], 0),
+                                ShapeEntry::new(7,  vec![3], 0),
+                                ShapeEntry::new(8,  vec![4], 0),
+                                ShapeEntry::new(9,  vec![4], 0),
+                                ShapeEntry::new(10, vec![5], 0),
+                                ShapeEntry::new(11, vec![5], 0),
+                            ],
+                            vec![
+                                Geometry::new(Some(String::from("red")),    vec![0,  1]),
+                                Geometry::new(Some(String::from("blue")),   vec![2,  3]),
+                                Geometry::new(Some(String::from("green")),  vec![4,  5]),
+                                Geometry::new(Some(String::from("gold")),   vec![6,  7]),
+                                Geometry::new(Some(String::from("orange")), vec![8,  9]),
+                                Geometry::new(Some(String::from("purple")), vec![10, 11]),
+                            ]
+                        )
+                    ],
+                )
+            }
         ],
     }
 }
@@ -494,5 +596,21 @@ fn test_parse_object_every_element_smoothing_group_exists() {
             }
         }
     }      
+}
+
+/// The Wavefront OBJ parser should associate the correct material with each
+/// geometry element.
+#[test]
+fn test_parse_object_every_element_should_have_geometry() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result_set = parser.parse_objset().unwrap();
+        for (result, expected) 
+            in result_set.objects.iter().zip(test.expected.objects.iter()) { 
+                assert_eq!(result.geometry_set, expected.geometry_set);
+        }
+    }
 }
 
