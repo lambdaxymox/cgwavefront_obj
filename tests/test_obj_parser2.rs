@@ -97,7 +97,7 @@ fn test_cases() -> TestSet {
                         vec![
                             Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))
                         ], 
-                        vec![ShapeEntry::new(0, vec![3], 1)],
+                        vec![ShapeEntry { element: 0, groups: vec![3], smoothing_group: 1 }],
                         vec![Geometry::new(None, vec![0])]
                     )
                 ])
@@ -128,7 +128,7 @@ fn test_cases() -> TestSet {
                         vec![Group(String::from("default"))],
                         vec![SmoothingGroup(0)],
                         vec![Element::Face(VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0), VTNIndex::VTN(0, 0, 0))], 
-                        vec![ShapeEntry::new(0, vec![0], 0)],
+                        vec![ShapeEntry { element: 0, groups: vec![0], smoothing_group: 0 }],
                         vec![Geometry::new(None, vec![0])]
                     )
                 ])
@@ -183,15 +183,15 @@ fn test_cases() -> TestSet {
                             Element::Face(VTNIndex::V(5), VTNIndex::V(0), VTNIndex::V(4)),
                         ], 
                         vec![
-                            ShapeEntry::new(0, vec![0], 0), 
-                            ShapeEntry::new(1, vec![0], 0),
-                            ShapeEntry::new(2, vec![0], 0), 
-                            ShapeEntry::new(3, vec![0], 0),
-                            ShapeEntry::new(4, vec![0], 0), 
-                            ShapeEntry::new(5, vec![0], 0),
-                            ShapeEntry::new(6, vec![0], 0), 
-                            ShapeEntry::new(7, vec![0], 0),
-                            ShapeEntry::new(8, vec![0], 0),
+                            ShapeEntry { element: 0, groups: vec![0], smoothing_group: 0 }, 
+                            ShapeEntry { element: 1, groups: vec![0], smoothing_group: 0 },
+                            ShapeEntry { element: 2, groups: vec![0], smoothing_group: 0 }, 
+                            ShapeEntry { element: 3, groups: vec![0], smoothing_group: 0 },
+                            ShapeEntry { element: 4, groups: vec![0], smoothing_group: 0 },
+                            ShapeEntry { element: 5, groups: vec![0], smoothing_group: 0 },
+                            ShapeEntry { element: 6, groups: vec![0], smoothing_group: 0 }, 
+                            ShapeEntry { element: 7, groups: vec![0], smoothing_group: 0 },
+                            ShapeEntry { element: 8, groups: vec![0], smoothing_group: 0 },
                         ],
                         vec![Geometry::new(None, vec![0, 1, 2, 3, 4, 5, 6, 7, 8])]
                     )
@@ -274,18 +274,18 @@ fn test_cases() -> TestSet {
                                 Element::Face(VTNIndex::V(1), VTNIndex::V(6), VTNIndex::V(2)),
                             ],
                             vec![
-                                ShapeEntry::new(0,  vec![0], 0),
-                                ShapeEntry::new(1,  vec![0], 0),
-                                ShapeEntry::new(2,  vec![1], 0),
-                                ShapeEntry::new(3,  vec![1], 0),
-                                ShapeEntry::new(4,  vec![2], 0),
-                                ShapeEntry::new(5,  vec![2], 0),
-                                ShapeEntry::new(6,  vec![3], 0),
-                                ShapeEntry::new(7,  vec![3], 0),
-                                ShapeEntry::new(8,  vec![4], 0),
-                                ShapeEntry::new(9,  vec![4], 0),
-                                ShapeEntry::new(10, vec![5], 0),
-                                ShapeEntry::new(11, vec![5], 0),
+                                ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 2,  groups: vec![1], smoothing_group: 0 },
+                                ShapeEntry { element: 3,  groups: vec![1], smoothing_group: 0 },
+                                ShapeEntry { element: 4,  groups: vec![2], smoothing_group: 0 },
+                                ShapeEntry { element: 5,  groups: vec![2], smoothing_group: 0 },
+                                ShapeEntry { element: 6,  groups: vec![3], smoothing_group: 0 },
+                                ShapeEntry { element: 7,  groups: vec![3], smoothing_group: 0 },
+                                ShapeEntry { element: 8,  groups: vec![4], smoothing_group: 0 },
+                                ShapeEntry { element: 9,  groups: vec![4], smoothing_group: 0 },
+                                ShapeEntry { element: 10, groups: vec![5], smoothing_group: 0 },
+                                ShapeEntry { element: 11, groups: vec![5], smoothing_group: 0 },
                             ],
                             vec![
                                 Geometry::new(Some(String::from("red")),    vec![0,  1]),

@@ -165,20 +165,6 @@ pub struct ShapeEntry {
     pub smoothing_group: SmoothingGroupIndex,
 }
 
-impl ShapeEntry {
-    pub fn new(
-        element: ElementIndex, 
-        groups: Vec<GroupIndex>, 
-        smoothing_group: SmoothingGroupIndex) -> ShapeEntry {
-
-        ShapeEntry {
-            element: element,
-            groups: groups,
-            smoothing_group: smoothing_group,
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Shape {
     pub element: Element,
@@ -820,7 +806,11 @@ impl<'a> Parser<'a> {
             
             let groups: Vec<usize> = (min_group_index..max_group_index).collect();
             for i in min_element_index..max_element_index {
-                shape_entry_table.push(ShapeEntry::new(i, groups.clone(), 0));
+                shape_entry_table.push(ShapeEntry { 
+                    element: i, 
+                    groups: groups.clone(), 
+                    smoothing_group: 0 
+                });
             }
         }
         debug_assert!(shape_entry_table.len() == elements.len());
