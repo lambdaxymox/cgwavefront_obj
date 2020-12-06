@@ -223,9 +223,9 @@ impl ShapeEntry {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Shape {
-    element: Element,
-    groups: Vec<Group>,
-    smoothing_groups: Vec<SmoothingGroup>,
+    pub element: Element,
+    pub groups: Vec<Group>,
+    pub smoothing_groups: Vec<SmoothingGroup>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -430,24 +430,24 @@ impl DisplayObjectSetCompositor {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ErrorKind {
     EndOfFile,
-    ExpectedStatementButGot(String, String),
-    ExpectedFloatButGot(String),
-    ExpectedIntegerButGot(String),
+    ExpectedTagStatement,
+    ExpectedFloat,
+    ExpectedInteger,
     ExpectedVertexIndexButGot(String),
     ExpectedTextureIndexButGot(String),
     ExpectedNormalIndexButGot(String),
     ExpectedVertexNormalIndexButGot(String),
     ExpectedVertexTextureIndexButGot(String),
-    ExpectedVTNIndexButGot(String),
+    ExpectedVTNIndex,
     EveryFaceElementMustHaveAtLeastThreeVertices,
     EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-    InvalidElementDeclaration(String),
+    InvalidElementDeclaration,
     ElementMustBeAPointLineOrFace,
-    SmoothingGroupNameMustBeOffOrInteger(String),
+    SmoothingGroupNameMustBeOffOrInteger,
     SmoothingGroupDeclarationHasNoName,
     MaterialStatementHasNoName,
 }
-
+/*
 impl fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use ErrorKind::*;
@@ -521,28 +521,30 @@ impl fmt::Display for ErrorKind {
         }
     }
 }
-
+*/
 /// An error that is returned from parsing an invalid *.obj file, or
 /// another kind of error.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
     line_number: usize,
     kind: ErrorKind,
+    message: String,
 }
 
 impl ParseError {
     /// Generate a new parse error.
-    fn new(line_number: usize, kind: ErrorKind) -> ParseError {
+    fn new(line_number: usize, kind: ErrorKind, message: String) -> ParseError {
         ParseError {
             line_number: line_number,
             kind: kind,
+            message: message,
         }
     }
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "Parse error at line {}: {}", self.line_number, self.kind)
+        write!(f, "Parse error at line {}: {}", self.line_number, self.message)
     }
 }
 
@@ -550,8 +552,8 @@ impl error::Error for ParseError {}
 
 
 #[inline]
-fn error<T>(line_number: usize, kind: ErrorKind) -> Result<T, ParseError> {
-    Err(ParseError::new(line_number, kind))
+fn error<T>(line_number: usize, kind: ErrorKind, message: String) -> Result<T, ParseError> {
+    Err(ParseError::new(line_number, kind, message))
 }
 
 
@@ -591,16 +593,25 @@ impl<'a> Parser<'a> {
     fn next_string(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
-            None => error(self.line_number, ErrorKind::EndOfFile)
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile,
+                format!("Reached the end of the input in the process of getting the next token.")
+            )
         }
     }
 
     fn expect_tag(&mut self, tag: &str) -> Result<(), ParseError> {
         match self.next() {
-            None => error(self.line_number, ErrorKind::EndOfFile),
+            None => error(
+                self.line_number, 
+                ErrorKind::EndOfFile,
+                format!("Reached the end of the input in the process of getting the next token.")
+            ),
             Some(st) if st != tag => error(
                 self.line_number, 
-                ErrorKind::ExpectedStatementButGot(tag.into(), st.into())
+                ErrorKind::ExpectedTagStatement,
+                format!("Expected `{}` but got `{}` instead.", tag, st)
             ),
             _ => Ok(())
         }
@@ -612,7 +623,8 @@ impl<'a> Parser<'a> {
             Ok(val) => Ok(val),
             Err(_) => error(
                 self.line_number, 
-                ErrorKind::ExpectedFloatButGot(st.into())
+                ErrorKind::ExpectedFloat,
+                format!("Expected a floating point number but got `{}` instead.", st)
             ),
         }
     }
@@ -623,7 +635,8 @@ impl<'a> Parser<'a> {
             Ok(val) => Ok(val),
             Err(_) => error(
                 self.line_number, 
-                ErrorKind::ExpectedIntegerButGot(st.into())
+                ErrorKind::ExpectedInteger,
+                format!("Expected an integer but got `{}` instead.", st)
             ),
         }
     }
@@ -722,7 +735,8 @@ impl<'a> Parser<'a> {
         if split1.is_none() || splits_iter.next().is_some() {
             return error(
                 self.line_number, 
-                ErrorKind::ExpectedVTNIndexButGot(st.into())
+                ErrorKind::ExpectedVTNIndex,
+                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
             );
         }
         
@@ -733,7 +747,8 @@ impl<'a> Parser<'a> {
             (Some(v), Some(t), Some(n)) => Ok(VTNIndex::VTN(v - 1, t - 1, n - 1)),
             _ => return error(
                 self.line_number, 
-                ErrorKind::ExpectedVTNIndexButGot(st.into())
+                ErrorKind::ExpectedVTNIndex,
+                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
             ),
         }
     }
@@ -764,7 +779,8 @@ impl<'a> Parser<'a> {
                     Err(_) => {
                         return error(
                             self.line_number,
-                            ErrorKind::ExpectedIntegerButGot(st.into())
+                            ErrorKind::ExpectedInteger,
+                            format!("Expected an integer but got `{}` instead.", st)
                         )
                     }
                 }
@@ -788,7 +804,11 @@ impl<'a> Parser<'a> {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
                 return error(
                     self.line_number, 
-                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement
+                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
+                    format!(
+                        "Every VTN index describing the vertex data for a line must have\
+                         the same form."
+                    )
                 );
             }
         }
@@ -811,7 +831,11 @@ impl<'a> Parser<'a> {
         if vtn_indices.len() < 3 {
             return error(
                 self.line_number, 
-                ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices
+                ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices,
+                format!(
+                    "A face primitive must have at least three vertices.\
+                     At minimum, a triangle requires three indices."
+                )
             );
         }
 
@@ -820,7 +844,11 @@ impl<'a> Parser<'a> {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
                 return error(
                     self.line_number, 
-                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement
+                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
+                    format!(
+                        "Every VTN index describing the vertex data for a face must have\
+                         the same form."
+                    )
                 );
             }
         }
@@ -842,7 +870,13 @@ impl<'a> Parser<'a> {
             Some("p") => self.parse_point(elements),
             Some("l") => self.parse_line(elements),
             Some("f") => self.parse_face(elements),
-            _ => error(self.line_number, ErrorKind::ElementMustBeAPointLineOrFace),
+            _ => error(
+                self.line_number, 
+                ErrorKind::ElementMustBeAPointLineOrFace,
+                format!(
+                    "An element must be declared as a point (`p`), line (`l`), or face (`f`)."
+                )
+            ),
         }
     }
 
@@ -875,13 +909,20 @@ impl<'a> Parser<'a> {
             } else {
                 return error(
                     self.line_number, 
-                    ErrorKind::SmoothingGroupNameMustBeOffOrInteger(name.into())
+                    ErrorKind::SmoothingGroupNameMustBeOffOrInteger,
+                    format!(
+                        "A smoothing group name must either be `off`, which denotes that an \
+                        object has no smoothing groups, or an integer. The parser got `{}` instead.",
+                        name
+                    )
                 );
             }
         } else {
             return error(
                 self.line_number, 
-                ErrorKind::SmoothingGroupDeclarationHasNoName
+                ErrorKind::SmoothingGroupDeclarationHasNoName,
+                format!("Got a smoothing group declaration without a smoothing group name.")
+
             );
         }
 
@@ -898,7 +939,8 @@ impl<'a> Parser<'a> {
         } else {
             return error(
                 self.line_number,
-                ErrorKind::MaterialStatementHasNoName
+                ErrorKind::MaterialStatementHasNoName,
+                format!("Got a `usemtl` material declaration without a material name.")
             )
         }
 
@@ -1101,7 +1143,8 @@ impl<'a> Parser<'a> {
                 Some(other_st) => {
                     return error(
                         self.line_number, 
-                        ErrorKind::InvalidElementDeclaration(other_st.into())
+                        ErrorKind::InvalidElementDeclaration,
+                        format!("Unsupported or invalid element declaration `{}`.", other_st)
                     );
                 }
             }
