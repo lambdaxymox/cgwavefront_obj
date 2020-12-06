@@ -178,15 +178,6 @@ pub struct Geometry {
     pub shapes: Vec<ShapeEntryIndex>,
 }
 
-impl Geometry {
-    pub fn new(material_name: Option<String>, shapes: Vec<ShapeEntryIndex>) -> Geometry {
-        Geometry {
-            material_name: material_name,
-            shapes: shapes,
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub enum VTNTriple<'a> {
     V(&'a Vertex),
@@ -209,34 +200,6 @@ pub struct Object {
 }
 
 impl Object {
-    pub fn new(
-        name: String,
-        vertex_set: Vec<Vertex>, 
-        texture_vertex_set: Vec<TextureVertex>, 
-        normal_vertex_set: Vec<NormalVertex>,
-        group_set: Vec<Group>, 
-        smoothing_group_set: Vec<SmoothingGroup>, 
-        element_set: Vec<Element>,
-        shape_set: Vec<ShapeEntry>,
-        geometry_set: Vec<Geometry>) -> Object {
-        
-        Object {
-            name: name,
-            vertex_set: vertex_set,
-            texture_vertex_set: texture_vertex_set,
-            normal_vertex_set: normal_vertex_set,
-            group_set: group_set,
-            smoothing_group_set: smoothing_group_set,
-            element_set: element_set,
-            shape_set: shape_set,
-            geometry_set: geometry_set
-        }
-    }
-
-    pub fn name(&self) -> &str { 
-        &self.name
-    }
-
     pub fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
@@ -276,17 +239,17 @@ impl fmt::Display for Object {
 
 impl Default for Object {
     fn default() -> Object {
-        Object::new(
-            String::from(""),   
-            Default::default(), 
-            Default::default(), 
-            Default::default(), 
-            Default::default(), 
-            Default::default(), 
-            Default::default(),
-            Default::default(),
-            Default::default(),
-        )
+        Object {
+            name: String::from(""),   
+            vertex_set: Default::default(), 
+            texture_vertex_set: Default::default(), 
+            normal_vertex_set: Default::default(), 
+            group_set: Default::default(), 
+            smoothing_group_set: Default::default(), 
+            element_set: Default::default(),
+            shape_set: Default::default(),
+            geometry_set: Default::default(),
+        }
     }
 }
 
@@ -836,7 +799,7 @@ impl<'a> Parser<'a> {
             
             let shapes: Vec<ShapeEntryIndex> = (min_element_index..max_element_index).collect();
             let material_name = material_names[material_name_index].map(String::from);
-            let geometry = Geometry::new(material_name, shapes);
+            let geometry = Geometry { material_name: material_name, shapes: shapes };
             geometries.push(geometry);
         }
     }
@@ -1642,7 +1605,10 @@ mod objectset_tests {
             ShapeEntry { element: 11, groups: vec![0], smoothing_group: 0 },
         ];
         let geometry_set = vec![
-            Geometry::new(None, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+            Geometry { 
+                material_name: None, 
+                shapes: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] 
+            },
         ];
         let object = Object {
             name: name,

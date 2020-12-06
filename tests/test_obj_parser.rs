@@ -3156,7 +3156,8 @@ fn test_case(file_path: &str) -> Test {
         ShapeEntry { element: 1022, groups: vec![0, 1, 2], smoothing_group: 0 },
         ShapeEntry { element: 1023, groups: vec![0, 1, 2], smoothing_group: 0 },
     ];
-    let geometry_set = vec![Geometry::new(None, vec![
+    let material_name = None;
+    let shapes = vec![
         0,    1,    2,    3,    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,   
         16,   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,   
         32,   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,   44,   45,   46,   47,   
@@ -3221,7 +3222,8 @@ fn test_case(file_path: &str) -> Test {
         976,  977,  978,  979,  980,  981,  982,  983,  984,  985,  986,  987,  988,  989,  990,  991,  
         992,  993,  994,  995,  996,  997,  998,  999,  1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 
         1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 
-    ])];
+    ];
+    let geometry_set = vec![Geometry { material_name: material_name, shapes: shapes }];
     let object = Object {
         name: name,
         vertex_set: vertex_set,
