@@ -1027,19 +1027,19 @@ impl<'a> Parser<'a> {
                         (min_element_group_index, max_element_group_index), 
                         (min_group_index, max_group_index)
                     ));
-                    min_element_group_index = max_element_group_index;
+                    // min_element_group_index = max_element_group_index;
 
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
                         smoothing_group_index
                     ));
-                    min_element_smoothing_group_index = max_element_smoothing_group_index;
+                    // min_element_smoothing_group_index = max_element_smoothing_group_index;
 
                     material_name_entry_table.push((
                         (min_element_material_name_index, max_element_material_name_index),
                         material_name_index
                     ));
-                    min_element_material_name_index = max_element_material_name_index;
+                    // min_element_material_name_index = max_element_material_name_index;
 
                     break;
                 }
