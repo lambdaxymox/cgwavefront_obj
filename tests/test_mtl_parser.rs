@@ -1,4 +1,3 @@
-use wavefront_obj::mtl;
 use wavefront_obj::mtl::{
     MaterialSet,
     Material,
@@ -80,6 +79,201 @@ fn test_cases() -> TestSet {
                             map_dissolve: Some(String::from("window.png")),
                             map_decal: None,
                         }
+                    ]
+                }
+            },
+            Test {
+                data: String::from(r"
+                    newmtl cube
+                    Ns 10.0000
+                    Ni 1.5000
+                    d 1.0000
+                    illum 2
+                    Ka 0.0000 0.0000 0.0000
+                    Kd 0.5880 0.5880 0.5880
+                    Ks 0.0000 0.0000 0.0000
+                    Ke 0.3000 0.3000 0.3000
+                    map_Ka cube.png
+                    map_Kd cube.png
+                "),
+                expected: MaterialSet {
+                    materials: vec![
+                        Material {
+                            name: String::from("cube"),
+                            color_ambient: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            color_diffuse: Color { r: 0.5880, g: 0.5880, b: 0.5880 },
+                            color_specular: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            color_emissive: Color { r: 0.3, g: 0.3, b: 0.3 },
+                            specular_exponent: 10.0,
+                            dissolve: 1.0,
+                            optical_density: Some(1.5),
+                            illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+                            map_ambient: Some(String::from("cube.png")),
+                            map_diffuse: Some(String::from("cube.png")),
+                            map_specular: None,
+                            map_emissive: None,
+                            map_specular_exponent: None,
+                            map_bump: None,
+                            map_displacement: None,
+                            map_dissolve: None,
+                            map_decal: None,
+                        }
+                    ]
+                }
+            },
+            Test {
+                data: String::from(r"
+                    newmtl fresnel_blu
+                    Ka 0.0000 0.0000 0.0000
+                    Kd 0.0000 0.0000 0.0000
+                    Ks 0.6180 0.8760 0.1430
+                    Ns 200
+                    illum 1
+                    map_d fresnel_blu_dissolve.png
+
+                    newmtl real_windsh
+                    Ka 0.0000 0.0000 0.0000
+                    Kd 0.0000 0.0000 0.0000
+                    Ks 0.0000 0.0000 0.0000
+                    Ns 200
+                    Ni 1.5000
+                    illum 2
+                    decal decal.jpg
+
+                    newmtl fresnel_win
+                    Ka 0.0000 0.0000 1.0000
+                    Kd 0.0000 0.0000 1.0000
+                    Ks 0.6180 0.8760 0.1430
+                    Ns 200
+                    Ni 1.2000
+                    illum 0
+
+                    newmtl tin
+                    Ka 0.5000 0.5000 0.5000
+                    Kd 0.3000 0.2540 0.3128
+                    Ks 0.3245 0.2976 0.1234
+                    Ns 200
+                    illum 2
+                    map_Bump tin_bump.png
+                    map_Ka tin_Ka.png
+                    map_Kd tin_Kd.png
+                    map_Ks tin_Ks.png
+
+                    newmtl material
+                    Ni 3.4924
+                    illum 2
+                    d 0.9
+                    map_Ke material_Ke.png
+                    map_Ka material_Ka.png
+                    map_Kd material_Kd.png
+                    map_Ks material_Ks.png
+                    bump material_bump.png
+                    map_Ns material_Ns.png
+                    disp material_displacement.png
+
+                "),
+                expected: MaterialSet {
+                    materials: vec![
+                        Material {
+                            name: String::from("fresnel_blu"),
+                            color_ambient: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            color_diffuse: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            color_specular: Color { r: 0.6180, g: 0.8760, b: 0.1430 },
+                            color_emissive: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            specular_exponent: 200.0,
+                            dissolve: 1.0,
+                            optical_density: None,
+                            illumination_model: IlluminationModel::AmbientDiffuse,
+                            map_ambient: None,
+                            map_diffuse: None,
+                            map_specular: None,
+                            map_emissive: None,
+                            map_specular_exponent: None,
+                            map_bump: None,
+                            map_displacement: None,
+                            map_dissolve: Some(String::from("fresnel_blu_dissolve.png")),
+                            map_decal: None,
+                        },
+                        Material {
+                            name: String::from("real_windsh"),
+                            color_ambient: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            color_diffuse: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            color_specular: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            color_emissive: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            specular_exponent: 200.0,
+                            dissolve: 1.0,
+                            optical_density: Some(1.5),
+                            illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+                            map_ambient: None,
+                            map_diffuse: None,
+                            map_specular: None,
+                            map_emissive: None,
+                            map_specular_exponent: None,
+                            map_bump: None,
+                            map_displacement: None,
+                            map_dissolve: None,
+                            map_decal: Some(String::from("decal.jpg")),
+                        },
+                        Material {
+                            name: String::from("fresnel_win"),
+                            color_ambient: Color { r: 0.0, g: 0.0, b: 1.0 },
+                            color_diffuse: Color { r: 0.0, g: 0.0, b: 1.0 },
+                            color_specular: Color { r: 0.6180, g: 0.8760, b: 0.1430 },
+                            color_emissive: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            specular_exponent: 200.0,
+                            dissolve: 1.0,
+                            optical_density: Some(1.2000),
+                            illumination_model: IlluminationModel::Ambient,
+                            map_ambient: None,
+                            map_diffuse: None,
+                            map_specular: None,
+                            map_emissive: None,
+                            map_specular_exponent: None,
+                            map_bump: None,
+                            map_displacement: None,
+                            map_dissolve: None,
+                            map_decal: None,
+                        },
+                        Material {
+                            name: String::from("tin"),
+                            color_ambient: Color { r: 0.5000, g: 0.5000, b: 0.5000 },
+                            color_diffuse: Color { r: 0.3000, g: 0.2540, b: 0.3128 },
+                            color_specular: Color { r: 0.3245, g: 0.2976, b: 0.1234 },
+                            color_emissive: Color { r: 0.0, g: 0.0, b: 0.0 },
+                            specular_exponent: 200.0,
+                            dissolve: 1.0,
+                            optical_density: None,
+                            illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+                            map_ambient: Some(String::from("tin_Ka.png")),
+                            map_diffuse: Some(String::from("tin_Kd.png")),
+                            map_specular: Some(String::from("tin_Ks.png")),
+                            map_emissive: None,
+                            map_specular_exponent: None,
+                            map_bump: Some(String::from("tin_bump.png")),
+                            map_displacement: None,
+                            map_dissolve: None,
+                            map_decal: None,
+                        },
+                        Material {
+                            name: String::from("material"),
+                            color_ambient: Color { r: 0.0000, g: 0.0000, b: 0.0000 },
+                            color_diffuse: Color { r: 0.0000, g: 0.0000, b: 0.0000 },
+                            color_specular: Color { r: 0.0000, g: 0.0000, b: 0.0000 },
+                            color_emissive: Color { r: 0.0000, g: 0.0000, b: 0.0000 },
+                            specular_exponent: 0.0,
+                            dissolve: 0.9,
+                            optical_density: Some(3.4924),
+                            illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+                            map_ambient: Some(String::from("material_Ka.png")),
+                            map_diffuse: Some(String::from("material_Kd.png")),
+                            map_specular: Some(String::from("material_Ks.png")),
+                            map_emissive: Some(String::from("material_Ke.png")),
+                            map_specular_exponent: Some(String::from("material_Ns.png")),
+                            map_bump: Some(String::from("material_bump.png")),
+                            map_displacement: Some(String::from("material_displacement.png")),
+                            map_dissolve: None,
+                            map_decal: None,
+                        },
                     ]
                 }
             }
