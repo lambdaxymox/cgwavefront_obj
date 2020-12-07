@@ -14,7 +14,6 @@ use wavefront_obj::obj::{
     Geometry,
     Parser,
 };
-
 use std::fs::File;
 use std::io::Read;
 

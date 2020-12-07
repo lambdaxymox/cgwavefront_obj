@@ -15,7 +15,6 @@ use wavefront_obj::obj::{
     Geometry,
     Parser,
 };
-
 use std::slice;
 
 
