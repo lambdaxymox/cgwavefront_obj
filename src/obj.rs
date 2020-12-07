@@ -588,32 +588,18 @@ pub struct ObjectSet {
     pub objects: Vec<Object>,
 }
 
-/// The `DisplayObjectCompositor` type is the default compositor
-/// for presenting object set information to the end user.
-struct DisplayObjectSetCompositor { }
-
-impl DisplayObjectSetCompositor {
-    fn new() -> Self { 
-        Self {} 
-    }
-
-    fn compose(&self, object_set: &ObjectSet) -> String {
+impl fmt::Display for ObjectSet {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let compositor = DisplayObjectCompositor::new();
         let mut string = String::from("ObjectSet {\n");
         
-        for object in object_set.objects.iter() {
+        for object in self.objects.iter() {
             string += &compositor.compose(&object);
             string += &"\n";
         }
 
         string += &"}\n";
-        string
-    }
-}
-
-impl fmt::Display for ObjectSet {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let string = DisplayObjectSetCompositor::new().compose(self);
+    
         write!(formatter, "{}", string)
     }
 }
