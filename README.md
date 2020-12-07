@@ -1,7 +1,7 @@
 # Wavefront OBJ Loader Library
 
 ## Introduction
-The `wavefront-obj` library is a library for working with Wavefront OBJ files. 
+The **wavefront-obj** library is a library for working with Wavefront OBJ files. 
 Wavefront OBJ is a file format that represents three-dimensional meshes and 
 material data. In  particular, the library parses and represents Wavefront OBJ 
 and MTL files. It presently supports polygonal geometry only. Any file containing 
