@@ -374,7 +374,10 @@ pub struct Shape {
 /// shapes.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Geometry {
+    /// The material name that contains the material and lighting properties
+    /// of each shape in this collection.
     pub material_name: Option<String>,
+    /// The shapes associated with a particular material and geometry.
     pub shapes: Vec<ShapeEntryIndex>,
 }
 
@@ -654,6 +657,7 @@ pub struct ParseError {
 }
 
 impl ParseError {
+    /// Construct a new parse error.
     fn new(line_number: usize, kind: ErrorKind, message: String) -> ParseError {
         ParseError {
             line_number: line_number,
@@ -692,14 +696,17 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Construct a new parse error
     fn error<T>(&self, kind: ErrorKind, message: String) -> Result<T, ParseError> {
         Err(ParseError::new(self.line_number, kind, message))
     }
 
+    /// Peek at the currently held token without advancing the token stream.
     fn peek(&mut self) -> Option<&'a str> {
         self.lexer.peek()
     }
 
+    /// Advance the token stream one step returning the next string.
     fn next(&mut self) -> Option<&'a str> {
         let token = self.lexer.next();
         if let Some(val) = token {
@@ -711,10 +718,15 @@ impl<'a> Parser<'a> {
         token
     }
 
+    /// Advance the token stream one step without returning the next token. 
     fn advance(&mut self) {
         self.next();
     }
 
+    /// Advance the token stream one step, returning the next token in the 
+    /// stream.
+    ///
+    /// This function generates an error is it runs out of input.
     fn next_string(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
@@ -725,6 +737,10 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Advance the token stream if the next token in the stream matches the
+    /// input tag.
+    ///
+    /// This functions returns an error if the expected tag is not present.
     fn expect_tag(&mut self, tag: &str) -> Result<(), ParseError> {
         match self.next() {
             None => self.error(
@@ -739,6 +755,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse a floating point number from the current token in the stream.
     fn parse_f64(&mut self) -> Result<f64, ParseError> {
         let st = self.next_string()?;
         match st.parse::<f64>() {
@@ -750,6 +767,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse an integer from the current token in the stream.
     fn parse_usize(&mut self) -> Result<usize, ParseError> {
         let st = self.next_string()?;
         match st.parse::<usize>() {
@@ -761,13 +779,22 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Apply a parser to the input stream. 
+    ///
+    /// If the parser `parser` fails to parse the current token in the stream,
+    /// it returns nothing and the stream state does not change. Otherwise, the 
+    /// stream advances and the corresponding result is returned. 
     fn try_once<P, T>(&mut self, parser: P) -> Option<T> where P: FnOnce(&str) -> Option<T> {
         match self.peek() {
-            Some(st) => parser(&st).map(|got| { self.advance(); got }),
+            Some(st) => parser(&st).map(|got| { 
+                self.advance(); 
+                got 
+            }),
             None => None,
         }
     }
 
+    /// Parse a vertex from the input.
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
         self.expect_tag("v")?;
  
@@ -780,6 +807,7 @@ impl<'a> Parser<'a> {
         Ok(Vertex { x: x, y: y, z: z, w: w })
     }
 
+    /// Parse a texture vertex from the input.
     fn parse_texture_vertex(&mut self) -> Result<TextureVertex, ParseError> {
         self.expect_tag("vt")?;
 
@@ -792,6 +820,7 @@ impl<'a> Parser<'a> {
         Ok(TextureVertex { u: u, v: v, w: w })
     }
 
+    /// Parse a normal vector from the input.
     fn parse_normal_vertex(&mut self) -> Result<NormalVertex, ParseError> {
         self.expect_tag("vn")?;
 
@@ -802,18 +831,23 @@ impl<'a> Parser<'a> {
         Ok(NormalVertex { x: x, y: y, z: z })
     }
 
+    /// Skip over any number of newlines in the input stream.
     fn skip_zero_or_more_newlines(&mut self) {
         while let Some("\n") = self.peek() {
             self.advance();
         }
     }
 
+    /// Skip over at least one newline in the input stream.
+    ///
+    /// The function returns an error if no newline tokens are present.
     fn skip_one_or_more_newlines(&mut self) -> Result<(), ParseError> {
         self.expect_tag("\n")?;
         self.skip_zero_or_more_newlines();
         Ok(())
     }
 
+    /// Parse the name of an object.
     fn parse_object_name(&mut self) -> Result<&'a str, ParseError> {
         match self.peek() {
             Some("o") => {
@@ -827,6 +861,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse a vertex/texture/normal index.
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         let process_split = |split: &str| -> Result<Option<usize>, ParseError> {
             if split.len() > 0 {
@@ -871,6 +906,9 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse one more more VTN indices.
+    ///
+    /// Return the number of VTN indices parsed if no errors occurred.
     fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<usize, ParseError> {
         let mut indices_parsed = 0;
         while let Ok(vtn_index) = self.parse_vtn_index() {
@@ -881,6 +919,10 @@ impl<'a> Parser<'a> {
         Ok(indices_parsed)
     }
 
+    /// Parse one or more point from the current line in the input stream.
+    ///
+    /// There can be more than one point in a single line of input, so
+    /// this parsing rule will attempt to read all of them.
     fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
         self.expect_tag("p")?;
 
@@ -908,6 +950,10 @@ impl<'a> Parser<'a> {
         Ok(elements_parsed)
     }
 
+    /// Parse one more more line elements from a line of text input from the input.
+    ///
+    /// If the parser cannot parse each line element from a line of text input, the
+    /// parser returns an error.
     fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
         self.expect_tag("l")?;
 
@@ -937,6 +983,12 @@ impl<'a> Parser<'a> {
         Ok(vtn_indices.len() - 1)
     }
 
+    /// Parse one or more faces from a single line of text input.
+    ///
+    /// All face verticies must have the same vertex/texture/normal form on
+    /// a line of input. If they do not, the parser will return an error. Otherwise,
+    /// it succeeds. The face parser unpacks the face elements by treating the line
+    /// of face indices as a triangle fan.
     fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
         self.expect_tag("f")?;
         
@@ -979,6 +1031,7 @@ impl<'a> Parser<'a> {
         Ok(vtn_indices.len() - 2)
     }
 
+    /// Parse all the elements of a givne type from a line of text input.
     fn parse_elements(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {  
         match self.peek() {
             Some("p") => self.parse_point(elements),
@@ -993,6 +1046,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse group names from a line of text input.
     fn parse_groups(&mut self, groups: &mut Vec<Group>) -> Result<usize, ParseError> {
         self.expect_tag("g")?;
         let mut groups_parsed = 0;
@@ -1009,6 +1063,7 @@ impl<'a> Parser<'a> {
         Ok(groups_parsed)
     }
 
+    /// Parse a smoothing group name from a line of text input.
     fn parse_smoothing_group(
         &mut self, 
         smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<usize, ParseError> {
@@ -1039,6 +1094,7 @@ impl<'a> Parser<'a> {
         Ok(1)
     }
 
+    /// Parse a material name from a line of text input.
     fn parse_material_name(
         &mut self, 
         material_names: &mut Vec<Option<&'a str>>) -> Result<usize, ParseError> {
@@ -1056,6 +1112,7 @@ impl<'a> Parser<'a> {
         Ok(1)
     }
 
+    /// Construct a set of shape entries for each element in the element set.
     fn parse_shape_entries(
         &self,
         shape_entry_table: &mut Vec<ShapeEntry>,
@@ -1087,6 +1144,7 @@ impl<'a> Parser<'a> {
         debug_assert!(shape_entry_table.len() == elements.len());
     }
 
+    /// Construct a set of geometries for reach material in an object.
     fn parse_geometries(
         &self, 
         geometries: &mut Vec<Geometry>, 
@@ -1103,6 +1161,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse one object from a Wavefront OBJ file.
     fn parse_object(&mut self,
         min_vertex_index:  &mut usize,  
         max_vertex_index:  &mut usize,
@@ -1293,6 +1352,7 @@ impl<'a> Parser<'a> {
         })
     }
 
+    /// Parse a set of objects in a wavefront OBJ file.
     fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
         let mut result = Vec::new();
 
@@ -1319,6 +1379,7 @@ impl<'a> Parser<'a> {
         Ok(result)
     }
 
+    /// Parse a set of material library file names from a line of text input.
     fn parse_material_library_line(&mut self, material_libraries: &mut Vec<String>) -> Result<usize, ParseError> {
         self.expect_tag("mtllib")?;
         let mut number_of_libraries_found = 0;
@@ -1335,6 +1396,7 @@ impl<'a> Parser<'a> {
         Ok(number_of_libraries_found)
     }
 
+    /// Parse a set of material library names from a Wavefront OBJ file. 
     fn parse_material_libraries(&mut self) -> Result<Vec<String>, ParseError> {
         let mut material_libraries = vec![];
         self.skip_zero_or_more_newlines();
