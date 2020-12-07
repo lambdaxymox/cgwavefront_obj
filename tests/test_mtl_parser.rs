@@ -146,3 +146,279 @@ fn test_parse_material_set_should_parse_correct_material_names() {
         } 
     }
 }
+
+/// The parser should correctly parse the ambient color of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_ambient_colors() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.color_ambient, expected_material.color_ambient);
+        } 
+    }
+}
+
+/// The parser should correctly parse the diffuse color of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_diffuse_colors() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.color_diffuse, expected_material.color_diffuse);
+        } 
+    }
+}
+
+/// The parser should correctly parse the specular color of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_specular_colors() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.color_specular, expected_material.color_specular);
+        } 
+    }
+}
+
+/// The parser should correctly parse the emissive color of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_emissive_colors() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.color_emissive, expected_material.color_emissive);
+        } 
+    }
+}
+
+/// The parser should correctly parse the specular exponent of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_specular_exponents() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.specular_exponent, expected_material.specular_exponent);
+        } 
+    }
+}
+
+/// The parser should correctly parse the alpha value of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_alpha_values() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.dissolve, expected_material.dissolve);
+        } 
+    }
+}
+
+/// The parser should correctly parse the optical density of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_optical_densities() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.optical_density, expected_material.optical_density);
+        } 
+    }
+}
+
+/// The parser should correctly parse the illumination model of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_illumination_models() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.illumination_model, expected_material.illumination_model);
+        } 
+    }
+}
+
+/// The parser should correctly parse the ambient map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_ambient_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_ambient, expected_material.map_ambient);
+        } 
+    }
+}
+
+/// The parser should correctly parse the diffuse map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_diffuse_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_diffuse, expected_material.map_diffuse);
+        } 
+    }
+}
+
+/// The parser should correctly parse the specular map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_specular_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_specular, expected_material.map_specular);
+        } 
+    }
+}
+
+/// The parser should correctly parse the emissive map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_emissive_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_emissive, expected_material.map_emissive);
+        } 
+    }
+}
+
+/// The parser should correctly parse the specular exponent map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_specular_exponent_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(
+                result_material.map_specular_exponent, 
+                expected_material.map_specular_exponent
+            );
+        } 
+    }
+}
+
+/// The parser should correctly parse the bump map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_bump_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_bump, expected_material.map_bump);
+        } 
+    }
+}
+
+/// The parser should correctly parse the displacement map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_displacement_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_displacement, expected_material.map_displacement);
+        } 
+    }
+}
+
+/// The parser should correctly parse the alpha map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_alpha_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_dissolve, expected_material.map_dissolve);
+        } 
+    }
+}
+
+/// The parser should correctly parse the decal map of each material.
+#[test]
+fn test_parse_material_set_should_parse_correct_decal_maps() {
+    let tests = test_cases();
+
+    for test in tests.iter() {
+        let mut parser = Parser::new(&test.data);
+        let result = parser.parse_mtlset().unwrap();
+        for (result_material, expected_material) 
+            in result.materials.iter().zip(test.expected.materials.iter()) {
+
+            assert_eq!(result_material.map_decal, expected_material.map_decal);
+        } 
+    }
+}
+
