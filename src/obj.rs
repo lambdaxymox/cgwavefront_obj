@@ -518,7 +518,7 @@ pub enum ErrorKind {
 /// another kind of error.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
-    /// The line number where the error occurs.
+    /// The line number where the error occurred.
     pub line_number: usize,
     /// The kind of error that occurred.
     pub kind: ErrorKind,
