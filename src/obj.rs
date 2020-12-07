@@ -271,7 +271,12 @@ type SmoothingGroupIndex = usize;
 type ShapeEntryIndex = usize;
 
 
-
+/// An element is the smallest component of a more complex geometric figure.
+///
+/// An element can be either a point, line, or a face (triangle). A geometric figures
+/// is a collection of elements. Typically, a geometric figure consists of elements that
+/// are all the same type, i.e. a three-dimensional object is composed of all faces,
+/// or a line is composed of all line elements.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Element {
     Point(VTNIndex),
@@ -295,6 +300,8 @@ impl fmt::Display for Element {
     }
 }
 
+/// A group is a label for a collection of elements within an object.
+/// A collection of groups enables one to organize collections of elements.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Group(pub String);
 
@@ -310,6 +317,9 @@ impl Default for Group {
     }
 }
 
+/// A smoothing group is a label providing information on which collections
+/// of elements should have their normal vectors interpolated over to give
+/// those elements a non-faceted appearance.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroup(pub usize);
 
@@ -336,17 +346,27 @@ impl fmt::Display for SmoothingGroup {
     }
 }
 
+/// A shape entry is a collection of indices grouping together all the 
+/// organizational information about each element in an object.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ShapeEntry {
+    /// The index of the element in the element set that the shape entry describes.
     pub element: ElementIndex,
+    /// The groups that a particular element belongs to.
     pub groups: Vec<GroupIndex>,
+    /// The smoothing group that a particular element belongs to.
     pub smoothing_group: SmoothingGroupIndex,
 }
 
+/// A shape is a collection of data grouping together all the organizational
+/// information about each element in an object.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Shape {
+    /// The element from the element set.
     pub element: Element,
+    /// The names of the groups that a particular element belongs to.
     pub groups: Vec<Group>,
+    /// The smoothing group that a particular element belongs to.
     pub smoothing_groups: Vec<SmoothingGroup>,
 }
 
@@ -356,7 +376,8 @@ pub struct Geometry {
     pub shapes: Vec<ShapeEntryIndex>,
 }
 
-#[derive(Clone, Debug)]
+/// A VTN triple contains the actual data of each element in an object.
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VTNTriple<'a> {
     V(&'a Vertex),
     VT(&'a Vertex, &'a TextureVertex), 
@@ -364,20 +385,110 @@ pub enum VTNTriple<'a> {
     VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
+/// An object is a collection of vertices, texture vertices, normal vectors,
+/// and geometric primitives composing a unit of geometry in a scene to 
+/// be rendered.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Object {
+    /// The name of the object.
     pub name: String,
+    /// The set of vertices in an object.
     pub vertex_set: Vec<Vertex>,
+    /// The set of texture coordinates in an object for mapping materials onto
+    /// an object.
     pub texture_vertex_set: Vec<TextureVertex>,
+    /// The set of normal vectors defined at each vertex in an object.
     pub normal_vertex_set: Vec<NormalVertex>,
+    /// The set of names of groups of elements in an object.
     pub group_set: Vec<Group>,
+    /// The set of names of smoothing groups of elements in an object.
     pub smoothing_group_set: Vec<SmoothingGroup>,
+    /// The set of primitives (i.e. points, lines, and faces) in an object.
     pub element_set: Vec<Element>,
+    /// The set of grouping data associated with each element in an object.
     pub shape_set: Vec<ShapeEntry>,
+    /// The set of elements associated with each material used in an object.
     pub geometry_set: Vec<Geometry>,
 }
 
 impl Object {
+    /// Fetch the vertex/texture/normal of a vertex in an object.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// # use wavefront_obj::obj;
+    /// # use wavefront_obj::obj::{
+    /// #    VTNIndex,
+    /// #    VTNTriple,
+    /// #    Vertex,
+    /// #    TextureVertex,
+    /// #    NormalVertex,
+    /// # };
+    /// #
+    /// let obj_file = String::from(r"
+    ///     o quad                    \
+    ///     v -0.5 -0.5 0.0           \
+    ///     v  0.5 -0.5 0.0           \
+    ///     v  0.5  0.5 0.0           \
+    ///     v -0.5  0.5 0.0           \
+    ///     ## 4 vertices             \
+    ///                               \
+    ///     vt 0.0 0.0 0.0            \
+    ///     vt 1.0 0.0 0.0            \
+    ///     vt 1.0 1.0 0.0            \
+    ///     vt 0.0 1.0 0.0            \
+    ///     ## 4 texture vertices     \
+    ///                               \
+    ///     vn 0.0 0.0 1.0            \
+    ///     vn 0.0 0.0 1.0            \
+    ///     vn 0.0 0.0 1.0            \
+    ///     vn 0.0 0.0 1.0            \
+    ///     ## 4 normal vertices      \
+    ///                               \
+    ///     f 1/1/1 2/2/2 3/3/3 4/4/4 \
+    ///     ## 2 faces                \
+    ///     ## end quad               \
+    /// ");
+    /// let obj_set = obj::parse(&obj_file).unwrap();
+    /// 
+    /// // The vertex data of an obj file are stored 1-indexed, but the library stores 
+    /// // the vertex data 0-indexed, so one must add one to each index to get the indices
+    /// // as they would appear in a *.obj file.
+    /// let vtn_index0 = VTNIndex::VTN(0, 0, 0);
+    /// let vtn_index1 = VTNIndex::VTN(1, 1, 1);
+    /// let vtn_index2 = VTNIndex::VTN(2, 2, 2);
+    /// let vtn_index3 = VTNIndex::VTN(3, 3, 3);
+    /// 
+    /// let object = &obj_set.objects[0];
+    /// let vtn_triple0 = object.get_vtn_triple(vtn_index0);
+    /// let vtn_triple1 = object.get_vtn_triple(vtn_index1);
+    /// let vtn_triple2 = object.get_vtn_triple(vtn_index2);
+    /// let vtn_triple3 = object.get_vtn_triple(vtn_index3);
+    /// let vertex0 = Vertex { x: -0.5, y: -0.5, z: 0.0, w: 1.0 };
+    /// let vertex1 = Vertex { x:  0.5, y: -0.5, z: 0.0, w: 1.0 };
+    /// let vertex2 = Vertex { x:  0.5, y:  0.5, z: 0.0, w: 1.0 };
+    /// let vertex3 = Vertex { x: -0.5, y:  0.5, z: 0.0, w: 1.0 };
+    /// let texture_vertex0 = TextureVertex { u: 0.0, v: 0.0, w: 0.0 };
+    /// let texture_vertex1 = TextureVertex { u: 1.0, v: 0.0, w: 0.0 };
+    /// let texture_vertex2 = TextureVertex { u: 1.0, v: 1.0, w: 0.0 };
+    /// let texture_vertex3 = TextureVertex { u: 0.0, v: 1.0, w: 0.0 };
+    /// let normal_vertex0 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    /// let normal_vertex1 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    /// let normal_vertex2 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    /// let normal_vertex3 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    /// let expected0 = Some(VTNTriple::VTN(&vertex0, &texture_vertex0, &normal_vertex0));
+    /// let expected1 = Some(VTNTriple::VTN(&vertex1, &texture_vertex1, &normal_vertex1));
+    /// let expected2 = Some(VTNTriple::VTN(&vertex2, &texture_vertex2, &normal_vertex2));
+    /// let expected3 = Some(VTNTriple::VTN(&vertex3, &texture_vertex3, &normal_vertex3));
+    ///
+    /// assert_eq!(vtn_triple0, expected0);
+    /// assert_eq!(vtn_triple1, expected1);
+    /// assert_eq!(vtn_triple2, expected2);
+    /// assert_eq!(vtn_triple3, expected3);
+    ///
+    /// assert!(object.get_vtn_triple(VTNIndex::VTN(4, 4, 4)).is_none());
+    /// ```
     pub fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
         match index {
             VTNIndex::V(v_index) => {
@@ -406,36 +517,6 @@ impl Object {
             }
         }
     }
-}
-
-impl fmt::Display for Object {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let string = DisplayObjectCompositor::new().compose(self);
-        write!(formatter, "{}", string)
-    }
-}
-
-impl Default for Object {
-    fn default() -> Object {
-        Object {
-            name: String::from(""),   
-            vertex_set: Default::default(), 
-            texture_vertex_set: Default::default(), 
-            normal_vertex_set: Default::default(), 
-            group_set: Default::default(), 
-            smoothing_group_set: Default::default(), 
-            element_set: Default::default(),
-            shape_set: Default::default(),
-            geometry_set: Default::default(),
-        }
-    }
-}
-
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct ObjectSet {
-    pub material_libraries: Vec<String>,
-    pub objects: Vec<Object>,
 }
 
 struct DisplayObjectCompositor { }
@@ -470,6 +551,36 @@ impl DisplayObjectCompositor {
 
         string       
     }
+}
+
+impl fmt::Display for Object {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        let string = DisplayObjectCompositor::new().compose(self);
+        write!(formatter, "{}", string)
+    }
+}
+
+impl Default for Object {
+    fn default() -> Object {
+        Object {
+            name: String::from(""),   
+            vertex_set: Default::default(), 
+            texture_vertex_set: Default::default(), 
+            normal_vertex_set: Default::default(), 
+            group_set: Default::default(), 
+            smoothing_group_set: Default::default(), 
+            element_set: Default::default(),
+            shape_set: Default::default(),
+            geometry_set: Default::default(),
+        }
+    }
+}
+
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ObjectSet {
+    pub material_libraries: Vec<String>,
+    pub objects: Vec<Object>,
 }
 
 /// The `DisplayObjectCompositor` type is the default compositor
