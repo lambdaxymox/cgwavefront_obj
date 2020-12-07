@@ -75,8 +75,11 @@ pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
 /// the ambient color, diffuse color, specular color, and the emissive color.
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct Color {
+    /// The red component of a color.
     pub r: f64,
+    /// The green component of a color.
     pub g: f64,
+    /// The blue component of a color.
     pub b: f64
 }
 
@@ -99,8 +102,11 @@ impl Color {
 /// point.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IlluminationModel {
+    /// Apply an ambient color to the material only.
     Ambient,
+    /// Apply a Lambertian shading model to a material.
     AmbientDiffuse,
+    /// Apply a Phone shading model to a material.
     AmbientDiffuseSpecular,
 }
 
@@ -241,6 +247,7 @@ pub struct ParseError {
 }
 
 impl ParseError {
+    /// Construct a new parse error.
     fn new(
         line_number: usize, 
         kind: ErrorKind, 
@@ -282,14 +289,17 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Construct a new parse error.
     fn error<T>(&self, kind: ErrorKind, message: String) -> Result<T, ParseError> {
         Err(ParseError::new(self.line_number, kind, message))
     }
 
+    /// Peek at the currently held token without advancing the token stream.
     fn peek(&mut self) -> Option<&'a str> {
         self.lexer.peek()
     }
 
+    /// Advance the token stream one step returning the currently held string.
     fn next(&mut self) -> Option<&'a str> {
         let token = self.lexer.next();
         if let Some(val) = token {
@@ -301,10 +311,15 @@ impl<'a> Parser<'a> {
         token
     }
 
+    /// Advance the token stream one step without returning the current token. 
     fn advance(&mut self) {
         self.next();
     }
 
+    /// Advance the token stream one step, returning the next token in the 
+    /// stream.
+    ///
+    /// This function generates an error is it runs out of input.
     fn next_string(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
@@ -312,6 +327,10 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Advance the token stream if the next token in the stream matches the
+    /// input tag.
+    ///
+    /// This functions returns an error if the expected tag is not present.
     fn expect_tag(&mut self, tag: &str) -> Result<(), ParseError> {
         match self.next() {
             None => self.error(ErrorKind::EndOfFile, format!("")),
@@ -323,12 +342,14 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Skip zero or more newlines in the input stream.
     fn skip_zero_or_more_newlines(&mut self) {
         while let Some("\n") = self.peek() {
             self.advance();
         }
     }
 
+    /// Parse a floating point number from the current token in the stream.
     fn parse_f64(&mut self) -> Result<f64, ParseError> {
         let st = self.next_string()?;
         match st.parse::<f64>() {
@@ -340,6 +361,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse an integer from the current token in the stream.
     fn parse_usize(&mut self) -> Result<usize, ParseError> {
         let st = self.next_string()?;
         match st.parse::<usize>() {
@@ -351,6 +373,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse a RGB color from the input stream.
     fn parse_color(&mut self) -> Result<Color, ParseError> {
         let r = self.parse_f64()?;
         let g = self.parse_f64()?;
@@ -359,41 +382,49 @@ impl<'a> Parser<'a> {
         Ok(Color { r: r, g: g, b: b })
     }
 
+    /// Parse a material's ambient component from the input stream.
     fn parse_ambient_component(&mut self) -> Result<Color, ParseError> {
         self.expect_tag("Ka")?;
         self.parse_color()
     }
 
+    /// Parse a material's diffuse component from the input stream.
     fn parse_diffuse_component(&mut self) -> Result<Color, ParseError> {
         self.expect_tag("Kd")?;
         self.parse_color()
     }
 
+    /// Parse a material's specular component from the input stream.
     fn parse_specular_component(&mut self) -> Result<Color, ParseError> {
         self.expect_tag("Ks")?;
         self.parse_color()
     }
 
+    /// parse a material's emissive component from the input stream.
     fn parse_emissive_component(&mut self) -> Result<Color, ParseError> {
         self.expect_tag("Ke")?;
         self.parse_color()
     }
 
+    /// Parse a material's dissolve (alpha) component from the input stream.
     fn parse_dissolve_component(&mut self) -> Result<f64, ParseError> {
         self.expect_tag("d")?;
         self.parse_f64()
     }
 
+    /// Parse a material's specular exponent from the input stream.
     fn parse_specular_exponent(&mut self) -> Result<f64, ParseError> {
         self.expect_tag("Ns")?;
         self.parse_f64()
     }
 
+    /// Parse a material's optical density componeont from the input stream.
     fn parse_optical_density(&mut self) -> Result<f64, ParseError> {
         self.expect_tag("Ni")?;
         self.parse_f64()
     }
 
+    /// Parse the name of a material's ambient texture map from the input stream.
     fn parse_map_ambient(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ka") => {}
@@ -410,6 +441,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's diffuse texture map from the input stream.
     fn parse_map_diffuse(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Kd") => {}
@@ -426,6 +458,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's specular texture map from the input stream.
     fn parse_map_specular(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ks") => {}
@@ -442,6 +475,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's emissive texture map from the input stream.
     fn parse_map_emissive(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ke") => {}
@@ -458,6 +492,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's bump texture map from the input stream.
     fn parse_map_bump(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Bump") => {
@@ -478,6 +513,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's displacement texture map from the input stream.
     fn parse_map_displacement(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("disp") => {}
@@ -494,6 +530,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's dissolve (alpha) texture map from the input stream.
     fn parse_map_dissolve(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_d") => {}
@@ -510,6 +547,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's decal texture map from the input stream.
     fn parse_map_decal(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("decal") => {}
@@ -526,6 +564,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material's specular exponent texture map from the input stream.
     fn parse_map_specular_exponent(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ns") => {}
@@ -542,6 +581,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse a material's illumination model.
     fn parse_illumination_model(&mut self) -> Result<IlluminationModel, ParseError> {
         self.expect_tag("illum")?;
         let model_number = self.parse_usize()?;
@@ -556,6 +596,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse the name of a material.
     fn parse_newmtl(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some("newmtl") => {}
@@ -584,6 +625,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse one material from a MTL file.
     fn parse_material(&mut self) -> Result<Material, ParseError> {
         let mut material = Material::new();
         let name = self.parse_newmtl()?;

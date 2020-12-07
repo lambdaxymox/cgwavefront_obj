@@ -696,7 +696,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    /// Construct a new parse error
+    /// Construct a new parse error.
     fn error<T>(&self, kind: ErrorKind, message: String) -> Result<T, ParseError> {
         Err(ParseError::new(self.line_number, kind, message))
     }
@@ -706,7 +706,7 @@ impl<'a> Parser<'a> {
         self.lexer.peek()
     }
 
-    /// Advance the token stream one step returning the next string.
+    /// Advance the token stream one step returning the currently held string.
     fn next(&mut self) -> Option<&'a str> {
         let token = self.lexer.next();
         if let Some(val) = token {
@@ -718,7 +718,7 @@ impl<'a> Parser<'a> {
         token
     }
 
-    /// Advance the token stream one step without returning the next token. 
+    /// Advance the token stream one step without returning the current token. 
     fn advance(&mut self) {
         self.next();
     }
