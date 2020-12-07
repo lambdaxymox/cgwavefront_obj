@@ -323,13 +323,6 @@ impl Default for Group {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroup(pub usize);
 
-impl SmoothingGroup {
-    #[inline]
-    pub fn as_usize(&self) -> usize { 
-        self.0 
-    }
-}
-
 impl Default for SmoothingGroup {
     fn default() -> SmoothingGroup { 
         SmoothingGroup(0) 
