@@ -2,12 +2,12 @@
 
 ## Introduction
 The `wavefront-obj` library is a library for working with Wavefront OBJ files. 
-Wavefront OBJ is a file format that represents three-dimensional meshes. In 
-particular, the library parses and represents Wavefront OBJ files. It presently 
-supports polygonal geometry only. Any file containing free-form geometry 
-elements will be rejected. For specific details on the grammar, see the 
-`GRAMMAR.md` file. For information on the file format, the `docs` directory 
-contains a copy of the format specification.
+Wavefront OBJ is a file format that represents three-dimensional meshes and 
+material data. In  particular, the library parses and represents Wavefront OBJ 
+and MTL files. It presently supports polygonal geometry only. Any file containing 
+free-form geometry elements will be rejected by the parser. For specific details 
+on the grammar, see the `GRAMMAR.md` file. For information on the file format, the 
+`docs` directory contains a copy of the format specification.
 
 ### What Is The Wavefront OBJ Format For?
 The Wavefront OBJ format's purpose is to load and store geometry assets for 
@@ -45,7 +45,9 @@ use wavefront_obj::obj;
 use wavefront_obj::mtl;
 ```
 
-Each module has a top-level parsing function to parse a each file type.
+Each module has a top-level parsing function to parse a each file type. There are concrete
+examples of explicit use of the module to parse OBJ and MTL files in the module documentation
+as well as the `examples` directory in the source tree.
 
 ## Notes
 * The Wavefront OBJ format does not contain information about how polygons of 
