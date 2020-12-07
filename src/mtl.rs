@@ -765,6 +765,7 @@ impl<'a> Parser<'a> {
 mod mtl_primitive_tests {
     use super::{
         Parser,
+        Color,
     };
 
 
@@ -778,6 +779,12 @@ mod mtl_primitive_tests {
     fn test_parse_usize() {
         let mut parser = Parser::new("    763   ");
         assert_eq!(parser.parse_usize(), Ok(763));
+    }
+
+    #[test]
+    fn test_parse_color() {
+        let mut parser = Parser::new("    0.1345345 0.63453 0.982430   ");
+        assert_eq!(parser.parse_color(), Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 }));
     }
 }
 
