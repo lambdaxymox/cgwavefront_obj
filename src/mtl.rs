@@ -274,6 +274,7 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
+    /// Construct a new parser for an mtl file input as a string.
     pub fn new(input: &'a str) -> Parser<'a> {
         Parser {
             line_number: 1,

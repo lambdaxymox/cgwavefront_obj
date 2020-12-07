@@ -321,7 +321,7 @@ impl Default for Group {
 }
 
 /// A smoothing group is a label providing information on which collections
-/// of elements should have their normal vectors interpolated over to give
+/// of elements should have their normal vectors interpolated over give
 /// those elements a non-faceted appearance.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroup(pub usize);
@@ -366,6 +366,12 @@ pub struct Shape {
     pub smoothing_groups: Vec<SmoothingGroup>,
 }
 
+/// The geometry inside an object is a collection of elements along with their 
+/// material description data.
+///
+/// The material description data describes which material from a corresponding 
+/// material library contains the data for rendering each primitive in the set of
+/// shapes.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Geometry {
     pub material_name: Option<String>,
