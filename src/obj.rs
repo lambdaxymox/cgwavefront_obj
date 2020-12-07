@@ -14,12 +14,18 @@ pub fn parse<T: AsRef<str>>(input: T) -> Result<ObjectSet, ParseError> {
     Parser::new(input.as_ref()).parse_objset()
 }
 
-
+/// A single three dimensional point in an object, or a single
+/// three-dimensional point of an object in homogeneous coordinates
+/// when the w-component is one.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vertex {
+    /// The **x-axis** component of a vertex.
     pub x: f64,
+    /// The **y-axis** component of a vertex.
     pub y: f64,
+    /// The **z-axis** component of a vertex.
     pub z: f64,
+    /// The **w-axis** (homogeneous) component of a vertex.
     pub w: f64,
 }
 
@@ -29,10 +35,14 @@ impl fmt::Display for Vertex {
     }
 }
 
+/// A single three-dimensional coordinate in a texture.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TextureVertex {
+    /// The horizontal coordinate of a texture vertex.
     pub u: f64,
+    /// The vertical coordinate of a texture vertex.
     pub v: f64,
+    /// The depth coordinate of a texture vertex.
     pub w: f64,
 }
 
@@ -42,10 +52,14 @@ impl fmt::Display for TextureVertex {
     }
 }
 
+/// A normal vextor at a vertex in an object.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct NormalVertex {
+    /// The **x-axis** component of a normal vector.
     pub x: f64,
+    /// The **y-axis** component of a normal vector.
     pub y: f64,
+    /// The **z-axis** componont of a normal vector.
     pub z: f64,
 }
 
@@ -55,6 +69,14 @@ impl fmt::Display for NormalVertex {
     }
 }
 
+/// A general vertex/texture/normal index representing the indices
+/// of a vertex, texture vertex, and normal vector in an element
+/// of a geometry figure. 
+/// 
+/// A VTN index has the forms of **vertex**, **vertex/texture**, 
+/// **vertex//normal**, or **vertex/texture/normal** indices, 
+/// which indicates which data of vertices, texture vertices, and
+/// normal vectors are bound to each vertex in a shape element.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VTNIndex { 
     V(VertexIndex),
@@ -64,6 +86,42 @@ pub enum VTNIndex {
 }
 
 impl VTNIndex {
+    /// Determine whether two VTN indices have the same form.
+    ///
+    /// The function returns true if both VTN indices are of the form
+    /// vertex, vertex/texture/ vertex//normal, or vertex/texture/normal.
+    /// Otherwise, the function returns false.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// # use wavefront_obj::obj::{
+    /// #     VTNIndex,
+    /// # };
+    /// #
+    /// let v_index1 = VTNIndex::V(0);
+    /// let v_index2 = VTNIndex::V(1); 
+    /// assert!(v_index1.has_same_type_as(&v_index2));
+    /// 
+    /// let vt_index1 = VTNIndex::VT(2, 3);
+    /// let vt_index2 = VTNIndex::VT(4, 5);
+    /// assert!(vt_index1.has_same_type_as(&vt_index2));
+    ///
+    /// let vn_index1 = VTNIndex::VN(6, 7);
+    /// let vn_index2 = VTNIndex::VN(8, 9);
+    /// assert!(vn_index1.has_same_type_as(&vn_index2));
+    ///
+    /// let vtn_index1 = VTNIndex::VTN(10, 11, 12);
+    /// let vtn_index2 = VTNIndex::VTN(13, 14, 15);
+    /// assert!(vtn_index1.has_same_type_as(&vtn_index2));
+    ///
+    /// assert!(!v_index1.has_same_type_as(&vt_index1));
+    /// assert!(!v_index1.has_same_type_as(&vn_index1));
+    /// assert!(!v_index1.has_same_type_as(&vtn_index1));
+    /// assert!(!vt_index1.has_same_type_as(&vn_index1));
+    /// assert!(!vt_index1.has_same_type_as(&vtn_index1));
+    /// assert!(!vn_index1.has_same_type_as(&vtn_index1));
+    /// ```
     pub fn has_same_type_as(&self, other: &VTNIndex) -> bool {
         match (self, other) {
             (&VTNIndex::V(_),   &VTNIndex::V(_)) |
