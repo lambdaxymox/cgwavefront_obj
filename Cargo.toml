@@ -1,5 +1,5 @@
 [package]
-name = "wavefront_obj"
+name = "cgwavefront_obj"
 version = "0.8.0"
 authors = ["LambdaXymox <lambda.xymox@gmail.com>"]
 edition = "2018"

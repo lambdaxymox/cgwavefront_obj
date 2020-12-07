@@ -30,7 +30,7 @@ wavefront_obj = "0.8.0"
 
 to import the library. Include the line
 
-```rust
+```ignore
 extern crate wavefront_obj;
 ```
 
@@ -41,7 +41,7 @@ The library parses both **mtl** and **obj** files. In order to load a wavefront 
 file along with its modules, you need to import both the `mtl` and `obj` modules
 separately.
 
-```rust
+```ignore
 use wavefront_obj::obj;
 use wavefront_obj::mtl;
 ```
