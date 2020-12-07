@@ -257,9 +257,7 @@ impl ParseError {
 impl fmt::Display for ParseError {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(
-            formatter, 
-            "Parse error with kind {:?} at line {} with message \"{}\"", 
-            self.kind, self.line_number, self.message
+            formatter, "Parse error at line {}: {}", self.line_number, self.message
         )
     }
 }

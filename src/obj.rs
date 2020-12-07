@@ -115,6 +115,7 @@ pub fn parse<T: AsRef<str>>(input: T) -> Result<ObjectSet, ParseError> {
     Parser::new(input.as_ref()).parse_objset()
 }
 
+
 /// A single three dimensional point in an object, or a single
 /// three-dimensional point of an object in homogeneous coordinates
 /// when the w-component is one.
@@ -131,10 +132,11 @@ pub struct Vertex {
 }
 
 impl fmt::Display for Vertex {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "v  {}  {}  {}  {}", self.x, self.y, self.z, self.w)
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(formatter, "v  {}  {}  {}  {}", self.x, self.y, self.z, self.w)
     }
 }
+
 
 /// A single three-dimensional coordinate in a texture.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -148,10 +150,11 @@ pub struct TextureVertex {
 }
 
 impl fmt::Display for TextureVertex {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "vt  {}  {}  {}", self.u, self.v, self.w)
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(formatter, "vt  {}  {}  {}", self.u, self.v, self.w)
     }
 }
+
 
 /// A normal vextor at a vertex in an object.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -165,10 +168,11 @@ pub struct NormalVertex {
 }
 
 impl fmt::Display for NormalVertex {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "vn  {}  {}  {}", self.x, self.y, self.z)
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(formatter, "vn  {}  {}  {}", self.x, self.y, self.z)
     }
 }
+
 
 /// A general vertex/texture/normal index representing the indices
 /// of a vertex, texture vertex, and normal vector in an element
@@ -235,15 +239,28 @@ impl VTNIndex {
 }
 
 impl fmt::Display for VTNIndex {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        // NOTE: The library represented VTN indices starting form 0, whereas 
+        // *.obj files index starting from 1, so we must add one to each index
+        // when displaying the data back in a form that looks like the original
+        // file.
         match *self {
-            VTNIndex::V(v) => write!(f, "{}", v + 1),
-            VTNIndex::VT(v, vt) => write!(f, "{}/{}", v + 1 ,vt + 1),
-            VTNIndex::VN(v, vn) => write!(f, "{}//{}", v + 1, vn + 1),
-            VTNIndex::VTN(v, vt, vn) => write!(f, "{}/{}/{}", v + 1, vt + 1, vn + 1),
+            VTNIndex::V(v) => {
+                write!(formatter, "{}", v + 1)
+            }
+            VTNIndex::VT(v, vt) => {
+                write!(formatter, "{}/{}", v + 1 ,vt + 1)
+            }
+            VTNIndex::VN(v, vn) => {
+                write!(formatter, "{}//{}", v + 1, vn + 1)
+            }
+            VTNIndex::VTN(v, vt, vn) => {
+                write!(formatter, "{}/{}/{}", v + 1, vt + 1, vn + 1)
+            }
         }
     }
 }
+
 
 type ElementIndex = usize;
 type VertexIndex = usize;
@@ -253,6 +270,8 @@ type GroupIndex = usize;
 type SmoothingGroupIndex = usize;
 type ShapeEntryIndex = usize;
 
+
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Element {
     Point(VTNIndex),
@@ -261,16 +280,16 @@ pub enum Element {
 }
 
 impl fmt::Display for Element {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match *self {
             Element::Point(vtn) => {
-                write!(f, "p  {}", vtn)
+                write!(formatter, "p  {}", vtn)
             },
             Element::Line(vtn1, vtn2) => {
-                write!(f, "l  {}  {}", vtn1, vtn2)
+                write!(formatter, "l  {}  {}", vtn1, vtn2)
             },
             Element::Face(vtn1, vtn2, vtn3) => {
-                write!(f, "f  {}  {}  {}", vtn1, vtn2, vtn3)
+                write!(formatter, "f  {}  {}  {}", vtn1, vtn2, vtn3)
             },
         }
     }
@@ -280,8 +299,8 @@ impl fmt::Display for Element {
 pub struct Group(pub String);
 
 impl fmt::Display for Group {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.0)
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(formatter, "{}", self.0)
     }
 }
 
@@ -308,11 +327,11 @@ impl Default for SmoothingGroup {
 }
 
 impl fmt::Display for SmoothingGroup {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         if self.0 == 0 {
-            write!(f, "off")
+            write!(formatter, "off")
         } else {
-            write!(f, "{}", self.0)
+            write!(formatter, "{}", self.0)
         }
     }
 }
@@ -390,9 +409,9 @@ impl Object {
 }
 
 impl fmt::Display for Object {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let string = DisplayObjectCompositor::new().compose(self);
-        write!(f, "{}", string)
+        write!(formatter, "{}", string)
     }
 }
 
@@ -417,13 +436,6 @@ impl Default for Object {
 pub struct ObjectSet {
     pub material_libraries: Vec<String>,
     pub objects: Vec<Object>,
-}
-
-impl fmt::Display for ObjectSet {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let string = DisplayObjectSetCompositor::new().compose(self);
-        write!(f, "{}", string)
-    }
 }
 
 struct DisplayObjectCompositor { }
@@ -483,6 +495,13 @@ impl DisplayObjectSetCompositor {
     }
 }
 
+impl fmt::Display for ObjectSet {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        let string = DisplayObjectSetCompositor::new().compose(self);
+        write!(formatter, "{}", string)
+    }
+}
+
 /// A marker indicating the type of error generated during parsing of a 
 /// Wavefront OBJ file.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -537,8 +556,10 @@ impl ParseError {
 }
 
 impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "Parse error at line {}: {}", self.line_number, self.message)
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(
+            formatter, "Parse error at line {}: {}", self.line_number, self.message
+        )
     }
 }
 
