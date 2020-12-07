@@ -67,7 +67,7 @@ fn test_cases() -> TestSet {
                             color_specular: Color { r: 0.1, g: 0.1, b: 0.1 },
                             color_emissive: Color { r: 0.0, g: 0.0, b: 0.0 },
                             specular_exponent: 200_f64,
-                            dissolve: 0_f64,
+                            dissolve: 1_f64,
                             optical_density: None,
                             illumination_model: IlluminationModel::AmbientDiffuseSpecular,
                             map_ambient: None,
