@@ -119,7 +119,7 @@ pub fn parse<T: AsRef<str>>(input: T) -> Result<ObjectSet, ParseError> {
 /// A single three dimensional point in an object, or a single
 /// three-dimensional point of an object in homogeneous coordinates
 /// when the w-component is one.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Vertex {
     /// The **x-axis** component of a vertex.
     pub x: f64,
@@ -139,7 +139,7 @@ impl fmt::Display for Vertex {
 
 
 /// A single three-dimensional coordinate in a texture.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct TextureVertex {
     /// The horizontal coordinate of a texture vertex.
     pub u: f64,
@@ -157,7 +157,7 @@ impl fmt::Display for TextureVertex {
 
 
 /// A normal vextor at a vertex in an object.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct NormalVertex {
     /// The **x-axis** component of a normal vector.
     pub x: f64,
@@ -414,6 +414,9 @@ pub struct Object {
 impl Object {
     /// Fetch the vertex/texture/normal of a vertex in an object.
     ///
+    /// The function returns `None` if any of the VTN indices are not found
+    /// inside the object.
+    ///
     /// ## Example
     ///
     /// ```
@@ -465,28 +468,31 @@ impl Object {
     /// let vtn_triple1 = object.get_vtn_triple(vtn_index1);
     /// let vtn_triple2 = object.get_vtn_triple(vtn_index2);
     /// let vtn_triple3 = object.get_vtn_triple(vtn_index3);
-    /// let vertex0 = Vertex { x: -0.5, y: -0.5, z: 0.0, w: 1.0 };
-    /// let vertex1 = Vertex { x:  0.5, y: -0.5, z: 0.0, w: 1.0 };
-    /// let vertex2 = Vertex { x:  0.5, y:  0.5, z: 0.0, w: 1.0 };
-    /// let vertex3 = Vertex { x: -0.5, y:  0.5, z: 0.0, w: 1.0 };
-    /// let texture_vertex0 = TextureVertex { u: 0.0, v: 0.0, w: 0.0 };
-    /// let texture_vertex1 = TextureVertex { u: 1.0, v: 0.0, w: 0.0 };
-    /// let texture_vertex2 = TextureVertex { u: 1.0, v: 1.0, w: 0.0 };
-    /// let texture_vertex3 = TextureVertex { u: 0.0, v: 1.0, w: 0.0 };
-    /// let normal_vertex0 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
-    /// let normal_vertex1 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
-    /// let normal_vertex2 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
-    /// let normal_vertex3 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    ///
+    /// // Explicitly construct the vertex data so we can make comparisons.
+    /// # let vertex0 = Vertex { x: -0.5, y: -0.5, z: 0.0, w: 1.0 };
+    /// # let vertex1 = Vertex { x:  0.5, y: -0.5, z: 0.0, w: 1.0 };
+    /// # let vertex2 = Vertex { x:  0.5, y:  0.5, z: 0.0, w: 1.0 };
+    /// # let vertex3 = Vertex { x: -0.5, y:  0.5, z: 0.0, w: 1.0 };
+    /// # let texture_vertex0 = TextureVertex { u: 0.0, v: 0.0, w: 0.0 };
+    /// # let texture_vertex1 = TextureVertex { u: 1.0, v: 0.0, w: 0.0 };
+    /// # let texture_vertex2 = TextureVertex { u: 1.0, v: 1.0, w: 0.0 };
+    /// # let texture_vertex3 = TextureVertex { u: 0.0, v: 1.0, w: 0.0 };
+    /// # let normal_vertex0 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    /// # let normal_vertex1 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    /// # let normal_vertex2 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
+    /// # let normal_vertex3 = NormalVertex { x: 0.0, y: 0.0, z: 1.0 };
     /// let expected0 = Some(VTNTriple::VTN(&vertex0, &texture_vertex0, &normal_vertex0));
     /// let expected1 = Some(VTNTriple::VTN(&vertex1, &texture_vertex1, &normal_vertex1));
     /// let expected2 = Some(VTNTriple::VTN(&vertex2, &texture_vertex2, &normal_vertex2));
     /// let expected3 = Some(VTNTriple::VTN(&vertex3, &texture_vertex3, &normal_vertex3));
-    ///
+    /// 
     /// assert_eq!(vtn_triple0, expected0);
     /// assert_eq!(vtn_triple1, expected1);
     /// assert_eq!(vtn_triple2, expected2);
     /// assert_eq!(vtn_triple3, expected3);
     ///
+    /// // VTN indices lying outside the ones stored in the oject should return nothing.
     /// assert!(object.get_vtn_triple(VTNIndex::VTN(4, 4, 4)).is_none());
     /// ```
     pub fn get_vtn_triple(&self, index: VTNIndex) -> Option<VTNTriple> {
