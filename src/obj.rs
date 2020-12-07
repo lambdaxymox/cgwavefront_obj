@@ -10,6 +10,107 @@ use std::default::{
 
 
 /// Parse a wavefront object file from a string.
+///
+/// ## Example
+///
+/// ```
+/// # use wavefront_obj::obj;
+/// # use wavefront_obj::obj::{
+/// #      Vertex,
+/// #      NormalVertex,
+/// #      Group,
+/// #      SmoothingGroup,
+/// #      Element,
+/// #      ShapeEntry,
+/// #      Geometry,
+/// #      VTNIndex,
+/// #      Object,
+/// #      ObjectSet,
+/// # };
+/// #
+/// let obj_file = String::from(r"
+///     mtllib material_library.mtl   \
+///     o Object001                   \
+///     v 0.000000 2.000000 0.000000  \
+///     v 0.000000 0.000000 0.000000  \
+///     v 2.000000 0.000000 0.000000  \
+///     v 2.000000 2.000000 0.000000  \
+///     v 4.000000 0.000000 -1.255298 \
+///     v 4.000000 2.000000 -1.255298 \
+///     vn 0.000000 0.000000 1.000000 \
+///     vn 0.000000 0.000000 1.000000 \
+///     vn 0.276597 0.000000 0.960986 \
+///     vn 0.276597 0.000000 0.960986 \
+///     vn 0.531611 0.000000 0.846988 \
+///     vn 0.531611 0.000000 0.846988 \
+///     ## 6 vertices                 \
+///     ## 6 normals                  \
+///                                   \
+///     usemtl material               \
+///     g all                         \
+///     s 1                           \
+///     f 1//1 2//2 3//3 4//4         \
+///     f 4//4 3//3 5//5 6//6         \
+///     ## 2 elements                 \
+///                                   \
+///     #### End Object001            \
+///                                   \
+/// ");
+/// // let expected = ...;
+/// # let expected = ObjectSet {
+/// #     material_libraries: vec![
+/// #         String::from("material_library.mtl"),
+/// #     ],
+/// #     objects: vec![
+/// #         Object {
+/// #             name: String::from("Object001"),
+/// #             vertex_set: vec![
+/// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+/// #                 Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+/// #                 Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+/// #                 Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
+/// #                 Vertex { x: 4.000000, y: 0.000000, z: -1.255298, w: 1.0 },
+/// #                 Vertex { x: 4.000000, y: 2.000000, z: -1.255298, w: 1.0 },
+/// #             ],
+/// #             texture_vertex_set: vec![],
+/// #             normal_vertex_set: vec![
+/// #                 NormalVertex { x: 0.000000, y: 0.000000, z: 1.000000 },
+/// #                 NormalVertex { x: 0.000000, y: 0.000000, z: 1.000000 },
+/// #                 NormalVertex { x: 0.276597, y: 0.000000, z: 0.960986 },
+/// #                 NormalVertex { x: 0.276597, y: 0.000000, z: 0.960986 },
+/// #                 NormalVertex { x: 0.531611, y: 0.000000, z: 0.846988 },
+/// #                 NormalVertex { x: 0.531611, y: 0.000000, z: 0.846988 },
+/// #             ],
+/// #             group_set: vec![
+/// #                 Group(String::from("all")), 
+/// #             ],
+/// #             smoothing_group_set: vec![
+/// #                 SmoothingGroup(1),
+/// #             ],
+/// #             element_set: vec![
+/// #                 Element::Face(VTNIndex::VN(0, 0), VTNIndex::VN(1, 1), VTNIndex::VN(2, 2)),
+/// #                 Element::Face(VTNIndex::VN(0, 0), VTNIndex::VN(2, 2), VTNIndex::VN(3, 3)),
+/// #                 Element::Face(VTNIndex::VN(3, 3), VTNIndex::VN(2, 2), VTNIndex::VN(4, 4)),
+/// #                 Element::Face(VTNIndex::VN(3, 3), VTNIndex::VN(4, 4), VTNIndex::VN(5, 5)),
+/// #             ],
+/// #             shape_set: vec![
+/// #                 ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
+/// #                 ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
+/// #                 ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 0 },
+/// #                 ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
+/// #             ],
+/// #             geometry_set: vec![
+/// #                 Geometry { material_name: Some(String::from("material")), shapes: vec![0, 1, 2, 3] },
+/// #             ]
+/// #         }
+/// #     ]
+/// # };
+/// let result = obj::parse(&obj_file);
+/// assert!(result.is_ok());
+///
+/// let result = result.unwrap();
+/// assert_eq!(result.material_libraries, expected.material_libraries);
+/// ```
 pub fn parse<T: AsRef<str>>(input: T) -> Result<ObjectSet, ParseError> {
     Parser::new(input.as_ref()).parse_objset()
 }
@@ -382,20 +483,34 @@ impl DisplayObjectSetCompositor {
     }
 }
 
-
+/// A marker indicating the type of error generated during parsing of a 
+/// Wavefront OBJ file.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ErrorKind {
+    /// The parser reached the end of the input early.
     EndOfFile,
+    /// The parser expected a tag statement that was not present.
     ExpectedTagStatement,
+    /// The parser expected a floating point number but found something else.
     ExpectedFloat,
+    /// The parser expected an integer but found something else.
     ExpectedInteger,
+    /// The parser expected a vertex/texture/normal index but found something else.
     ExpectedVTNIndex,
+    /// The parser encountered a face element that did not have enough vertices.
     EveryFaceElementMustHaveAtLeastThreeVertices,
+    /// An element had VTN indices with different forms.
     EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-    InvalidElementDeclaration,
+    /// A statement in a wavefront obj file that is either unsupported or does not exist.
+    InvalidObjectStatement,
+    /// The parser encountered an invalid or unsupported element type.
     ElementMustBeAPointLineOrFace,
+    /// The smoothing group name is something other than an integer or the default
+    /// value `off`.
     SmoothingGroupNameMustBeOffOrInteger,
+    /// The smoothing group declaration is missing a name.
     SmoothingGroupDeclarationHasNoName,
+    /// The `usemtl` statement has no corresponding material name.
     MaterialStatementHasNoName,
 }
 
@@ -403,13 +518,15 @@ pub enum ErrorKind {
 /// another kind of error.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
-    line_number: usize,
-    kind: ErrorKind,
-    message: String,
+    /// The line number where the error occurs.
+    pub line_number: usize,
+    /// The kind of error that occurred.
+    pub kind: ErrorKind,
+    /// A message describing why the parse error was generated.
+    pub message: String,
 }
 
 impl ParseError {
-    /// Generate a new parse error.
     fn new(line_number: usize, kind: ErrorKind, message: String) -> ParseError {
         ParseError {
             line_number: line_number,
@@ -430,11 +547,14 @@ impl error::Error for ParseError {}
 
 /// A Wavefront OBJ file parser.
 pub struct Parser<'a> {
+    /// The current line position of the parser in the input stream.
     line_number: usize,
+    /// the underlying lexer that generates tokens.
     lexer: PeekableLexer<'a>,
 }
 
 impl<'a> Parser<'a> {
+    /// Construct a new Wavefront OBJ file parser.
     pub fn new(input: &'a str) -> Parser<'a> {
         Parser {
             line_number: 1,
@@ -1005,8 +1125,8 @@ impl<'a> Parser<'a> {
                 }
                 Some(other_st) => {
                     return self.error(
-                        ErrorKind::InvalidElementDeclaration,
-                        format!("Unsupported or invalid element declaration `{}`.", other_st)
+                        ErrorKind::InvalidObjectStatement,
+                        format!("Unsupported or invalid object statement `{}`.", other_st)
                     );
                 }
             }
@@ -1096,6 +1216,93 @@ impl<'a> Parser<'a> {
         Ok(material_libraries)
     }
 
+    /// Parse the object set in the wavefront obj file.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// # use wavefront_obj::obj;
+    /// # use wavefront_obj::obj::{
+    /// #      Vertex,
+    /// #      NormalVertex,
+    /// #      Group,
+    /// #      SmoothingGroup,
+    /// #      Element,
+    /// #      ShapeEntry,
+    /// #      Geometry,
+    /// #      VTNIndex,
+    /// #      Object,
+    /// #      ObjectSet,
+    /// #      Parser,
+    /// # };
+    /// #
+    /// let obj_file = String::from(r"
+    ///     mtllib material_library.mtl    \
+    ///     v 0.000000  2.000000  0.000000 \
+    ///     v 0.000000  0.000000  0.000000 \
+    ///     v 2.000000  0.000000  0.000000 \
+    ///     v 2.000000  2.000000  0.000000 \
+    ///     v 4.000000  0.000000 -1.255298 \
+    ///     v 4.000000  2.000000 -1.255298 \
+    ///     ## 6 vertices                  \
+    ///                                    \
+    ///     g all                          \
+    ///     s 1                            \
+    ///     usemtl material                \
+    ///     f 1 2 3 4                      \
+    ///     f 4 3 5 6                      \
+    ///     ## 2 elements                  \
+    /// ");
+    /// // let expected = ...;
+    /// # /// // let expected = ...
+    /// # let expected = ObjectSet {
+    /// #     material_libraries: vec![
+    /// #         String::from("material_library.mtl"),
+    /// #     ],
+    /// #     objects: vec![
+    /// #         Object {
+    /// #             name: String::from(""),
+    /// #             vertex_set: vec![
+    /// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+    /// #                 Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+    /// #                 Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+    /// #                 Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
+    /// #                 Vertex { x: 4.000000, y: 0.000000, z: -1.255298, w: 1.0 },
+    /// #                 Vertex { x: 4.000000, y: 2.000000, z: -1.255298, w: 1.0 },
+    /// #             ],
+    /// #             texture_vertex_set: vec![],
+    /// #             normal_vertex_set: vec![],
+    /// #             group_set: vec![
+    /// #                 Group(String::from("all")), 
+    /// #             ],
+    /// #             smoothing_group_set: vec![
+    /// #                 SmoothingGroup(1),
+    /// #             ],
+    /// #             element_set: vec![
+    /// #                 Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
+    /// #                 Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
+    /// #                 Element::Face(VTNIndex::V(3), VTNIndex::V(2), VTNIndex::V(4)),
+    /// #                 Element::Face(VTNIndex::V(3), VTNIndex::V(4), VTNIndex::V(5)),
+    /// #             ],
+    /// #             shape_set: vec![
+    /// #                 ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
+    /// #                 ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
+    /// #                 ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 0 },
+    /// #                 ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
+    /// #             ],
+    /// #             geometry_set: vec![
+    /// #                 Geometry { material_name: Some(String::from("material")), shapes: vec![0, 1, 2, 3] },
+    /// #             ]
+    /// #         }
+    /// #     ]
+    /// # };
+    /// let mut parser = Parser::new(&obj_file);
+    /// let result = parser.parse_objset();
+    /// assert!(result.is_ok());
+    /// 
+    /// let result = result.unwrap();
+    /// assert_eq!(result, expected)
+    /// ```
     pub fn parse_objset(&mut self) -> Result<ObjectSet, ParseError> {
         let material_libraries = self.parse_material_libraries()?;
         let objects = self.parse_objects()?;
