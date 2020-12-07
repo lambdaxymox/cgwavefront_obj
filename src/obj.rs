@@ -514,7 +514,7 @@ pub enum ErrorKind {
     MaterialStatementHasNoName,
 }
 
-/// An error that is returned from parsing an invalid *.obj file, or
+/// An error that is returned from parsing an invalid `*.obj` file, or
 /// another kind of error.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
@@ -545,7 +545,8 @@ impl fmt::Display for ParseError {
 impl error::Error for ParseError {}
 
 
-/// A Wavefront OBJ file parser.
+/// A Wavefront OBJ file parser extracts three-dimensional geometric data
+/// from a `*.obj` file.
 pub struct Parser<'a> {
     /// The current line position of the parser in the input stream.
     line_number: usize,

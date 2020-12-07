@@ -6,11 +6,74 @@ use std::error;
 use std::fmt;
 
 
+/// Parse a material library file from a string.
+///
+/// ## Example
+///
+/// ```
+/// # use wavefront_obj::mtl;
+/// # use wavefront_obj::mtl::{
+/// #     MaterialSet,
+/// #     Material,
+/// #     IlluminationModel,
+/// #     Color,
+/// # };
+/// #
+/// let mtl_file = String::from(r"
+///     newmtl my_material
+///     Ka 0.0435 0.0435 0.0435
+///     Kd 0.1086 0.1086 0.1086
+///     Ks 0.0000 0.0000 0.0000
+///     illum 2
+///     d 0.6600
+///     Ns 10.0000
+///     Ni 1.19713
+///     map_Ke emissive.jpg
+///     map_Ka ambient.jpg
+///     map_Kd diffuse.jpg
+///     map_Ks specular.jpg
+///     map_Ns specular_exponent.jpg
+///     map_d dissolve.png
+///     disp displacement.png
+///     decal decal.jpg
+///     bump height.png
+/// ");
+/// // let expected = ...;
+/// # let expected = MaterialSet {
+/// #     materials: vec![Material {
+/// #         name: String::from("my_material"),
+/// #         color_ambient: Color { r: 0.0435, g: 0.0435, b: 0.0435 },
+/// #         color_diffuse: Color { r: 0.1086, g: 0.1086, b: 0.1086 },
+/// #         color_specular: Color { r: 0.0000, g: 0.0000, b: 0.0000 },
+/// #         color_emissive: Color { r: 0.0, g: 0.0, b: 0.0 },
+/// #         specular_exponent: 10.0000,
+/// #         dissolve: 0.6600,
+/// #         optical_density: Some(1.19713),
+/// #         illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+/// #         map_ambient: Some(String::from("ambient.jpg")),
+/// #         map_diffuse: Some(String::from("diffuse.jpg")),
+/// #         map_specular: Some(String::from("specular.jpg")),
+/// #         map_emissive: Some(String::from("emissive.jpg")),
+/// #         map_specular_exponent: Some(String::from("specular_exponent.jpg")),
+/// #         map_bump: Some(String::from("height.png")),
+/// #         map_displacement: Some(String::from("displacement.png")),
+/// #         map_dissolve: Some(String::from("dissolve.png")),
+/// #         map_decal: Some(String::from("decal.jpg")),
+/// #     }]
+/// # };
+/// let result = mtl::parse(&mtl_file);
+/// eprintln!("{:?}", result);
+/// assert!(result.is_ok());
+///
+/// let result = result.unwrap();
+/// assert_eq!(result, expected);
+/// ```
 pub fn parse<T: AsRef<str>>(input: T) -> Result<MaterialSet, ParseError> {
     Parser::new(input.as_ref()).parse_mtlset()
 }
 
-
+/// A representation of a material's color attributes, such as
+/// the ambient color, diffuse color, specular color, and the emissive color.
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub struct Color {
     pub r: f64,
@@ -29,6 +92,12 @@ impl Color {
     }
 }
 
+/// The illumination model describes how to illuminate an object with a given 
+/// material.
+/// 
+/// The illumination model data is based on the original set Wavefront MTL spec 
+/// illumination models. This parameter exists mostly for legacy reasons at this 
+/// point.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IlluminationModel {
     Ambient,
@@ -36,25 +105,74 @@ pub enum IlluminationModel {
     AmbientDiffuseSpecular,
 }
 
+/// A material description associated with an object in a scene describes
+/// how to illuminate the object. 
+/// 
+/// A material can contain multiple texture maps including a diffuse map, a 
+/// specular map, a specular exponent map, and an ambient map. This combination 
+/// of maps allows one to implement some variation or other of a Phong shading 
+/// model. Other maps include bump maps and displacement maps for varying the 
+/// roughness of the material across the surface of an object, as well as 
+/// a dissolve map that descibes how the variation changes across an object.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Material {
+    /// The material's name in the material library.
     pub name: String,
+    /// The ambient color of the material. This parameter is typically used in
+    /// some variation of Phong shading.
     pub color_ambient: Color,
+    /// The diffuse color of the material. This parameter is typically used in
+    /// some variation of Phong shading.
     pub color_diffuse: Color,
+    /// The specular color of the material. This parameter is typically used in
+    /// some variation of Phong shading.
     pub color_specular: Color,
+    /// The emissive color of the material. When an object also happens to be
+    /// a light source, the emissive color descibes the color of light the
+    /// object emits.
     pub color_emissive: Color,
+    /// The specular exponent of the material used in either Phong shading or
+    /// Blinn-Phong shading.
     pub specular_exponent: f64,
+    /// The dissolve paramter specifies the amount of opacity (alpha) of a material.
+    /// A dissolve of 0.0 is a fully transparent material, and a dissolve of 1.0 is
+    /// a fully opaque material.
     pub dissolve: f64,
+    /// The index of refaction of the material. This enables transparency 
+    /// effects.
     pub optical_density: Option<f64>,
+    /// The illumination model used to render a material. This parameter is 
+    /// based on the original models defined in the MTL spec, and it told the 
+    /// Wavefront software's system how to render the object. Since we do this 
+    /// with programmable shaders on modern workloads anyway, this parameter 
+    /// may be considered a legacy item.
     pub illumination_model: IlluminationModel,
+    /// A texture map describing the ambient color as it varies across an object.
     pub map_ambient: Option<String>,
+    /// A texture map that describes the diffuse color as it varies across an object.
     pub map_diffuse: Option<String>,
+    /// A texture map that describes the specular color as it varies across an object.
     pub map_specular: Option<String>,
+    /// A texture map that describes the emissive color as it varies across an object. 
     pub map_emissive: Option<String>,
+    /// A texture map that describes the specular exponent at different locations
+    /// on an object.
     pub map_specular_exponent: Option<String>,
+    /// A texture map that stores the height data that describes how a normal vector
+    /// gets perturbed across a surface for providing extra surface detail at low 
+    /// computational cost.
     pub map_bump: Option<String>,
+    /// A texture map that describes the local deformation of the surface of an 
+    /// object, creating surface roughness. Displacement mapping differs from bump 
+    /// mapping in that a displacement map describes how to actually modify the 
+    /// tesselation of an object's surface. A bump map merely perturbs the normal
+    /// vector without modifying the geometry.
     pub map_displacement: Option<String>,
+    /// A texture map that describes the opacity of a material as it varies across
+    /// an object.
     pub map_dissolve: Option<String>,
+    /// A texture map that replaces the main surface color with a color looked up
+    /// from the decal map.
     pub map_decal: Option<String>,
 }
 
@@ -83,26 +201,43 @@ impl Material {
     }
 }
 
+/// A collection of materials that may be used by multiple parts of a single
+/// object, or referenced when rendering a collection of objects.
 #[derive(Clone, Debug, PartialEq)]
 pub struct MaterialSet {
     pub materials: Vec<Material>,
 }
 
+/// A marker indicating the type of error generated during parsing of a 
+/// Wavefront MTL file.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ErrorKind {
+    /// The parser prematurely reached the end of the input.
     EndOfFile,
-    ExpectedTag,
+    /// The parser expected a tag statement that was not present.
+    ExpectedTagStatement,
+    /// The parser expected a floating point number but got something else
+    /// instead.
     ExpectedFloat,
+    /// The parser expected an integer but got something else instead.
     ExpectedInteger,
+    /// The parser expected there to be no more input.
     ExpectedEndOfInput,
+    /// The MTL file specified an unsupported or unknown illumination model. 
     UnknownIlluminationModel,
+    /// A general parsing error occurred.
     ErrorParsingMaterial,
 }
 
+/// An error that is returned from parsing an invalid `*.mtl` file, or
+/// another kind of error.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ParseError {
+    /// The line number where the error occurred.
     line_number: usize,
+    /// The kind of error that occurred.
     kind: ErrorKind,
+    /// A message describing why the parse error was generated.
     message: String,
 }
 
@@ -135,7 +270,9 @@ impl error::Error for ParseError {}
 
 /// A Wavefront MTL file parser.
 pub struct Parser<'a> {
+    /// the current line number in the input stream.
     line_number: usize,
+    /// The underlying lexer that tokenizes the input stream.
     lexer: PeekableLexer<'a>,
 }
 
@@ -181,7 +318,7 @@ impl<'a> Parser<'a> {
         match self.next() {
             None => self.error(ErrorKind::EndOfFile, format!("")),
             Some(st) if st != tag => self.error(
-                ErrorKind::ExpectedTag,
+                ErrorKind::ExpectedTagStatement,
                 format!("Expected statement {} but got statement {}", tag, st)
             ),
             _ => Ok(())
@@ -426,7 +563,7 @@ impl<'a> Parser<'a> {
             Some("newmtl") => {}
             Some(st) => {
                 return self.error(
-                    ErrorKind::ExpectedTag,
+                    ErrorKind::ExpectedTagStatement,
                     format!("Expected `newmtl` but got {}.", st)
                 )
             }
@@ -534,7 +671,8 @@ impl<'a> Parser<'a> {
         Ok(material)
     }
 
-    fn parse_mtlset(&mut self) -> Result<MaterialSet, ParseError> {
+    /// Parse an MTL file from the input lexer's input stream.
+    pub fn parse_mtlset(&mut self) -> Result<MaterialSet, ParseError> {
         self.skip_zero_or_more_newlines();
 
         let mut materials = Vec::new();
@@ -553,7 +691,7 @@ impl<'a> Parser<'a> {
             Some(st) => {
                 return self.error(
                     ErrorKind::ExpectedEndOfInput,
-                    format!("Expeted end of input but got `{}`.", st)
+                    format!("Expected end of input but got `{}`.", st)
                 )
             }
             None => {}
