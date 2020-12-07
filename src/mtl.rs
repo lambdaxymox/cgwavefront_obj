@@ -62,7 +62,6 @@ use std::fmt;
 /// #     }]
 /// # };
 /// let result = mtl::parse(&mtl_file);
-/// eprintln!("{:?}", result);
 /// assert!(result.is_ok());
 ///
 /// let result = result.unwrap();
@@ -672,6 +671,66 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse an MTL file from the input lexer's input stream.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// # use wavefront_obj::mtl::{
+    /// #     MaterialSet,
+    /// #     Material,
+    /// #     IlluminationModel,
+    /// #     Color,
+    /// #     Parser,
+    /// # };
+    /// #
+    /// let mtl_file = String::from(r"
+    ///     newmtl my_material
+    ///     Ka 0.0435 0.0435 0.0435
+    ///     Kd 0.1086 0.1086 0.1086
+    ///     Ks 0.0000 0.0000 0.0000
+    ///     illum 2
+    ///     d 0.6600
+    ///     Ns 10.0000
+    ///     Ni 1.19713
+    ///     map_Ke emissive.jpg
+    ///     map_Ka ambient.jpg
+    ///     map_Kd diffuse.jpg
+    ///     map_Ks specular.jpg
+    ///     map_Ns specular_exponent.jpg
+    ///     map_d dissolve.png
+    ///     disp displacement.png
+    ///     decal decal.jpg
+    ///     bump height.png
+    /// ");
+    /// // let expected = ...;
+    /// # let expected = MaterialSet {
+    /// #     materials: vec![Material {
+    /// #         name: String::from("my_material"),
+    /// #         color_ambient: Color { r: 0.0435, g: 0.0435, b: 0.0435 },
+    /// #         color_diffuse: Color { r: 0.1086, g: 0.1086, b: 0.1086 },
+    /// #         color_specular: Color { r: 0.0000, g: 0.0000, b: 0.0000 },
+    /// #         color_emissive: Color { r: 0.0, g: 0.0, b: 0.0 },
+    /// #         specular_exponent: 10.0000,
+    /// #         dissolve: 0.6600,
+    /// #         optical_density: Some(1.19713),
+    /// #         illumination_model: IlluminationModel::AmbientDiffuseSpecular,
+    /// #         map_ambient: Some(String::from("ambient.jpg")),
+    /// #         map_diffuse: Some(String::from("diffuse.jpg")),
+    /// #         map_specular: Some(String::from("specular.jpg")),
+    /// #         map_emissive: Some(String::from("emissive.jpg")),
+    /// #         map_specular_exponent: Some(String::from("specular_exponent.jpg")),
+    /// #         map_bump: Some(String::from("height.png")),
+    /// #         map_displacement: Some(String::from("displacement.png")),
+    /// #         map_dissolve: Some(String::from("dissolve.png")),
+    /// #         map_decal: Some(String::from("decal.jpg")),
+    /// #     }]
+    /// # };
+    /// let result = Parser::new(&mtl_file).parse_mtlset();
+    /// assert!(result.is_ok());
+    ///
+    /// let result = result.unwrap();
+    /// assert_eq!(result, expected);
+    /// ```
     pub fn parse_mtlset(&mut self) -> Result<MaterialSet, ParseError> {
         self.skip_zero_or_more_newlines();
 
