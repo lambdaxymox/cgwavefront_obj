@@ -4,7 +4,7 @@ version = "0.8.0"
 authors = ["LambdaXymox <lambda.xymox@gmail.com>"]
 edition = "2018"
 readme = "README.md"
-repository = "https://github.com/lambdaxymox/wavefront-obj"
+repository = "https://github.com/lambdaxymox/cgwavefront_obj"
 categories = [
     "graphics",
     "game-development",
@@ -17,6 +17,7 @@ keywords = [
     "mtl"
 ]
 license = "Apache-2.0 OR MIT"
+description = "A library for working with Wavefront OBJ and MTL files."
 
 [lib]
 name = "wavefront_obj"

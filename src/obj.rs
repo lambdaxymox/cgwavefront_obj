@@ -9,7 +9,7 @@ use std::default::{
 };
 
 
-/// Parse an object set file from a string.
+/// Parse a set of objects and material library names from a string.
 ///
 /// ## Example
 ///
