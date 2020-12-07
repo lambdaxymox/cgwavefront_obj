@@ -64,7 +64,12 @@ ObjectSet       ::= [Object | ObjectBody] [Object]*
 ## Grammar For MTL Files
 The grammar is written in Backus-Naur form. A `MtlSet` is a collection of 
 materials that are extracted from a `*.mtl` file. Each material is composed of 
-multiple illumination model parameters and texture maps.
+multiple illumination model parameters and texture maps. The spec MTL illumination 
+model parameters by default only specify variations of Phong shading models. There
+are proposed extensions to the MTL format to enable specifying physically-based 
+rendering parameters as well, but we do not implement most of them here. The one 
+physically-based rendering parameter that **wavefront_obj** supports is for emissive
+values with the tag `Ke` and for emissive maps with the tag `map_Ke`.
 
 ```
 Empty               ::= ''
