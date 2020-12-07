@@ -590,14 +590,14 @@ pub struct ObjectSet {
 
 /// The `DisplayObjectCompositor` type is the default compositor
 /// for presenting object set information to the end user.
-pub struct DisplayObjectSetCompositor { }
+struct DisplayObjectSetCompositor { }
 
 impl DisplayObjectSetCompositor {
-    pub fn new() -> Self { 
+    fn new() -> Self { 
         Self {} 
     }
 
-    pub fn compose(&self, object_set: &ObjectSet) -> String {
+    fn compose(&self, object_set: &ObjectSet) -> String {
         let compositor = DisplayObjectCompositor::new();
         let mut string = String::from("ObjectSet {\n");
         
