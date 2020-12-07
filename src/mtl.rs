@@ -668,7 +668,7 @@ impl<'a> Parser<'a> {
         Ok(material)
     }
 
-    /// Parse an MTL file from the input lexer's input stream.
+    /// Parse an MTL file.
     ///
     /// ## Example
     ///

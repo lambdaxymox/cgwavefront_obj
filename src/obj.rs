@@ -9,7 +9,7 @@ use std::default::{
 };
 
 
-/// Parse a wavefront object file from a string.
+/// Parse an object set file from a string.
 ///
 /// ## Example
 ///
@@ -127,7 +127,8 @@ pub struct Vertex {
     pub y: f64,
     /// The **z-axis** component of a vertex.
     pub z: f64,
-    /// The **w-axis** (homogeneous) component of a vertex.
+    /// The **w-axis** (homogeneous) component of a vertex. The default value
+    /// of this field is 0 when the w coordinate is not present.
     pub w: f64,
 }
 
@@ -156,7 +157,7 @@ impl fmt::Display for TextureVertex {
 }
 
 
-/// A normal vextor at a vertex in an object.
+/// A normal vector at a vertex in an object.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct NormalVertex {
     /// The **x-axis** component of a normal vector.
@@ -277,7 +278,7 @@ type ShapeEntryIndex = usize;
 /// is a collection of elements. Typically, a geometric figure consists of elements that
 /// are all the same type, i.e. a three-dimensional object is composed of all faces,
 /// or a line is composed of all line elements.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Element {
     Point(VTNIndex),
     Line(VTNIndex, VTNIndex),
@@ -301,7 +302,9 @@ impl fmt::Display for Element {
 }
 
 /// A group is a label for a collection of elements within an object.
-/// A collection of groups enables one to organize collections of elements.
+///
+/// A collection of groups enables one to organize collections of elements 
+/// by group.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Group(pub String);
 
@@ -323,12 +326,6 @@ impl Default for Group {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct SmoothingGroup(pub usize);
 
-impl Default for SmoothingGroup {
-    fn default() -> SmoothingGroup { 
-        SmoothingGroup(0) 
-    }
-}
-
 impl fmt::Display for SmoothingGroup {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         if self.0 == 0 {
@@ -336,6 +333,12 @@ impl fmt::Display for SmoothingGroup {
         } else {
             write!(formatter, "{}", self.0)
         }
+    }
+}
+
+impl Default for SmoothingGroup {
+    fn default() -> SmoothingGroup { 
+        SmoothingGroup(0) 
     }
 }
 
@@ -575,10 +578,13 @@ impl Default for Object {
     }
 }
 
-
+/// An object set is a collection of objects and material library named obtained 
+/// from parsing an `*.obj` file. An `*.obj` file may contain more that one object.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ObjectSet {
+    /// The set of material libraries associated with the object set.
     pub material_libraries: Vec<String>,
+    /// The set of objects in an object set.
     pub objects: Vec<Object>,
 }
 
