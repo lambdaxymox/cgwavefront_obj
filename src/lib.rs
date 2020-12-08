@@ -25,7 +25,7 @@ Add the following line to your `Cargo.toml` file
 
 ```toml
 [dependencies]
-wavefront_obj = "1.0.1"
+wavefront_obj = "1.0.2"
 ```
 
 to import the library. Include the line
