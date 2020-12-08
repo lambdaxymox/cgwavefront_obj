@@ -59,6 +59,7 @@ as well as the `examples` directory in the source tree.
   rendering. Otherwise, the results of rendering will be unpredictable.
 */
 
+#![allow(clippy::redundant_field_names)]
 mod lexer;
 
 pub mod obj;

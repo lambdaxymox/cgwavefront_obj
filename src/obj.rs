@@ -536,7 +536,7 @@ impl DisplayObjectCompositor {
     fn new() -> Self { Self {} }
 
     fn compose_set<T: fmt::Display>(&self, set: &[T], name: &str) -> String {
-        let mut string = String::from(format!("    {} set:\n", name));
+        let mut string = format!("    {} set:\n", name);
         if set.is_empty() {
             string += &format!("        data: []\n");
         } else {
@@ -864,7 +864,7 @@ impl<'a> Parser<'a> {
     /// Parse a vertex/texture/normal index.
     fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
         let process_split = |split: &str| -> Result<Option<usize>, ParseError> {
-            if split.len() > 0 {
+            if !split.is_empty() {
                 let index = split.parse::<usize>();
                 Ok(index.ok())
             } else {
@@ -899,7 +899,7 @@ impl<'a> Parser<'a> {
             (Some(v), None, Some(n)) => Ok(VTNIndex::VN(v - 1, n - 1)),
             (Some(v), Some(t), None) => Ok(VTNIndex::VT(v - 1, t - 1)),
             (Some(v), Some(t), Some(n)) => Ok(VTNIndex::VTN(v - 1, t - 1, n - 1)),
-            _ => return self.error(
+            _ => self.error(
                 ErrorKind::ExpectedVTNIndex,
                 format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
             ),

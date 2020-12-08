@@ -617,7 +617,7 @@ impl<'a> Parser<'a> {
         match self.next() {
             Some(st) => Ok(st),
             None => {
-                return self.error(
+                self.error(
                     ErrorKind::EndOfFile,
                     format!("Expected material name but got end of input.")
                 )
@@ -661,39 +661,39 @@ impl<'a> Parser<'a> {
                 }
                 Some("map_Ka") => {
                     let name = self.parse_map_ambient()?;
-                    material.map_ambient = name.map(|st| String::from(st));
+                    material.map_ambient = name.map(String::from);
                 }
                 Some("map_Kd") => {
                     let name = self.parse_map_diffuse()?;
-                    material.map_diffuse = name.map(|st| String::from(st));
+                    material.map_diffuse = name.map(String::from);
                 }
                 Some("map_Ks") => {
                     let name = self.parse_map_specular()?;
-                    material.map_specular = name.map(|st| String::from(st));
+                    material.map_specular = name.map(String::from);
                 }
                 Some("map_Ke") => {
                     let name = self.parse_map_emissive()?;
-                    material.map_emissive = name.map(|st| String::from(st));
+                    material.map_emissive = name.map(String::from);
                 }
                 Some("map_Ns") => {
                     let name = self.parse_map_specular_exponent()?;
-                    material.map_specular_exponent = name.map(|st| String::from(st));
+                    material.map_specular_exponent = name.map(String::from);
                 }
                 Some("map_Bump") | Some("bump") => {
                     let map_bump = self.parse_map_bump()?;
-                    material.map_bump = map_bump.map(|name| String::from(name));
+                    material.map_bump = map_bump.map(String::from);
                 }
                 Some("disp") => {
                     let map_displacement = self.parse_map_displacement()?;
-                    material.map_displacement = map_displacement.map(|name| String::from(name));
+                    material.map_displacement = map_displacement.map(String::from);
                 }
                 Some("map_d") => {
                     let map_dissolve = self.parse_map_dissolve()?;
-                    material.map_dissolve = map_dissolve.map(|name| String::from(name));
+                    material.map_dissolve = map_dissolve.map(String::from);
                 }
                 Some("decal") => {
                     let map_decal = self.parse_map_decal()?;
-                    material.map_decal = map_decal.map(|name| String::from(name));
+                    material.map_decal = map_decal.map(String::from);
                 }
                 Some("newmtl") | None => {
                     break;
@@ -787,14 +787,11 @@ impl<'a> Parser<'a> {
             }
         }
         
-        match self.peek() {
-            Some(st) => {
-                return self.error(
-                    ErrorKind::ExpectedEndOfInput,
-                    format!("Expected end of input but got `{}`.", st)
-                )
-            }
-            None => {}
+        if let Some(st) = self.peek() {
+            return self.error(
+                ErrorKind::ExpectedEndOfInput,
+                format!("Expected end of input but got `{}`.", st)
+            )
         }
 
         Ok(MaterialSet { materials: materials })
