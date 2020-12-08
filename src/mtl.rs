@@ -323,7 +323,10 @@ impl<'a> Parser<'a> {
     fn next_string(&mut self) -> Result<&'a str, ParseError> {
         match self.next() {
             Some(st) => Ok(st),
-            None => self.error(ErrorKind::EndOfFile, format!(""))
+            None => self.error(
+                ErrorKind::EndOfFile, 
+                "Expected token but reached end of input.".to_owned()
+            )
         }
     }
 
@@ -436,7 +439,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -453,7 +456,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -470,7 +473,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -487,7 +490,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -508,7 +511,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -525,7 +528,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -542,7 +545,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -559,7 +562,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -576,7 +579,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(Some(st)),
             None => self.error(
                 ErrorKind::EndOfFile, 
-                format!("Expected texture map name but got end of input.")
+                "Expected texture map name but got end of input.".to_owned()
             ),
         }
     }
@@ -609,7 +612,7 @@ impl<'a> Parser<'a> {
             None => {
                 return self.error(
                     ErrorKind::EndOfFile,
-                    format!("Expected `newmtl` but got end of input.")
+                    "Expected `newmtl` but got end of input.".to_owned()
                 )
             }
         }
@@ -619,7 +622,7 @@ impl<'a> Parser<'a> {
             None => {
                 self.error(
                     ErrorKind::EndOfFile,
-                    format!("Expected material name but got end of input.")
+                    "Expected material name but got end of input.".to_owned()
                 )
             }
         }
@@ -777,14 +780,9 @@ impl<'a> Parser<'a> {
 
         let mut materials = Vec::new();
 
-        loop {
-            match self.peek() {
-                Some("newmtl") => {
-                    let material = self.parse_material()?;
-                    materials.push(material);
-                }
-                _ => break,
-            }
+        while let Some("newmtl") = self.peek() {
+            let material = self.parse_material()?;
+            materials.push(material);
         }
         
         if let Some(st) = self.peek() {

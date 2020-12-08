@@ -229,13 +229,13 @@ impl VTNIndex {
     /// assert!(!vn_index1.has_same_type_as(&vtn_index1));
     /// ```
     pub fn has_same_type_as(&self, other: &VTNIndex) -> bool {
-        match (self, other) {
+        matches!(
+            (self, other),
             (&VTNIndex::V(_),   &VTNIndex::V(_)) |
             (&VTNIndex::VT(_,_),  &VTNIndex::VT(_,_)) | 
             (&VTNIndex::VN(_,_),  &VTNIndex::VN(_,_)) | 
-            (&VTNIndex::VTN(_,_,_), &VTNIndex::VTN(_,_,_)) => true,
-            _ => false,
-        }
+            (&VTNIndex::VTN(_,_,_), &VTNIndex::VTN(_,_,_))
+        )
     }
 }
 
@@ -538,7 +538,7 @@ impl DisplayObjectCompositor {
     fn compose_set<T: fmt::Display>(&self, set: &[T], name: &str) -> String {
         let mut string = format!("    {} set:\n", name);
         if set.is_empty() {
-            string += &format!("        data: []\n");
+            string += "        data: []\n";
         } else {
             let length = set.len();
             string += &format!("        data: [({}) ... ({})]\n", set[0], set[length-1]);
@@ -558,7 +558,7 @@ impl DisplayObjectCompositor {
         string += &self.compose_set(&object.group_set, "group");
         string += &self.compose_set(&object.smoothing_group_set, "smoothing group");
         string += &self.compose_set(&object.element_set, "element");
-        string += &format!("}}\n");
+        string += "}}\n";
 
         string       
     }
@@ -732,7 +732,7 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(st),
             None => self.error(
                 ErrorKind::EndOfFile,
-                format!("Reached the end of the input in the process of getting the next token.")
+                "Reached the end of the input in the process of getting the next token.".to_owned()
             )
         }
     }
@@ -745,7 +745,7 @@ impl<'a> Parser<'a> {
         match self.next() {
             None => self.error(
                 ErrorKind::EndOfFile,
-                format!("Reached the end of the input in the process of getting the next token.")
+                "Reached the end of the input in the process of getting the next token.".to_owned()
             ),
             Some(st) if st != tag => self.error(
                 ErrorKind::ExpectedTagStatement,
@@ -967,10 +967,8 @@ impl<'a> Parser<'a> {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
                 return self.error(
                     ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-                    format!(
-                        "Every VTN index describing the vertex data for a line must have\
-                         the same form."
-                    )
+                    "Every VTN index describing the vertex data for a line must have\
+                            the same form.".to_owned()
                 );
             }
         }
@@ -999,10 +997,8 @@ impl<'a> Parser<'a> {
         if vtn_indices.len() < 3 {
             return self.error(
                 ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices,
-                format!(
-                    "A face primitive must have at least three vertices.\
-                     At minimum, a triangle requires three indices."
-                )
+                "A face primitive must have at least three vertices.\
+                        At minimum, a triangle requires three indices.".to_owned()
             );
         }
 
@@ -1011,10 +1007,8 @@ impl<'a> Parser<'a> {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
                 return self.error(
                     ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-                    format!(
-                        "Every VTN index describing the vertex data for a face must have\
-                         the same form."
-                    )
+                    "Every VTN index describing the vertex data for a face \
+                             must have the same form.".to_owned()
                 );
             }
         }
@@ -1039,9 +1033,7 @@ impl<'a> Parser<'a> {
             Some("f") => self.parse_face(elements),
             _ => self.error(
                 ErrorKind::ElementMustBeAPointLineOrFace,
-                format!(
-                    "An element must be declared as a point (`p`), line (`l`), or face (`f`)."
-                )
+                "An element must be a point (`p`), line (`l`), or face (`f`).".to_owned()
             ),
         }
     }
@@ -1087,7 +1079,7 @@ impl<'a> Parser<'a> {
         } else {
             return self.error(
                 ErrorKind::SmoothingGroupDeclarationHasNoName,
-                format!("Got a smoothing group declaration without a smoothing group name.")
+                "Got a smoothing group declaration without a smoothing group name.".to_owned()
             );
         }
 
@@ -1105,7 +1097,7 @@ impl<'a> Parser<'a> {
         } else {
             return self.error(
                 ErrorKind::MaterialStatementHasNoName,
-                format!("Got a `usemtl` material declaration without a material name.")
+                "Got a `usemtl` material declaration without a material name.".to_owned()
             )
         }
 
@@ -1364,7 +1356,7 @@ impl<'a> Parser<'a> {
         let mut max_normal_index = 0;
 
         self.skip_zero_or_more_newlines();
-        while let Some(_) = self.peek() {
+        while self.peek().is_some() {
             result.push(self.parse_object(
                 &mut min_vertex_index, 
                 &mut max_vertex_index,
