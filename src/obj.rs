@@ -1026,7 +1026,12 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse all the elements of a givne type from a line of text input.
-    fn parse_elements(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {  
+    fn parse_elements(
+        &mut self, 
+        elements: &mut Vec<Element>,
+        vertex__index_range: (usize, usize),
+        texture_index_range: (usize, usize),
+        normal_index_range: (usize, usize)) -> Result<usize, ParseError> {  
         match self.peek() {
             Some("p") => self.parse_point(elements),
             Some("l") => self.parse_line(elements),
@@ -1274,7 +1279,12 @@ impl<'a> Parser<'a> {
                         material_name_index = 0;
                     }
 
-                    let amount_parsed = self.parse_elements(&mut elements)?;
+                    let amount_parsed = self.parse_elements(
+                        &mut elements,
+                        (*min_vertex_index, *max_vertex_index),
+                        (*min_texture_index, *max_vertex_index),
+                        (*min_normal_index, *max_normal_index)
+                    )?;
                     max_element_group_index += amount_parsed;
                     max_element_smoothing_group_index += amount_parsed;
                     max_element_material_name_index += amount_parsed;
@@ -1708,7 +1718,7 @@ mod element_tests {
             Element::Point(VTNIndex::V(0)), Element::Point(VTNIndex::V(1)),
             Element::Point(VTNIndex::V(2)), Element::Point(VTNIndex::V(3)),
         ];
-        assert!(parser.parse_elements(&mut result).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1716,7 +1726,7 @@ mod element_tests {
     fn test_parse_point2() {
         let mut parser = super::Parser::new("p 1 1/2 3 4/5");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result).is_err());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_err());
     }
 
     #[test]
@@ -1728,7 +1738,7 @@ mod element_tests {
             Element::Line(VTNIndex::V(37),  VTNIndex::V(117)),
             Element::Line(VTNIndex::V(117), VTNIndex::V(107)),
         ];
-        assert!(parser.parse_elements(&mut result).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1739,7 +1749,7 @@ mod element_tests {
         let expected = vec![
             Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
         ];
-        assert!(parser.parse_elements(&mut result).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1751,7 +1761,7 @@ mod element_tests {
             Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
             Element::Line(VTNIndex::VT(117, 107), VTNIndex::VT(323, 397)),
         ];
-        assert!(parser.parse_elements(&mut result).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1759,14 +1769,14 @@ mod element_tests {
     fn test_parse_line4() {
         let mut parser = super::Parser::new("l 297/38 118 324 \n");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result).is_err());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_err());
     }
 
     #[test]
     fn test_parse_line5() {
         let mut parser = super::Parser::new("l 297 118/108 324/398 \n");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result).is_err());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_err());
     }
 
     #[test]
@@ -1776,7 +1786,7 @@ mod element_tests {
         let expected = vec![
             Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
         ];
-        assert!(parser.parse_elements(&mut result).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1788,7 +1798,7 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
         ];
-        assert!(parser.parse_elements(&mut result).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1801,7 +1811,7 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(323), VTNIndex::V(397)),
         ];
-        assert!(parser.parse_elements(&mut result).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1824,7 +1834,7 @@ mod element_tests {
             Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34083, 34083), VTNIndex::VN(34090, 34090)),
             Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34090, 34090), VTNIndex::VN(34075, 34075)),
         ];
-        parser.parse_elements(&mut result).unwrap();
+        parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).unwrap();
         assert_eq!(result, expected);
     }
 }

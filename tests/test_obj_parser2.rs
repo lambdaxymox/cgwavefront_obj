@@ -360,7 +360,7 @@ fn test_cases() -> TestSet {
                     # 6 vertices                  \
                     # 6 normals                   \
                                                   \
-                    usemtl material               \
+                    usemtl material1              \
                     g all                         \
                     s 1                           \
                     f 1//1 2//2 3//3 4//4         \
@@ -368,6 +368,56 @@ fn test_cases() -> TestSet {
                     # 2 elements                  \
                                                   \
                     #### End Object001            \
+                                                  \
+                    o Object002                   \
+                    v 0.000000 2.000000 0.000000  \
+                    v 0.000000 0.000000 0.000000  \
+                    v 2.000000 0.000000 0.000000  \
+                    v 2.000000 2.000000 0.000000  \
+                    v 4.000000 0.000000 -1.255298 \
+                    v 4.000000 2.000000 -1.255298 \
+                    vn 0.000000 0.000000 1.000000 \
+                    vn 0.000000 0.000000 1.000000 \
+                    vn 0.276597 0.000000 0.960986 \
+                    vn 0.276597 0.000000 0.960986 \
+                    vn 0.531611 0.000000 0.846988 \
+                    vn 0.531611 0.000000 0.846988 \
+                    # 6 vertices                  \
+                    # 6 normals                   \
+                                                  \
+                    usemtl material2              \
+                    g all                         \
+                    s 1                           \
+                    f 7//7   8//8 9//9   10//10   \
+                    f 10//10 9//9 11//11 12//12   \
+                    # 2 elements                  \
+                                                  \
+                    #### End Object002            \
+                                                  \
+                    o Object003                   \
+                    v 0.000000 2.000000 0.000000  \
+                    v 0.000000 0.000000 0.000000  \
+                    v 2.000000 0.000000 0.000000  \
+                    v 2.000000 2.000000 0.000000  \
+                    v 4.000000 0.000000 -1.255298 \
+                    v 4.000000 2.000000 -1.255298 \
+                    vn 0.000000 0.000000 1.000000 \
+                    vn 0.000000 0.000000 1.000000 \
+                    vn 0.276597 0.000000 0.960986 \
+                    vn 0.276597 0.000000 0.960986 \
+                    vn 0.531611 0.000000 0.846988 \
+                    vn 0.531611 0.000000 0.846988 \
+                    # 6 vertices                  \
+                    # 6 normals                   \
+                                                  \
+                    usemtl material3              \
+                    g all                         \
+                    s 1                           \
+                    f 13//13 14//14 15//15 16//16 \
+                    f 16//16 15//15 17//17 18//18 \
+                    # 2 elements                  \
+                                                  \
+                    #### End Object003            \
                 "),
                 expected: ObjectSet {
                     material_libraries: vec![
@@ -412,9 +462,91 @@ fn test_cases() -> TestSet {
                                 ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
                             ],
                             geometry_set: vec![
-                                Geometry { material_name: Some(String::from("material")), shapes: vec![0, 1, 2, 3] },
+                                Geometry { material_name: Some(String::from("material1")), shapes: vec![0, 1, 2, 3] },
                             ]
-                        }
+                        },
+                        Object {
+                            name: String::from("Object002"),
+                            vertex_set: vec![
+                                Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+                                Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
+                                Vertex { x: 4.000000, y: 0.000000, z: -1.255298, w: 1.0 },
+                                Vertex { x: 4.000000, y: 2.000000, z: -1.255298, w: 1.0 },
+                            ],
+                            texture_vertex_set: vec![],
+                            normal_vertex_set: vec![
+                                NormalVertex { x: 0.000000, y: 0.000000, z: 1.000000 },
+                                NormalVertex { x: 0.000000, y: 0.000000, z: 1.000000 },
+                                NormalVertex { x: 0.276597, y: 0.000000, z: 0.960986 },
+                                NormalVertex { x: 0.276597, y: 0.000000, z: 0.960986 },
+                                NormalVertex { x: 0.531611, y: 0.000000, z: 0.846988 },
+                                NormalVertex { x: 0.531611, y: 0.000000, z: 0.846988 },
+                            ],
+                            group_set: vec![
+                                Group(String::from("all")), 
+                            ],
+                            smoothing_group_set: vec![
+                                SmoothingGroup(1),
+                            ],
+                            element_set: vec![
+                                Element::Face(VTNIndex::VN(0, 0), VTNIndex::VN(1, 1), VTNIndex::VN(2, 2)),
+                                Element::Face(VTNIndex::VN(0, 0), VTNIndex::VN(2, 2), VTNIndex::VN(3, 3)),
+                                Element::Face(VTNIndex::VN(3, 3), VTNIndex::VN(2, 2), VTNIndex::VN(4, 4)),
+                                Element::Face(VTNIndex::VN(3, 3), VTNIndex::VN(4, 4), VTNIndex::VN(5, 5)),
+                            ],
+                            shape_set: vec![
+                                ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
+                            ],
+                            geometry_set: vec![
+                                Geometry { material_name: Some(String::from("material2")), shapes: vec![0, 1, 2, 3] },
+                            ]
+                        },
+                        Object {
+                            name: String::from("Object003"),
+                            vertex_set: vec![
+                                Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+                                Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+                                Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
+                                Vertex { x: 4.000000, y: 0.000000, z: -1.255298, w: 1.0 },
+                                Vertex { x: 4.000000, y: 2.000000, z: -1.255298, w: 1.0 },
+                            ],
+                            texture_vertex_set: vec![],
+                            normal_vertex_set: vec![
+                                NormalVertex { x: 0.000000, y: 0.000000, z: 1.000000 },
+                                NormalVertex { x: 0.000000, y: 0.000000, z: 1.000000 },
+                                NormalVertex { x: 0.276597, y: 0.000000, z: 0.960986 },
+                                NormalVertex { x: 0.276597, y: 0.000000, z: 0.960986 },
+                                NormalVertex { x: 0.531611, y: 0.000000, z: 0.846988 },
+                                NormalVertex { x: 0.531611, y: 0.000000, z: 0.846988 },
+                            ],
+                            group_set: vec![
+                                Group(String::from("all")), 
+                            ],
+                            smoothing_group_set: vec![
+                                SmoothingGroup(1),
+                            ],
+                            element_set: vec![
+                                Element::Face(VTNIndex::VN(0, 0), VTNIndex::VN(1, 1), VTNIndex::VN(2, 2)),
+                                Element::Face(VTNIndex::VN(0, 0), VTNIndex::VN(2, 2), VTNIndex::VN(3, 3)),
+                                Element::Face(VTNIndex::VN(3, 3), VTNIndex::VN(2, 2), VTNIndex::VN(4, 4)),
+                                Element::Face(VTNIndex::VN(3, 3), VTNIndex::VN(4, 4), VTNIndex::VN(5, 5)),
+                            ],
+                            shape_set: vec![
+                                ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 0 },
+                                ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
+                            ],
+                            geometry_set: vec![
+                                Geometry { material_name: Some(String::from("material3")), shapes: vec![0, 1, 2, 3] },
+                            ]
+                        },
                     ]
                 }
             }
