@@ -927,13 +927,12 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         let process_split = |split: &str, value_range: (usize, usize)| -> Result<Option<usize>, ParseError> {
             if !split.is_empty() {
-                let parsed_value = match split.parse::<isize>() {
-                    Ok(val) => Ok(val),
-                    Err(_) => self.error(
+                let parsed_value = split.parse::<isize>().or_else(|_| {
+                    self.error(
                         ErrorKind::ExpectedInteger,
                         format!("Expected an integer but got `{}` instead.", split)
-                    ),
-                }?;
+                    )
+                })?;
                 let index = self.calculate_index(value_range, parsed_value)?;
                 Ok(Some(index))
             } else {
