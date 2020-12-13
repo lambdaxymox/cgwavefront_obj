@@ -820,17 +820,6 @@ impl<'a> Parser<'a> {
         }
     }
 
-    /// Parse an integer from the current token in the stream.
-    fn parse_isize_from(&self, st: &str) -> Result<isize, ParseError> {
-        match st.parse::<isize>() {
-            Ok(val) => Ok(val),
-            Err(_) => self.error(
-                ErrorKind::ExpectedInteger,
-                format!("Expected an integer but got `{}` instead.", st)
-            ),
-        }
-    }
-
     /// Apply a parser to the input stream. 
     ///
     /// If the parser `parser` fails to parse the current token in the stream,
@@ -951,7 +940,13 @@ impl<'a> Parser<'a> {
             Some(st) => {
                 let process_split = |split: &str, value_range: (usize, usize)| -> Result<Option<usize>, ParseError> {
                     if !split.is_empty() {
-                        let parsed_value = self.parse_isize_from(split)?;
+                        let parsed_value = match split.parse::<isize>() {
+                            Ok(val) => Ok(val),
+                            Err(_) => self.error(
+                                ErrorKind::ExpectedInteger,
+                                format!("Expected an integer but got `{}` instead.", split)
+                            ),
+                        }?;
                         let index = self.calculate_index(value_range, parsed_value)?;
                         Ok(Some(index))
                     } else {
