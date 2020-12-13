@@ -1131,7 +1131,9 @@ impl<'a> Parser<'a> {
             texture_index_range, 
             normal_index_range
         )?;
-        
+        eprintln!("self.peek() = {:?}", self.peek());
+        eprintln!("vertex_index_range = {:?}", vertex_index_range);
+        eprintln!("vtn_indices = {:?}", vtn_indices);
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
             return self.error(
@@ -1425,15 +1427,15 @@ impl<'a> Parser<'a> {
                         material_name_index = 0;
                     }
 
-                    let amount_parsed = self.parse_elements(
+                    let elements_parsed = self.parse_elements(
                         &mut elements,
                         (*min_vertex_index, *max_vertex_index),
                         (*min_texture_index, *max_vertex_index),
                         (*min_normal_index, *max_normal_index)
                     )?;
-                    max_element_group_index += amount_parsed;
-                    max_element_smoothing_group_index += amount_parsed;
-                    max_element_material_name_index += amount_parsed;
+                    max_element_group_index += elements_parsed;
+                    max_element_smoothing_group_index += elements_parsed;
+                    max_element_material_name_index += elements_parsed;
                 }
                 Some("\n") => {
                     self.skip_one_or_more_newlines()?;
@@ -1606,8 +1608,8 @@ impl<'a> Parser<'a> {
     ///     g all                          \
     ///     s 1                            \
     ///     usemtl material2               \
-    ///     f 4 5 6 7                      \
-    ///     f 7 6 8 9                      \
+    ///     f 7 8 9 10                     \
+    ///     f 10 9 11 12                   \
     ///     ## 2 elements                  \
     ///                                    \
     /// ");
