@@ -1140,18 +1140,6 @@ impl<'a> Parser<'a> {
             );
         }
 
-        /*
-        // Verify that each VTN index has the same type and has a valid form.
-        for i in 1..vtn_indices.len() {
-            if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
-                return self.error(
-                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-                    "Every VTN index describing the vertex data for a face \
-                             must have the same form.".to_owned()
-                );
-            }
-        }
-        */
         if !verify_vtn_indices(&vtn_indices) {
             return self.error(
                 ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
