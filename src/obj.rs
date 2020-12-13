@@ -797,18 +797,6 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse an integer from the current token in the stream.
-    fn parse_usize(&mut self) -> Result<usize, ParseError> {
-        let st = self.next_string()?;
-        match st.parse::<usize>() {
-            Ok(val) => Ok(val),
-            Err(_) => self.error(
-                ErrorKind::ExpectedInteger,
-                format!("Expected an integer but got `{}` instead.", st)
-            ),
-        }
-    }
-
-    /// Parse an integer from the current token in the stream.
     fn parse_isize(&mut self) -> Result<isize, ParseError> {
         let st = self.next_string()?;
         match st.parse::<isize>() {
@@ -1692,9 +1680,9 @@ mod primitive_tests {
     }
 
     #[test]
-    fn test_parse_usize() {
+    fn test_parse_isize() {
         let mut parser = super::Parser::new("    763   ");
-        assert_eq!(parser.parse_usize(), Ok(763));
+        assert_eq!(parser.parse_isize(), Ok(763));
     }
 }
 
