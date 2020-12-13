@@ -1427,19 +1427,16 @@ impl<'a> Parser<'a> {
                         (min_element_group_index, max_element_group_index), 
                         (min_group_index, max_group_index)
                     ));
-                    // min_element_group_index = max_element_group_index;
 
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
                         smoothing_group_index
                     ));
-                    // min_element_smoothing_group_index = max_element_smoothing_group_index;
 
                     material_name_entry_table.push((
                         (min_element_material_name_index, max_element_material_name_index),
                         material_name_index
                     ));
-                    // min_element_material_name_index = max_element_material_name_index;
 
                     break;
                 }
@@ -1464,11 +1461,8 @@ impl<'a> Parser<'a> {
         self.parse_geometries(&mut geometries, &material_name_entry_table, &material_names);
 
         *min_vertex_index  += vertices.len();
-        //*max_vertex_index  += vertices.len();
         *min_texture_index += texture_vertices.len();
-        //*max_texture_index += texture_vertices.len();
         *min_normal_index  += normal_vertices.len();
-        //*max_normal_index  += normal_vertices.len();
 
         Ok(Object {
             name: object_name.into(),
