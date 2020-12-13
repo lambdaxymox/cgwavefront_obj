@@ -627,6 +627,8 @@ pub enum ErrorKind {
     ExpectedInteger,
     /// The parser expected a vertex/texture/normal index but found something else.
     ExpectedVTNIndex,
+    /// the parser encountered an object element index that is out of range.
+    VTNIndexOutOfRange,
     /// The parser encountered a face element that did not have enough vertices.
     EveryFaceElementMustHaveAtLeastThreeVertices,
     /// An element had VTN indices with different forms.
@@ -779,6 +781,29 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parse an integer from the current token in the stream.
+    fn parse_isize(&mut self) -> Result<isize, ParseError> {
+        let st = self.next_string()?;
+        match st.parse::<isize>() {
+            Ok(val) => Ok(val),
+            Err(_) => self.error(
+                ErrorKind::ExpectedInteger,
+                format!("Expected an integer but got `{}` instead.", st)
+            ),
+        }
+    }
+
+    /// Parse an integer from the current token in the stream.
+    fn parse_isize_from(&self, st: &str) -> Result<isize, ParseError> {
+        match st.parse::<isize>() {
+            Ok(val) => Ok(val),
+            Err(_) => self.error(
+                ErrorKind::ExpectedInteger,
+                format!("Expected an integer but got `{}` instead.", st)
+            ),
+        }
+    }
+
     /// Apply a parser to the input stream. 
     ///
     /// If the parser `parser` fails to parse the current token in the stream,
@@ -861,57 +886,108 @@ impl<'a> Parser<'a> {
         }
     }
 
-    /// Parse a vertex/texture/normal index.
-    fn parse_vtn_index(&mut self) -> Result<VTNIndex, ParseError> {
-        let process_split = |split: &str| -> Result<Option<usize>, ParseError> {
-            if !split.is_empty() {
-                let index = split.parse::<usize>();
-                Ok(index.ok())
-            } else {
-                Ok(None)
-            }
+    #[inline(always)]
+    fn calculate_index(
+        &self,
+        value_range: (usize, usize),
+        parsed_value: isize) -> Result<usize, ParseError>
+    {
+        let (min_value, max_value) = value_range;
+        let actual_value = if parsed_value <= 0 {
+            max_value as isize - parsed_value
+        } else {
+            parsed_value - 1
         };
-    
-        let st = self.next_string()?;
-        let mut splits_iter = st.split('/');
-        let split1 = splits_iter
-            .next()
-            .and_then(|s| process_split(&s).transpose())
-            .transpose()?;
-        let split2 = splits_iter
-            .next()
-            .and_then(|s| process_split(&s).transpose())
-            .transpose()?;
-        let split3 = splits_iter
-            .next()
-            .and_then(|s| process_split(&s).transpose())
-            .transpose()?;
-    
-        if split1.is_none() || splits_iter.next().is_some() {
-            return self.error(
-                ErrorKind::ExpectedVTNIndex,
-                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
-            );
+        eprintln!("actual_value = {}; value_range = {:?}", actual_value, value_range);
+
+        if (actual_value >= min_value as isize) && (actual_value < max_value as isize) {
+            debug_assert!(actual_value >= 0);
+            Ok((actual_value - min_value as isize) as usize)
+        } else {
+            self.error(
+                ErrorKind::VTNIndexOutOfRange, 
+                format!(
+                    "Expected index in range [{}, {}), but got {}.",
+                    min_value, max_value, actual_value
+                )
+            )
         }
-        
-        match (split1, split2, split3) {
-            (Some(v), None, None) => Ok(VTNIndex::V(v - 1)),
-            (Some(v), None, Some(n)) => Ok(VTNIndex::VN(v - 1, n - 1)),
-            (Some(v), Some(t), None) => Ok(VTNIndex::VT(v - 1, t - 1)),
-            (Some(v), Some(t), Some(n)) => Ok(VTNIndex::VTN(v - 1, t - 1, n - 1)),
-            _ => self.error(
-                ErrorKind::ExpectedVTNIndex,
-                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
-            ),
+    }
+
+    /// Parse a vertex/texture/normal index.
+    fn parse_vtn_index(
+        &mut self, 
+        vertex_index_range: (usize, usize),
+        texture_index_range: (usize, usize),
+        normal_index_range: (usize, usize)) -> Result<VTNIndex, ParseError>
+    {
+        match self.next() {
+            Some(st) => {
+                let process_split = |split: &str, value_range: (usize, usize)| -> Result<Option<usize>, ParseError> {
+                    if !split.is_empty() {
+                        let parsed_value = self.parse_isize_from(split)?;
+                        let index = self.calculate_index(value_range, parsed_value)?;
+                        Ok(Some(index))
+                    } else {
+                        Ok(None)
+                    }
+                };
+            
+                let mut splits_iter = st.split('/');
+                let split1 = splits_iter
+                    .next()
+                    .and_then(|s| process_split(&s, vertex_index_range).transpose())
+                    .transpose()?;
+                let split2 = splits_iter
+                    .next()
+                    .and_then(|s| process_split(&s, texture_index_range).transpose())
+                    .transpose()?;
+                let split3 = splits_iter
+                    .next()
+                    .and_then(|s| process_split(&s, normal_index_range).transpose())
+                    .transpose()?;
+            
+                if split1.is_none() || splits_iter.next().is_some() {
+                    return self.error(
+                        ErrorKind::ExpectedVTNIndex,
+                        format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
+                    );
+                }
+                
+                match (split1, split2, split3) {
+                    (Some(v), None, None) => Ok(VTNIndex::V(v)),
+                    (Some(v), None, Some(vn)) => Ok(VTNIndex::VN(v, vn)),
+                    (Some(v), Some(vt), None) => Ok(VTNIndex::VT(v, vt)),
+                    (Some(v), Some(vt), Some(vn)) => Ok(VTNIndex::VTN(v, vt, vn)),
+                    _ => self.error(
+                        ErrorKind::ExpectedVTNIndex,
+                        format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
+                    ),
+                }
+            }
+            None => {
+                return self.error(
+                    ErrorKind::EndOfFile,
+                    "Reached the end of the input in the process of getting 1the next token.".to_owned()
+                );
+            }
         }
     }
 
     /// Parse one more more VTN indices.
     ///
     /// Return the number of VTN indices parsed if no errors occurred.
-    fn parse_vtn_indices(&mut self, vtn_indices: &mut Vec<VTNIndex>) -> Result<usize, ParseError> {
+    fn parse_vtn_indices(
+        &mut self, 
+        vtn_indices: &mut Vec<VTNIndex>,
+        vertex_index_range: (usize, usize),
+        texture_index_range: (usize, usize),
+        normal_index_range: (usize, usize)) -> Result<usize, ParseError> 
+    {
         let mut indices_parsed = 0;
-        while let Ok(vtn_index) = self.parse_vtn_index() {
+        while let Ok(vtn_index) = self.parse_vtn_index(
+            vertex_index_range, texture_index_range, normal_index_range
+        ) {
             vtn_indices.push(vtn_index);
             indices_parsed += 1;
         }
@@ -923,17 +999,25 @@ impl<'a> Parser<'a> {
     ///
     /// There can be more than one point in a single line of input, so
     /// this parsing rule will attempt to read all of them.
-    fn parse_point(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
+    fn parse_point(
+        &mut self, 
+        elements: &mut Vec<Element>, 
+        vertex_index_range: (usize, usize),
+        texture_index_range: (usize, usize),
+        normal_index_range: (usize, usize)) -> Result<usize, ParseError>
+    {
         self.expect_tag("p")?;
 
-        let v_index = self.parse_usize()?;
-        elements.push(Element::Point(VTNIndex::V(v_index - 1)));
+        let parsed_value = self.parse_isize()?;
+        let v_index = self.calculate_index(vertex_index_range, parsed_value)?;
+        elements.push(Element::Point(VTNIndex::V(v_index)));
         let mut elements_parsed = 1;
         loop {
             match self.next() {
-                Some(st) if st != "\n" => match st.parse::<usize>() {
-                    Ok(v_index) => { 
-                        elements.push(Element::Point(VTNIndex::V(v_index - 1)));
+                Some(st) if st != "\n" => match st.parse::<isize>() {
+                    Ok(val) => {
+                        let v_index = self.calculate_index(vertex_index_range, val)?;
+                        elements.push(Element::Point(VTNIndex::V(v_index)));
                         elements_parsed += 1;
                     }
                     Err(_) => {
@@ -954,13 +1038,32 @@ impl<'a> Parser<'a> {
     ///
     /// If the parser cannot parse each line element from a line of text input, the
     /// parser returns an error.
-    fn parse_line(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
+    fn parse_line(
+        &mut self, 
+        elements: &mut Vec<Element>, 
+        vertex_index_range: (usize, usize),
+        texture_index_range: (usize, usize),
+        normal_index_range: (usize, usize)) -> Result<usize, ParseError>
+    {
         self.expect_tag("l")?;
 
         let mut vtn_indices = vec![];
-        vtn_indices.push(self.parse_vtn_index()?);
-        vtn_indices.push(self.parse_vtn_index()?);
-        self.parse_vtn_indices(&mut vtn_indices)?;
+        vtn_indices.push(self.parse_vtn_index(
+            vertex_index_range, 
+            texture_index_range, 
+            normal_index_range
+        )?);
+        vtn_indices.push(self.parse_vtn_index(
+            vertex_index_range, 
+            texture_index_range, 
+            normal_index_range
+        )?);
+        self.parse_vtn_indices(
+            &mut vtn_indices, 
+            vertex_index_range, 
+            texture_index_range, 
+            normal_index_range
+        )?;
 
         // Verify that each VTN index has the same type and has a valid form.
         for i in 1..vtn_indices.len() {
@@ -974,7 +1077,7 @@ impl<'a> Parser<'a> {
         }
 
         // Now that we have verified the indices, build the line elements.
-        for i in 0..vtn_indices.len()-1 {
+        for i in 0..(vtn_indices.len() - 1) {
             elements.push(Element::Line(vtn_indices[i], vtn_indices[i + 1]));
         }
 
@@ -983,22 +1086,33 @@ impl<'a> Parser<'a> {
 
     /// Parse one or more faces from a single line of text input.
     ///
-    /// All face verticies must have the same vertex/texture/normal form on
+    /// All face vertices must have the same vertex/texture/normal form on
     /// a line of input. If they do not, the parser will return an error. Otherwise,
     /// it succeeds. The face parser unpacks the face elements by treating the line
     /// of face indices as a triangle fan.
-    fn parse_face(&mut self, elements: &mut Vec<Element>) -> Result<usize, ParseError> {
+    fn parse_face(
+        &mut self, 
+        elements: &mut Vec<Element>, 
+        vertex_index_range: (usize, usize),
+        texture_index_range: (usize, usize),
+        normal_index_range: (usize, usize)) -> Result<usize, ParseError>
+    {
         self.expect_tag("f")?;
         
         let mut vtn_indices = vec![];
-        self.parse_vtn_indices(&mut vtn_indices)?;
 
+        self.parse_vtn_indices(
+            &mut vtn_indices, 
+            vertex_index_range, 
+            texture_index_range, 
+            normal_index_range
+        )?;
+        
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
             return self.error(
                 ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices,
-                "A face primitive must have at least three vertices.\
-                        At minimum, a triangle requires three indices.".to_owned()
+                "A face primitive must have at least three vertices.".to_owned()
             );
         }
 
@@ -1029,13 +1143,29 @@ impl<'a> Parser<'a> {
     fn parse_elements(
         &mut self, 
         elements: &mut Vec<Element>,
-        vertex__index_range: (usize, usize),
+        vertex_index_range: (usize, usize),
         texture_index_range: (usize, usize),
-        normal_index_range: (usize, usize)) -> Result<usize, ParseError> {  
+        normal_index_range: (usize, usize)) -> Result<usize, ParseError> {
+
         match self.peek() {
-            Some("p") => self.parse_point(elements),
-            Some("l") => self.parse_line(elements),
-            Some("f") => self.parse_face(elements),
+            Some("p") => self.parse_point(
+                elements, 
+                vertex_index_range, 
+                texture_index_range, 
+                normal_index_range
+            ),
+            Some("l") => self.parse_line(
+                elements, 
+                vertex_index_range, 
+                texture_index_range, 
+                normal_index_range
+            ),
+            Some("f") => self.parse_face(
+                elements, 
+                vertex_index_range, 
+                texture_index_range, 
+                normal_index_range
+            ),
             _ => self.error(
                 ErrorKind::ElementMustBeAPointLineOrFace,
                 "An element must be a point (`p`), line (`l`), or face (`f`).".to_owned()
@@ -1253,14 +1383,17 @@ impl<'a> Parser<'a> {
                 Some("v")  => {
                     let vertex = self.parse_vertex()?;
                     vertices.push(vertex);
+                    *max_vertex_index += 1;
                 }
                 Some("vt") => {
                     let texture_vertex = self.parse_texture_vertex()?;
                     texture_vertices.push(texture_vertex);
+                    *max_texture_index += 1;
                 }
                 Some("vn") => {
                     let normal_vertex = self.parse_normal_vertex()?;
                     normal_vertices.push(normal_vertex);
+                    *max_normal_index += 1;
                 }
                 Some("p") | Some("l") | Some("f") => {
                     if groups.is_empty() {
@@ -1335,11 +1468,11 @@ impl<'a> Parser<'a> {
         self.parse_geometries(&mut geometries, &material_name_entry_table, &material_names);
 
         *min_vertex_index  += vertices.len();
-        *max_vertex_index  += vertices.len();
+        //*max_vertex_index  += vertices.len();
         *min_texture_index += texture_vertices.len();
-        *max_texture_index += texture_vertices.len();
+        //*max_texture_index += texture_vertices.len();
         *min_normal_index  += normal_vertices.len();
-        *max_normal_index  += normal_vertices.len();
+        //*max_normal_index  += normal_vertices.len();
 
         Ok(Object {
             name: object_name.into(),
@@ -1672,7 +1805,7 @@ mod vtn_index_tests {
     fn test_parse_vtn_index1() {
         let mut parser = super::Parser::new("1291");
         let expected = VTNIndex::V(1290);
-        let result = parser.parse_vtn_index();
+        let result = parser.parse_vtn_index((0, 1300), (0, 1300), (0, 1300));
         assert_eq!(result, Ok(expected));
     }
 
@@ -1680,7 +1813,7 @@ mod vtn_index_tests {
     fn test_parse_vtn_index2() {
         let mut parser = super::Parser::new("1291/1315");
         let expected = VTNIndex::VT(1290, 1314);
-        let result = parser.parse_vtn_index();
+        let result = parser.parse_vtn_index((0, 1316), (0, 1316), (0, 1316));
         assert_eq!(result, Ok(expected));
     }
 
@@ -1688,7 +1821,7 @@ mod vtn_index_tests {
     fn test_parse_vtn_index3() {
         let mut parser = super::Parser::new("1291/1315/1314");
         let expected = VTNIndex::VTN(1290, 1314, 1313);
-        let result = parser.parse_vtn_index();
+        let result = parser.parse_vtn_index((0, 1316), (0, 1316), (0, 1316));
         assert_eq!(result, Ok(expected));
     }
 
@@ -1696,7 +1829,7 @@ mod vtn_index_tests {
     fn test_parse_vtn_index4() {
         let mut parser = super::Parser::new("1291//1315");
         let expected = VTNIndex::VN(1290, 1314);
-        let result = parser.parse_vtn_index();
+        let result = parser.parse_vtn_index((0, 1316), (0, 1316), (0, 1316));
         assert_eq!(result, Ok(expected));
     }
 
@@ -1718,7 +1851,7 @@ mod element_tests {
             Element::Point(VTNIndex::V(0)), Element::Point(VTNIndex::V(1)),
             Element::Point(VTNIndex::V(2)), Element::Point(VTNIndex::V(3)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 5), (0, 5), (0, 5)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1726,7 +1859,7 @@ mod element_tests {
     fn test_parse_point2() {
         let mut parser = super::Parser::new("p 1 1/2 3 4/5");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_err());
+        assert!(parser.parse_elements(&mut result, (0, 6), (0, 6), (0, 6)).is_err());
     }
 
     #[test]
@@ -1738,7 +1871,7 @@ mod element_tests {
             Element::Line(VTNIndex::V(37),  VTNIndex::V(117)),
             Element::Line(VTNIndex::V(117), VTNIndex::V(107)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 300), (0, 300), (0, 300)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1749,7 +1882,7 @@ mod element_tests {
         let expected = vec![
             Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 300), (0, 300), (0, 300)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1761,7 +1894,7 @@ mod element_tests {
             Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
             Element::Line(VTNIndex::VT(117, 107), VTNIndex::VT(323, 397)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 400), (0, 400), (0, 400)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1769,14 +1902,14 @@ mod element_tests {
     fn test_parse_line4() {
         let mut parser = super::Parser::new("l 297/38 118 324 \n");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_err());
+        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_err());
     }
 
     #[test]
     fn test_parse_line5() {
         let mut parser = super::Parser::new("l 297 118/108 324/398 \n");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_err());
+        assert!(parser.parse_elements(&mut result, (0, 400), (0, 400), (0, 400)).is_err());
     }
 
     #[test]
@@ -1786,7 +1919,7 @@ mod element_tests {
         let expected = vec![
             Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1798,7 +1931,7 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1811,7 +1944,7 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(323), VTNIndex::V(397)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).is_ok());
+        assert!(parser.parse_elements(&mut result, (0, 400), (0, 400), (0, 400)).is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1819,22 +1952,41 @@ mod element_tests {
     fn test_parse_face4() {
         let mut parser = super::Parser::new("f 297 118 \n");
         let mut result = vec![];
-        assert!(parser.parse_face(&mut result).is_err());
+        assert!(parser.parse_face(&mut result, (0, 400), (0, 400), (0, 400)).is_err());
     }
 
     #[test]
     fn test_parse_face5() {
+        let min_index = 320;
+        let max_index = 35000;
+        let vertex_index_range = (min_index, max_index);
+        let texture_index_range = (min_index, max_index);
+        let normal_index_range = (min_index, max_index);
         let mut parser = super::Parser::new(
             "f 34184//34184 34088//34088 34079//34079 34084//34084 34091//34091 34076//34076\n"
         );
         let mut result = vec![];
+        /*
         let expected = vec![
             Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34087, 34087), VTNIndex::VN(34078, 34078)),
             Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34078, 34078), VTNIndex::VN(34083, 34083)),
             Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34083, 34083), VTNIndex::VN(34090, 34090)),
             Element::Face(VTNIndex::VN(34183, 34183), VTNIndex::VN(34090, 34090), VTNIndex::VN(34075, 34075)),
         ];
-        parser.parse_elements(&mut result, (0, 1), (0, 1), (0, 1)).unwrap();
+        */
+        let expected = vec![
+            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33767, 33767), VTNIndex::VN(33758, 33758)),
+            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33758, 33758), VTNIndex::VN(33763, 33763)),
+            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33763, 33763), VTNIndex::VN(33770, 33770)),
+            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33770, 33770), VTNIndex::VN(33755, 33755)),
+        ];
+        parser.parse_elements(
+            &mut result, 
+            vertex_index_range, 
+            texture_index_range, 
+            normal_index_range
+        ).unwrap();
+
         assert_eq!(result, expected);
     }
 }
