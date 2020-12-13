@@ -689,6 +689,21 @@ pub struct Parser<'a> {
     lexer: PeekableLexer<'a>,
 }
 
+/// Triangulate a polygon with a triangle fan. 
+///
+/// NOTE: the OBJ specification assumes that polygons are coplanar, and 
+/// consequently the parser does not check this. It is up to the model creator 
+/// to ensure this.
+#[inline(always)]
+fn triangulate(elements: &mut Vec<Element>, vtn_indices: &[VTNIndex]) -> usize {
+    let vertex0 = vtn_indices[0];
+    for i in 0..(vtn_indices.len() - 2) {
+        elements.push(Element::Face(vertex0, vtn_indices[i + 1], vtn_indices[i + 2]));
+    }
+
+    vtn_indices.len() - 2
+}
+
 impl<'a> Parser<'a> {
     /// Construct a new Wavefront OBJ file parser.
     pub fn new(input: &'a str) -> Parser<'a> {
@@ -898,7 +913,6 @@ impl<'a> Parser<'a> {
         } else {
             parsed_value - 1
         };
-        eprintln!("actual_value = {}; value_range = {:?}", actual_value, value_range);
 
         if (actual_value >= min_value as isize) && (actual_value < max_value as isize) {
             debug_assert!(actual_value >= 0);
@@ -1090,6 +1104,8 @@ impl<'a> Parser<'a> {
     /// a line of input. If they do not, the parser will return an error. Otherwise,
     /// it succeeds. The face parser unpacks the face elements by treating the line
     /// of face indices as a triangle fan.
+    ///
+    /// The parser returns the number of triangles generated.
     fn parse_face(
         &mut self, 
         elements: &mut Vec<Element>, 
@@ -1127,6 +1143,7 @@ impl<'a> Parser<'a> {
             }
         }
 
+        /*
         // Triangulate the polygon with a triangle fan. Note that the OBJ 
         // specification assumes that polygons are coplanar, and consequently 
         // the parser does not check this. It is up to the model creator to 
@@ -1135,8 +1152,10 @@ impl<'a> Parser<'a> {
         for i in 0..(vtn_indices.len() - 2) {
             elements.push(Element::Face(vertex0, vtn_indices[i + 1], vtn_indices[i + 2]));
         }
+        */
+        let face_count = triangulate(elements, &vtn_indices);
 
-        Ok(vtn_indices.len() - 2)
+        Ok(face_count)
     }
 
     /// Parse all the elements of a givne type from a line of text input.
@@ -1565,6 +1584,7 @@ impl<'a> Parser<'a> {
     /// #
     /// let obj_file = String::from(r"
     ///     mtllib material_library.mtl    \
+    ///     o object1                      \
     ///     v 0.000000  2.000000  0.000000 \
     ///     v 0.000000  0.000000  0.000000 \
     ///     v 2.000000  0.000000  0.000000 \
@@ -1575,20 +1595,36 @@ impl<'a> Parser<'a> {
     ///                                    \
     ///     g all                          \
     ///     s 1                            \
-    ///     usemtl material                \
+    ///     usemtl material1               \
     ///     f 1 2 3 4                      \
     ///     f 4 3 5 6                      \
     ///     ## 2 elements                  \
+    ///                                    \
+    ///     o object2                      \
+    ///     v 0.000000  2.000000  0.000000 \
+    ///     v 0.000000  0.000000  0.000000 \
+    ///     v 2.000000  0.000000  0.000000 \
+    ///     v 2.000000  2.000000  0.000000 \
+    ///     v 4.000000  0.000000 -1.255298 \
+    ///     v 4.000000  2.000000 -1.255298 \
+    ///     ## 6 vertices                  \
+    ///                                    \
+    ///     g all                          \
+    ///     s 1                            \
+    ///     usemtl material2               \
+    ///     f 4 5 6 7                      \
+    ///     f 7 6 8 9                      \
+    ///     ## 2 elements                  \
+    ///                                    \
     /// ");
     /// // let expected = ...;
-    /// # /// // let expected = ...
     /// # let expected = ObjectSet {
     /// #     material_libraries: vec![
     /// #         String::from("material_library.mtl"),
     /// #     ],
     /// #     objects: vec![
     /// #         Object {
-    /// #             name: String::from(""),
+    /// #             name: String::from("object1"),
     /// #             vertex_set: vec![
     /// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
     /// #                 Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
@@ -1618,13 +1654,48 @@ impl<'a> Parser<'a> {
     /// #                 ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
     /// #             ],
     /// #             geometry_set: vec![
-    /// #                 Geometry { material_name: Some(String::from("material")), shapes: vec![0, 1, 2, 3] },
+    /// #                 Geometry { material_name: Some(String::from("material1")), shapes: vec![0, 1, 2, 3] },
+    /// #             ]
+    /// #         },
+    /// #         Object {
+    /// #             name: String::from("object2"),
+    /// #             vertex_set: vec![
+    /// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+    /// #                 Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+    /// #                 Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
+    /// #                 Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
+    /// #                 Vertex { x: 4.000000, y: 0.000000, z: -1.255298, w: 1.0 },
+    /// #                 Vertex { x: 4.000000, y: 2.000000, z: -1.255298, w: 1.0 },
+    /// #             ],
+    /// #             texture_vertex_set: vec![],
+    /// #             normal_vertex_set: vec![],
+    /// #             group_set: vec![
+    /// #                 Group(String::from("all")), 
+    /// #             ],
+    /// #             smoothing_group_set: vec![
+    /// #                 SmoothingGroup(1),
+    /// #             ],
+    /// #             element_set: vec![
+    /// #                 Element::Face(VTNIndex::V(0), VTNIndex::V(1), VTNIndex::V(2)),
+    /// #                 Element::Face(VTNIndex::V(0), VTNIndex::V(2), VTNIndex::V(3)),
+    /// #                 Element::Face(VTNIndex::V(3), VTNIndex::V(2), VTNIndex::V(4)),
+    /// #                 Element::Face(VTNIndex::V(3), VTNIndex::V(4), VTNIndex::V(5)),
+    /// #             ],
+    /// #             shape_set: vec![
+    /// #                 ShapeEntry { element: 0,  groups: vec![0], smoothing_group: 0 },
+    /// #                 ShapeEntry { element: 1,  groups: vec![0], smoothing_group: 0 },
+    /// #                 ShapeEntry { element: 2,  groups: vec![0], smoothing_group: 0 },
+    /// #                 ShapeEntry { element: 3,  groups: vec![0], smoothing_group: 0 },
+    /// #             ],
+    /// #             geometry_set: vec![
+    /// #                 Geometry { material_name: Some(String::from("material2")), shapes: vec![0, 1, 2, 3] },
     /// #             ]
     /// #         }
     /// #     ]
     /// # };
     /// let mut parser = Parser::new(&obj_file);
     /// let result = parser.parse_objset();
+    /// eprintln!("{:?}", result);
     /// assert!(result.is_ok());
     /// 
     /// let result = result.unwrap();
