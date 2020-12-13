@@ -1143,16 +1143,6 @@ impl<'a> Parser<'a> {
             }
         }
 
-        /*
-        // Triangulate the polygon with a triangle fan. Note that the OBJ 
-        // specification assumes that polygons are coplanar, and consequently 
-        // the parser does not check this. It is up to the model creator to 
-        // ensure this.
-        let vertex0 = vtn_indices[0];
-        for i in 0..(vtn_indices.len() - 2) {
-            elements.push(Element::Face(vertex0, vtn_indices[i + 1], vtn_indices[i + 2]));
-        }
-        */
         let face_count = triangulate(elements, &vtn_indices);
 
         Ok(face_count)
