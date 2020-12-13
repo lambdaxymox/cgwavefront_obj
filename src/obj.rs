@@ -936,62 +936,53 @@ impl<'a> Parser<'a> {
         texture_index_range: (usize, usize),
         normal_index_range: (usize, usize)) -> Result<VTNIndex, ParseError>
     {
-        match self.next() {
-            Some(st) => {
-                let process_split = |split: &str, value_range: (usize, usize)| -> Result<Option<usize>, ParseError> {
-                    if !split.is_empty() {
-                        let parsed_value = match split.parse::<isize>() {
-                            Ok(val) => Ok(val),
-                            Err(_) => self.error(
-                                ErrorKind::ExpectedInteger,
-                                format!("Expected an integer but got `{}` instead.", split)
-                            ),
-                        }?;
-                        let index = self.calculate_index(value_range, parsed_value)?;
-                        Ok(Some(index))
-                    } else {
-                        Ok(None)
-                    }
-                };
-            
-                let mut splits_iter = st.split('/');
-                let split1 = splits_iter
-                    .next()
-                    .and_then(|s| process_split(&s, vertex_index_range).transpose())
-                    .transpose()?;
-                let split2 = splits_iter
-                    .next()
-                    .and_then(|s| process_split(&s, texture_index_range).transpose())
-                    .transpose()?;
-                let split3 = splits_iter
-                    .next()
-                    .and_then(|s| process_split(&s, normal_index_range).transpose())
-                    .transpose()?;
-            
-                if split1.is_none() || splits_iter.next().is_some() {
-                    return self.error(
-                        ErrorKind::ExpectedVTNIndex,
-                        format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
-                    );
-                }
-                
-                match (split1, split2, split3) {
-                    (Some(v), None, None) => Ok(VTNIndex::V(v)),
-                    (Some(v), None, Some(vn)) => Ok(VTNIndex::VN(v, vn)),
-                    (Some(v), Some(vt), None) => Ok(VTNIndex::VT(v, vt)),
-                    (Some(v), Some(vt), Some(vn)) => Ok(VTNIndex::VTN(v, vt, vn)),
-                    _ => self.error(
-                        ErrorKind::ExpectedVTNIndex,
-                        format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
+        let st = self.next_string()?;
+        let process_split = |split: &str, value_range: (usize, usize)| -> Result<Option<usize>, ParseError> {
+            if !split.is_empty() {
+                let parsed_value = match split.parse::<isize>() {
+                    Ok(val) => Ok(val),
+                    Err(_) => self.error(
+                        ErrorKind::ExpectedInteger,
+                        format!("Expected an integer but got `{}` instead.", split)
                     ),
-                }
+                }?;
+                let index = self.calculate_index(value_range, parsed_value)?;
+                Ok(Some(index))
+            } else {
+                Ok(None)
             }
-            None => {
-                return self.error(
-                    ErrorKind::EndOfFile,
-                    "Reached the end of the input in the process of getting 1the next token.".to_owned()
-                );
-            }
+        };
+            
+        let mut splits_iter = st.split('/');
+        let split1 = splits_iter
+            .next()
+            .and_then(|s| process_split(&s, vertex_index_range).transpose())
+            .transpose()?;
+        let split2 = splits_iter
+            .next()
+            .and_then(|s| process_split(&s, texture_index_range).transpose())
+            .transpose()?;
+        let split3 = splits_iter
+            .next()
+            .and_then(|s| process_split(&s, normal_index_range).transpose())
+            .transpose()?;
+            
+        if split1.is_none() || splits_iter.next().is_some() {
+            return self.error(
+                ErrorKind::ExpectedVTNIndex,
+                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
+            );
+        }
+                
+        match (split1, split2, split3) {
+            (Some(v), None, None) => Ok(VTNIndex::V(v)),
+            (Some(v), None, Some(vn)) => Ok(VTNIndex::VN(v, vn)),
+            (Some(v), Some(vt), None) => Ok(VTNIndex::VT(v, vt)),
+            (Some(v), Some(vt), Some(vn)) => Ok(VTNIndex::VTN(v, vt, vn)),
+            _ => self.error(
+                ErrorKind::ExpectedVTNIndex,
+                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
+            ),
         }
     }
 
@@ -1350,6 +1341,7 @@ impl<'a> Parser<'a> {
                     smoothing_group_index = 0;
                 }
                 Some("s") => {
+                    if smoothing_groups.is_empty() {}
                     // Save the shape entry ranges for the current smoothing group.
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
