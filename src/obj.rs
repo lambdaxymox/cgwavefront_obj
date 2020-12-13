@@ -1028,9 +1028,7 @@ impl<'a> Parser<'a> {
     fn parse_point(
         &mut self, 
         elements: &mut Vec<Element>, 
-        vertex_index_range: (usize, usize),
-        texture_index_range: (usize, usize),
-        normal_index_range: (usize, usize)) -> Result<usize, ParseError>
+        vertex_index_range: (usize, usize)) -> Result<usize, ParseError>
     {
         self.expect_tag("p")?;
 
@@ -1165,9 +1163,7 @@ impl<'a> Parser<'a> {
         match self.peek() {
             Some("p") => self.parse_point(
                 elements, 
-                vertex_index_range, 
-                texture_index_range, 
-                normal_index_range
+                vertex_index_range
             ),
             Some("l") => self.parse_line(
                 elements, 
