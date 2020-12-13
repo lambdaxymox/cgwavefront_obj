@@ -1129,9 +1129,7 @@ impl<'a> Parser<'a> {
             texture_index_range, 
             normal_index_range
         )?;
-        eprintln!("self.peek() = {:?}", self.peek());
-        eprintln!("vertex_index_range = {:?}", vertex_index_range);
-        eprintln!("vtn_indices = {:?}", vtn_indices);
+
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
             return self.error(
@@ -1687,7 +1685,6 @@ impl<'a> Parser<'a> {
     /// # };
     /// let mut parser = Parser::new(&obj_file);
     /// let result = parser.parse_objset();
-    /// eprintln!("{:?}", result);
     /// assert!(result.is_ok());
     /// 
     /// let result = result.unwrap();
