@@ -694,7 +694,7 @@ pub struct Parser<'a> {
 /// NOTE: the OBJ specification assumes that polygons are coplanar, and 
 /// consequently the parser does not check this. It is up to the model creator 
 /// to ensure this.
-#[inline(always)]
+#[inline]
 fn triangulate(elements: &mut Vec<Element>, vtn_indices: &[VTNIndex]) -> usize {
     let vertex0 = vtn_indices[0];
     for i in 0..(vtn_indices.len() - 2) {
@@ -702,6 +702,18 @@ fn triangulate(elements: &mut Vec<Element>, vtn_indices: &[VTNIndex]) -> usize {
     }
 
     vtn_indices.len() - 2
+}
+
+/// Verify that each VTN index has the same type and has a valid form.
+#[inline]
+fn verify_vtn_indices(vtn_indices: &[VTNIndex]) -> bool {
+    for i in 1..vtn_indices.len() {
+        if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
+            return false;
+        }
+    }
+
+    true
 }
 
 impl<'a> Parser<'a> {
@@ -1079,14 +1091,11 @@ impl<'a> Parser<'a> {
             normal_index_range
         )?;
 
-        // Verify that each VTN index has the same type and has a valid form.
-        for i in 1..vtn_indices.len() {
-            if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
-                return self.error(
-                    ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-                    "Every VTN index for a line must have the same form.".to_owned()
-                );
-            }
+        if !verify_vtn_indices(&vtn_indices) {
+            return self.error(
+                ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
+                "Every VTN index for a line must have the same form.".to_owned()
+            );
         }
 
         // Now that we have verified the indices, build the line elements.
@@ -1131,6 +1140,7 @@ impl<'a> Parser<'a> {
             );
         }
 
+        /*
         // Verify that each VTN index has the same type and has a valid form.
         for i in 1..vtn_indices.len() {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
@@ -1140,6 +1150,13 @@ impl<'a> Parser<'a> {
                              must have the same form.".to_owned()
                 );
             }
+        }
+        */
+        if !verify_vtn_indices(&vtn_indices) {
+            return self.error(
+                ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
+                "Every VTN index for a face must have the same form.".to_owned()
+            );
         }
 
         let face_count = triangulate(elements, &vtn_indices);
