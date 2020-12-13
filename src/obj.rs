@@ -540,8 +540,7 @@ impl DisplayObjectCompositor {
         if set.is_empty() {
             string += "        data: []\n";
         } else {
-            let length = set.len();
-            string += &format!("        data: [({}) ... ({})]\n", set[0], set[length-1]);
+            string += &format!("        data: [({}) ... ({})]\n", set[0], set[set.len() - 1]);
         }
         string += &format!("        length: {}\n", set.len());
 
