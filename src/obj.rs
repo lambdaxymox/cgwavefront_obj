@@ -1084,8 +1084,7 @@ impl<'a> Parser<'a> {
             if !vtn_indices[i].has_same_type_as(&vtn_indices[0]) {
                 return self.error(
                     ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-                    "Every VTN index describing the vertex data for a line must have\
-                            the same form.".to_owned()
+                    "Every VTN index for a line must have the same form.".to_owned()
                 );
             }
         }
