@@ -1063,7 +1063,7 @@ mod mtlset_parser_tests {
         map_Kd diffuse.jpg              \
         map_Bump normal.png             \
         map_Ks specular.jpg             \
-        disp roughness.jpg              \
+        disp displacement.jpg           \
         ";
         let expected = Ok(MaterialSet {
             materials: vec![
@@ -1083,7 +1083,7 @@ mod mtlset_parser_tests {
                     map_emissive: None,
                     map_specular_exponent: None,
                     map_bump: Some(String::from("normal.png")),
-                    map_displacement: Some(String::from("roughness.jpg")),
+                    map_displacement: Some(String::from("displacement.jpg")),
                     map_dissolve: None,
                     map_decal: None,
                 },
@@ -1112,7 +1112,7 @@ mod mtlset_parser_tests {
         map_Kd diffuse.jpg                                                     \
         map_Bump normal.png                                                    \
         map_Ks specular.jpg                                                    \
-        disp roughness.jpg                                                     \
+        disp displacement.jpg                                                  \
         decal decal.jpg                                                        \
                                                                                \        
         # This is a bright green material.  When applied to an object, it will \ 
@@ -1161,7 +1161,7 @@ mod mtlset_parser_tests {
                     map_emissive: None,
                     map_specular_exponent: None,
                     map_bump: Some(String::from("normal.png")),
-                    map_displacement: Some(String::from("roughness.jpg")),
+                    map_displacement: Some(String::from("displacement.jpg")),
                     map_dissolve: None,
                     map_decal: Some(String::from("decal.jpg")),
                 },
