@@ -952,7 +952,6 @@ impl<'a> Parser<'a> {
             .next()
             .and_then(|s| process_split(&s, normal_index_range).transpose())
             .transpose()?;
-            
         if split1.is_none() || splits_iter.next().is_some() {
             return self.error(
                 ErrorKind::ExpectedVTNIndex,
@@ -1873,7 +1872,6 @@ mod vtn_index_tests {
         let result = parser.parse_vtn_index((0, 1316), (0, 1316), (0, 1316));
         assert_eq!(result, Ok(expected));
     }
-
 }
 
 #[cfg(test)]
@@ -2029,6 +2027,17 @@ mod element_tests {
             normal_index_range
         ).unwrap();
 
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_parse_face6() {
+        let mut parser = Parser::new("f 297/13/12 118/124/45 108/93/7\n");
+        let mut result = vec![];
+        let expected = vec![
+            Element::Face(VTNIndex::VTN(296, 12, 11), VTNIndex::VTN(117, 123, 44), VTNIndex::VTN(107, 92, 6)),
+        ];
+        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_ok());
         assert_eq!(result, expected);
     }
 }
