@@ -101,7 +101,7 @@ fn test_case(file_path: &str) -> Test {
     ];
     let material_name = None;
     let shapes = vec![
-        0,    1,    2,    3,    4,    5,    6,    7,    8,    9,    10,   11,   12,
+        0,    1,    2,    3,    4,    5,    6,    7,    8,    9,    10,   11,
     ];
     let geometry_set = vec![Geometry { material_name: material_name, shapes: shapes }];
     let object = Object {

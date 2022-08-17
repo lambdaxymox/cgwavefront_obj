@@ -681,6 +681,7 @@ impl error::Error for ParseError {}
 
 /// A Wavefront OBJ file parser extracts three-dimensional geometric data
 /// from a `*.obj` file.
+#[derive(Clone)]
 pub struct Parser<'a> {
     /// The current line position of the parser in the input stream.
     line_number: usize,
@@ -1268,13 +1269,44 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn calculate_index_ranges(
+        &self,
+        max_vertex_index:  &mut usize,
+        max_texture_index: &mut usize,
+        max_normal_index:  &mut usize
+    ) {
+        let mut cloned = self.clone();
+        loop {
+            match cloned.peek() {
+                Some("v")  => {
+                    *max_vertex_index += 1;
+                    cloned.advance();
+                }
+                Some("vt") => {
+                    *max_texture_index += 1;
+                    cloned.advance();
+                }
+                Some("vn") => {
+                    *max_normal_index += 1;
+                    cloned.advance();
+                }
+                Some("o") | None => {
+                    break;
+                }
+                _ => {
+                    cloned.advance();
+                }
+            }
+        }
+    }
+
     /// Parse one object from a Wavefront OBJ file.
     fn parse_object(&mut self,
-        min_vertex_index:  &mut usize,  
+        min_vertex_index:  &mut usize,
         max_vertex_index:  &mut usize,
-        min_texture_index: &mut usize,  
+        min_texture_index: &mut usize,
         max_texture_index: &mut usize,
-        min_normal_index:  &mut usize,  
+        min_normal_index:  &mut usize,
         max_normal_index:  &mut usize) -> Result<Object, ParseError> {
         
         let object_name = self.parse_object_name()?;
@@ -1302,6 +1334,8 @@ impl<'a> Parser<'a> {
         let mut min_element_material_name_index = 0;
         let mut max_element_material_name_index = 0;
         let mut material_name_index = 0;
+
+        self.calculate_index_ranges(max_vertex_index, max_texture_index, max_normal_index);
 
         loop {
             match self.peek() {
@@ -1364,17 +1398,17 @@ impl<'a> Parser<'a> {
                 Some("v")  => {
                     let vertex = self.parse_vertex()?;
                     vertices.push(vertex);
-                    *max_vertex_index += 1;
+                    // *max_vertex_index += 1;
                 }
                 Some("vt") => {
                     let texture_vertex = self.parse_texture_vertex()?;
                     texture_vertices.push(texture_vertex);
-                    *max_texture_index += 1;
+                    // *max_texture_index += 1;
                 }
                 Some("vn") => {
                     let normal_vertex = self.parse_normal_vertex()?;
                     normal_vertices.push(normal_vertex);
-                    *max_normal_index += 1;
+                    // *max_normal_index += 1;
                 }
                 Some("p") | Some("l") | Some("f") => {
                     if groups.is_empty() {
@@ -1396,7 +1430,7 @@ impl<'a> Parser<'a> {
                     let elements_parsed = self.parse_elements(
                         &mut elements,
                         (*min_vertex_index, *max_vertex_index),
-                        (*min_texture_index, *max_vertex_index),
+                        (*min_texture_index, *max_texture_index),
                         (*min_normal_index, *max_normal_index)
                     )?;
                     max_element_group_index += elements_parsed;
@@ -1466,20 +1500,20 @@ impl<'a> Parser<'a> {
     fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
         let mut result = Vec::new();
 
-        let mut min_vertex_index = 0;
-        let mut max_vertex_index = 0;
-        let mut min_tex_index    = 0;
-        let mut max_tex_index    = 0;
-        let mut min_normal_index = 0;
-        let mut max_normal_index = 0;
+        let mut min_vertex_index  = 0;
+        let mut max_vertex_index  = 0;
+        let mut min_texture_index = 0;
+        let mut max_texture_index = 0;
+        let mut min_normal_index  = 0;
+        let mut max_normal_index  = 0;
 
         self.skip_zero_or_more_newlines();
         while self.peek().is_some() {
             result.push(self.parse_object(
                 &mut min_vertex_index, 
                 &mut max_vertex_index,
-                &mut min_tex_index,    
-                &mut max_tex_index,
+                &mut min_texture_index,    
+                &mut max_texture_index,
                 &mut min_normal_index, 
                 &mut max_normal_index
             )?);

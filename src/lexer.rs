@@ -143,6 +143,7 @@ impl<'a> Iterator for Lexer<'a> {
 
 /// A lexical analyzer that caches tokens from the tokenizer to supports
 /// peeking into the steam without advancing the stream, and lookahead.
+#[derive(Clone)]
 pub struct PeekableLexer<'a> {
     /// The tokenizer for the input byte stream.
     inner: Lexer<'a>,
