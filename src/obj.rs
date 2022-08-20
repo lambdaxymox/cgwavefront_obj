@@ -1269,6 +1269,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /*
     fn calculate_index_ranges(
         &self,
         max_vertex_index:  &mut usize,
@@ -1299,6 +1300,7 @@ impl<'a> Parser<'a> {
             }
         }
     }
+    */
 
     /// Parse one object from a Wavefront OBJ file.
     fn parse_object(&mut self,
@@ -1335,7 +1337,7 @@ impl<'a> Parser<'a> {
         let mut max_element_material_name_index = 0;
         let mut material_name_index = 0;
 
-        self.calculate_index_ranges(max_vertex_index, max_texture_index, max_normal_index);
+        // self.calculate_index_ranges(max_vertex_index, max_texture_index, max_normal_index);
 
         loop {
             match self.peek() {
@@ -1398,17 +1400,17 @@ impl<'a> Parser<'a> {
                 Some("v")  => {
                     let vertex = self.parse_vertex()?;
                     vertices.push(vertex);
-                    // *max_vertex_index += 1;
+                    *max_vertex_index += 1;
                 }
                 Some("vt") => {
                     let texture_vertex = self.parse_texture_vertex()?;
                     texture_vertices.push(texture_vertex);
-                    // *max_texture_index += 1;
+                    *max_texture_index += 1;
                 }
                 Some("vn") => {
                     let normal_vertex = self.parse_normal_vertex()?;
                     normal_vertices.push(normal_vertex);
-                    // *max_normal_index += 1;
+                    *max_normal_index += 1;
                 }
                 Some("p") | Some("l") | Some("f") => {
                     if groups.is_empty() {
