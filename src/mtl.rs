@@ -1135,8 +1135,8 @@ mod mtlset_parser_tests {
         map_Ks specular.jpg                                                    \
         disp displacement.jpg                                                  \
         decal decal.jpg                                                        \
-                                                                               \        
-        # This is a bright green material.  When applied to an object, it will \ 
+                                                                               \
+        # This is a bright green material.  When applied to an object, it will \
         # remain bright green regardless of any lighting in the scene.         \
         newmtl neon_green                                                      \
         Kd 0.0000 1.0000 0.0000                                                \

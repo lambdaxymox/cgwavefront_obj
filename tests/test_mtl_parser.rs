@@ -44,7 +44,7 @@ fn test_cases() -> TestSet {
             Test {
                 data: String::from(r""),
                 expected: MaterialSet {
-                    materials: vec![]
+                    materials: vec![],
                 }
             },
             Test {

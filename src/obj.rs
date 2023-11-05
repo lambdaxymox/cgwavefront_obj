@@ -1773,7 +1773,7 @@ mod vertex_tests {
                 x: -6.207583,
                 y: 1.699077,
                 z: 8.466142,
-                w: 1.0
+                w: 1.0,
             })
         );
         assert_eq!(parser.next(), Some("\n"));
@@ -1783,21 +1783,21 @@ mod vertex_tests {
                 x: -14.299248,
                 y: 1.700244,
                 z: 8.468981,
-                w: 1.329624
+                w: 1.329624,
             })
         );
     }
 
     #[test]
     fn test_parse_vertex6() {
-        let mut parser = Parser::new("v -6.207583 1.699077 8.466142   v -14.299248 1.700244 8.468981 1.329624");
+        let mut parser = Parser::new("v -6.207583 1.699077 8.466142 v -14.299248 1.700244 8.468981 1.329624");
         assert_eq!(
             parser.parse_vertex(),
             Ok(Vertex {
                 x: -6.207583,
                 y: 1.699077,
                 z: 8.466142,
-                w: 1.0
+                w: 1.0,
             })
         );
         assert_eq!(parser.peek(), Some("v"));
@@ -1807,7 +1807,7 @@ mod vertex_tests {
                 x: -14.299248,
                 y: 1.700244,
                 z: 8.468981,
-                w: 1.329624
+                w: 1.329624,
             })
         );
     }
@@ -1854,7 +1854,7 @@ mod texture_vertex_tests {
             Ok(TextureVertex {
                 u: -1.929448,
                 v: 13.329624,
-                w: -5.221914
+                w: -5.221914,
             })
         );
         assert_eq!(parser.next(), Some("\n"));
@@ -1863,22 +1863,20 @@ mod texture_vertex_tests {
             Ok(TextureVertex {
                 u: -27.6068,
                 v: 31.1438,
-                w: 27.2099
+                w: 27.2099,
             })
         );
     }
 
     #[test]
     fn test_parse_texture_vertex4() {
-        let mut parser = Parser::new(
-            "vt -1.929448 13.329624 -5.221914 vt -27.6068  31.1438    27.2099",
-        );
+        let mut parser = Parser::new("vt -1.929448 13.329624 -5.221914 vt -27.6068  31.1438    27.2099");
         assert_eq!(
             parser.parse_texture_vertex(),
             Ok(TextureVertex {
                 u: -1.929448,
                 v: 13.329624,
-                w: -5.221914
+                w: -5.221914,
             })
         );
         assert_eq!(parser.peek(), Some("vt"));
@@ -1887,7 +1885,7 @@ mod texture_vertex_tests {
             Ok(TextureVertex {
                 u: -27.6068,
                 v: 31.1438,
-                w: 27.2099
+                w: 27.2099,
             })
         );
     }
@@ -1923,7 +1921,7 @@ mod normal_vertex_tests {
             Ok(NormalVertex {
                 x: -1.929448,
                 y: 13.329624,
-                z: -5.221914
+                z: -5.221914,
             })
         );
         assert_eq!(parser.next(), Some("\n"));
@@ -1932,16 +1930,14 @@ mod normal_vertex_tests {
             Ok(NormalVertex {
                 x: -27.6068,
                 y: 31.1438,
-                z: 27.2099
+                z: 27.2099,
             })
         );
     }
 
     #[test]
     fn test_parse_normal_vertex3() {
-        let mut parser = Parser::new(
-            "vn -1.929448 13.329624 -5.221914 vn -27.6068  31.1438    27.2099",
-        );
+        let mut parser = Parser::new("vn -1.929448 13.329624 -5.221914 vn -27.6068  31.1438    27.2099");
         assert_eq!(
             parser.parse_normal_vertex(),
             Ok(NormalVertex {
@@ -2376,7 +2372,7 @@ mod objectset_tests {
 
     #[rustfmt::skip]
     fn test_case() -> (Result<ObjectSet, ParseError>, Result<ObjectSet, ParseError>){
-        let obj_file =r"                 \
+        let obj_file =r"                \
             o object1                         \
             g cube                            \
             v  0.0  0.0  0.0                  \
@@ -2461,7 +2457,7 @@ mod objectset_tests {
         let geometry_set = vec![
             Geometry { 
                 material_name: None, 
-                shapes: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] 
+                shapes: vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
             },
         ];
         let object = Object {
@@ -2477,9 +2473,9 @@ mod objectset_tests {
         };
         let material_libraries = vec![];
         let objects = vec![object];
-        let expected = ObjectSet { 
-            material_libraries: material_libraries, 
-            objects: objects
+        let expected = ObjectSet {
+            material_libraries: material_libraries,
+            objects: objects,
         };
         let mut parser = Parser::new(obj_file);
         let result = parser.parse_objset();
