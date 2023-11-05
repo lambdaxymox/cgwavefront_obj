@@ -332,13 +332,6 @@ impl fmt::Display for SmoothingGroup {
         }
     }
 }
-/*
-impl Default for SmoothingGroup {
-    fn default() -> SmoothingGroup { 
-        SmoothingGroup(0) 
-    }
-}
-*/
 
 /// A shape entry is a collection of indices grouping together all the 
 /// organizational information about each element in an object.
@@ -567,23 +560,6 @@ impl fmt::Display for Object {
         write!(formatter, "{}", string)
     }
 }
-/*
-impl Default for Object {
-    fn default() -> Object {
-        Object {
-            name: String::from(""),   
-            vertex_set: Default::default(), 
-            texture_vertex_set: Default::default(), 
-            normal_vertex_set: Default::default(), 
-            group_set: Default::default(), 
-            smoothing_group_set: Default::default(), 
-            element_set: Default::default(),
-            shape_set: Default::default(),
-            geometry_set: Default::default(),
-        }
-    }
-}
-*/
 
 /// An object set is a collection of objects and material library named obtained 
 /// from parsing an `*.obj` file. An `*.obj` file may contain more that one object.
