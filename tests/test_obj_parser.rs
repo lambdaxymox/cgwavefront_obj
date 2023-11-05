@@ -26,6 +26,7 @@ struct Test {
     expected: ObjectSet,
 }
 
+#[rustfmt::skip]
 fn test_case(file_path: &str) -> Test {
     let mut file = File::open(file_path).unwrap();
     let mut data = String::new();

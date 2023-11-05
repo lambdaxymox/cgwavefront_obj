@@ -47,6 +47,7 @@ impl<'a> Iterator for TestSetIter<'a> {
     }
 }
 
+#[rustfmt::skip]
 fn test_cases() -> TestSet {
     TestSet {
         data: vec![
