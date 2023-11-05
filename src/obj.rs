@@ -1362,7 +1362,6 @@ impl<'a> Parser<'a> {
                     smoothing_group_index = 0;
                 }
                 Some("s") => {
-                    if smoothing_groups.is_empty() {}
                     // Save the shape entry ranges for the current smoothing group.
                     smoothing_group_entry_table.push((
                         (min_element_smoothing_group_index, max_element_smoothing_group_index),
