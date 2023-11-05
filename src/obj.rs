@@ -4,9 +4,6 @@ use crate::lexer::{
 };
 use std::error;
 use std::fmt;
-use std::default::{
-    Default,
-};
 
 
 /// Parse a set of objects and material library names from a string.
@@ -323,7 +320,7 @@ impl Default for Group {
 /// A smoothing group is a label providing information on which collections
 /// of elements should have their normal vectors interpolated over give
 /// those elements a non-faceted appearance.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 pub struct SmoothingGroup(pub usize);
 
 impl fmt::Display for SmoothingGroup {
@@ -335,12 +332,13 @@ impl fmt::Display for SmoothingGroup {
         }
     }
 }
-
+/*
 impl Default for SmoothingGroup {
     fn default() -> SmoothingGroup { 
         SmoothingGroup(0) 
     }
 }
+*/
 
 /// A shape entry is a collection of indices grouping together all the 
 /// organizational information about each element in an object.
@@ -393,7 +391,7 @@ pub enum VTNTriple<'a> {
 /// An object is a collection of vertices, texture vertices, normal vectors,
 /// and geometric primitives composing a unit of geometry in a scene to 
 /// be rendered.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Object {
     /// The name of the object.
     pub name: String,
@@ -569,7 +567,7 @@ impl fmt::Display for Object {
         write!(formatter, "{}", string)
     }
 }
-
+/*
 impl Default for Object {
     fn default() -> Object {
         Object {
@@ -585,6 +583,7 @@ impl Default for Object {
         }
     }
 }
+*/
 
 /// An object set is a collection of objects and material library named obtained 
 /// from parsing an `*.obj` file. An `*.obj` file may contain more that one object.
@@ -602,7 +601,7 @@ impl fmt::Display for ObjectSet {
         let mut string = String::from("ObjectSet {\n");
         
         for object in self.objects.iter() {
-            string += &compositor.compose(&object);
+            string += &compositor.compose(object);
             string += &"\n";
         }
 
@@ -815,7 +814,7 @@ impl<'a> Parser<'a> {
     /// stream advances and the corresponding result is returned. 
     fn try_once<P, T>(&mut self, parser: P) -> Option<T> where P: FnOnce(&str) -> Option<T> {
         match self.peek() {
-            Some(st) => parser(&st).map(|got| { 
+            Some(st) => parser(st).map(|got| { 
                 self.advance(); 
                 got 
             }),
@@ -943,15 +942,15 @@ impl<'a> Parser<'a> {
         let mut splits_iter = st.split('/');
         let split1 = splits_iter
             .next()
-            .and_then(|s| process_split(&s, vertex_index_range).transpose())
+            .and_then(|s| process_split(s, vertex_index_range).transpose())
             .transpose()?;
         let split2 = splits_iter
             .next()
-            .and_then(|s| process_split(&s, texture_index_range).transpose())
+            .and_then(|s| process_split(s, texture_index_range).transpose())
             .transpose()?;
         let split3 = splits_iter
             .next()
-            .and_then(|s| process_split(&s, normal_index_range).transpose())
+            .and_then(|s| process_split(s, normal_index_range).transpose())
             .transpose()?;
         if split1.is_none() || splits_iter.next().is_some() {
             return self.error(
@@ -1221,6 +1220,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Construct a set of shape entries for each element in the element set.
+    #[allow(clippy::type_complexity)]
     fn parse_shape_entries(
         &self,
         shape_entry_table: &mut Vec<ShapeEntry>,
@@ -1706,9 +1706,7 @@ impl<'a> Parser<'a> {
 
 #[cfg(test)]
 mod primitive_tests {
-    use super::{
-        Parser,
-    };
+    use super::Parser;
 
 
     #[test]
@@ -1851,9 +1849,7 @@ mod normal_vertex_tests {
 
 #[cfg(test)]
 mod object_tests {
-    use super::{
-        Parser,
-    };
+    use super::Parser;
 
 
     #[test]
@@ -2157,9 +2153,7 @@ mod smoothing_group_tests {
 
 #[cfg(test)]
 mod mtllib_tests {
-    use super::{
-        Parser,
-    };
+    use super::Parser;
 
 
     #[test]

@@ -336,7 +336,7 @@ impl<'a> Parser<'a> {
     /// This functions returns an error if the expected tag is not present.
     fn expect_tag(&mut self, tag: &str) -> Result<(), ParseError> {
         match self.next() {
-            None => self.error(ErrorKind::EndOfFile, format!("")),
+            None => self.error(ErrorKind::EndOfFile, String::new()),
             Some(st) if st != tag => self.error(
                 ErrorKind::ExpectedTagStatement,
                 format!("Expected statement {} but got statement {}", tag, st)
