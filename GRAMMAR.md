@@ -32,7 +32,7 @@ Letter          ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j'
 String          ::= [Letter]+ [Digit | Letter]*
 Digits          ::= [Digit]+
 Comment         ::= '#' String '\n'
-Whitespace      ::= [' ' | '\t' | '\n' | Comment]+
+Whitespace      ::= [' ' | '\t' | Comment]+
 Number          ::= ['-'] Digits
 Float           ::= Number '.' Digits
 Vertex          ::= 'v' Float Float Float [Float]
@@ -82,7 +82,7 @@ Letter              ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j
                       | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
 String              ::= [Letter]+ [Digit | Letter]*
 Digits              ::= [Digit]+
-Whitespace          ::= [' ' | '\t' | '\n' ]+
+Whitespace          ::= [' ' | '\t' ]+
 Number              ::= Digits
 Float               ::= Number '.' Digits
 NewMtl              ::= "newmtl"

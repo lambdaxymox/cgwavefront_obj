@@ -1,6 +1,6 @@
 [package]
 name = "cgwavefront_obj"
-version = "1.0.7"
+version = "1.0.8"
 authors = ["LambdaXymox <lambda.xymox@gmail.com>"]
 edition = "2021"
 readme = "README.md"
