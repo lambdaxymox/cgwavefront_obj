@@ -1045,6 +1045,7 @@ mod mtlset_parser_tests {
     };
 
 
+    #[rustfmt::skip]
     #[test]
     fn test_parse() {
         let mtl_file = r"
@@ -1094,6 +1095,7 @@ mod mtlset_parser_tests {
         assert_eq!(result, expected);
     }
 
+    #[rustfmt::skip]
     #[test]
     fn test_parse_multiple_materials() {
         let mtl_file = r"

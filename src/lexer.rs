@@ -239,7 +239,7 @@ mod tests {
         }
     }
 
-
+    #[rustfmt::skip]
     fn test_cases() -> Test {
         Test {
             test_cases: vec![

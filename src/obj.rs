@@ -2192,6 +2192,7 @@ mod objectset_tests {
     };
 
 
+    #[rustfmt::skip]
     fn test_case() -> (Result<ObjectSet, ParseError>, Result<ObjectSet, ParseError>){
         let obj_file =r"                 \
             o object1                         \
