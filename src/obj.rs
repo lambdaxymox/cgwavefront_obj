@@ -1197,6 +1197,7 @@ impl<'a> Parser<'a> {
 
     /// Construct a set of shape entries for each element in the element set.
     #[allow(clippy::type_complexity)]
+    #[allow(clippy::needless_range_loop)]
     fn parse_shape_entries(
         &self,
         shape_entry_table: &mut Vec<ShapeEntry>,
@@ -1220,7 +1221,7 @@ impl<'a> Parser<'a> {
 
         for &((min_element_index, max_element_index), 
                smoothing_group_index) in smoothing_group_entry_table {
- 
+            
             for i in min_element_index..max_element_index {
                 shape_entry_table[i].smoothing_group = smoothing_group_index;
             }
