@@ -1,11 +1,11 @@
+use std::slice;
 use wavefront_obj::mtl::{
-    MaterialSet,
-    Material,
-    IlluminationModel,
     Color,
+    IlluminationModel,
+    Material,
+    MaterialSet,
     Parser,
 };
-use std::slice;
 
 
 struct Test {
@@ -13,7 +13,7 @@ struct Test {
     expected: MaterialSet,
 }
 
-struct TestSet { 
+struct TestSet {
     data: Vec<Test>,
 }
 
@@ -286,7 +286,7 @@ fn test_cases() -> TestSet {
 #[test]
 fn test_parse_material_set() {
     let tests = test_cases();
-    
+
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
@@ -295,7 +295,7 @@ fn test_parse_material_set() {
     }
 }
 
-/// The parser should correctly parser each material in a 
+/// The parser should correctly parser each material in a
 /// Wavefront MTL file.
 #[test]
 fn test_parse_material_set_correctly_parses_each_material() {
@@ -304,11 +304,11 @@ fn test_parse_material_set_correctly_parses_each_material() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material, expected_material);
-        } 
+        }
     }
 }
 
@@ -334,11 +334,11 @@ fn test_parse_material_set_should_parse_correct_material_names() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.name, expected_material.name);
-        } 
+        }
     }
 }
 
@@ -350,11 +350,11 @@ fn test_parse_material_set_should_parse_correct_ambient_colors() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.color_ambient, expected_material.color_ambient);
-        } 
+        }
     }
 }
 
@@ -366,11 +366,11 @@ fn test_parse_material_set_should_parse_correct_diffuse_colors() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.color_diffuse, expected_material.color_diffuse);
-        } 
+        }
     }
 }
 
@@ -382,11 +382,11 @@ fn test_parse_material_set_should_parse_correct_specular_colors() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.color_specular, expected_material.color_specular);
-        } 
+        }
     }
 }
 
@@ -398,11 +398,11 @@ fn test_parse_material_set_should_parse_correct_emissive_colors() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.color_emissive, expected_material.color_emissive);
-        } 
+        }
     }
 }
 
@@ -414,11 +414,14 @@ fn test_parse_material_set_should_parse_correct_specular_exponents() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
-            assert_eq!(result_material.specular_exponent, expected_material.specular_exponent);
-        } 
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
+            assert_eq!(
+                result_material.specular_exponent,
+                expected_material.specular_exponent
+            );
+        }
     }
 }
 
@@ -430,11 +433,11 @@ fn test_parse_material_set_should_parse_correct_alpha_values() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.dissolve, expected_material.dissolve);
-        } 
+        }
     }
 }
 
@@ -446,11 +449,11 @@ fn test_parse_material_set_should_parse_correct_optical_densities() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.optical_density, expected_material.optical_density);
-        } 
+        }
     }
 }
 
@@ -462,11 +465,14 @@ fn test_parse_material_set_should_parse_correct_illumination_models() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
-            assert_eq!(result_material.illumination_model, expected_material.illumination_model);
-        } 
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
+            assert_eq!(
+                result_material.illumination_model,
+                expected_material.illumination_model
+            );
+        }
     }
 }
 
@@ -478,11 +484,11 @@ fn test_parse_material_set_should_parse_correct_ambient_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.map_ambient, expected_material.map_ambient);
-        } 
+        }
     }
 }
 
@@ -494,11 +500,11 @@ fn test_parse_material_set_should_parse_correct_diffuse_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.map_diffuse, expected_material.map_diffuse);
-        } 
+        }
     }
 }
 
@@ -510,11 +516,11 @@ fn test_parse_material_set_should_parse_correct_specular_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.map_specular, expected_material.map_specular);
-        } 
+        }
     }
 }
 
@@ -526,11 +532,11 @@ fn test_parse_material_set_should_parse_correct_emissive_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.map_emissive, expected_material.map_emissive);
-        } 
+        }
     }
 }
 
@@ -542,14 +548,14 @@ fn test_parse_material_set_should_parse_correct_specular_exponent_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(
-                result_material.map_specular_exponent, 
+                result_material.map_specular_exponent,
                 expected_material.map_specular_exponent
             );
-        } 
+        }
     }
 }
 
@@ -561,11 +567,11 @@ fn test_parse_material_set_should_parse_correct_bump_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.map_bump, expected_material.map_bump);
-        } 
+        }
     }
 }
 
@@ -577,11 +583,14 @@ fn test_parse_material_set_should_parse_correct_displacement_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
-            assert_eq!(result_material.map_displacement, expected_material.map_displacement);
-        } 
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
+            assert_eq!(
+                result_material.map_displacement,
+                expected_material.map_displacement
+            );
+        }
     }
 }
 
@@ -593,11 +602,11 @@ fn test_parse_material_set_should_parse_correct_alpha_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.map_dissolve, expected_material.map_dissolve);
-        } 
+        }
     }
 }
 
@@ -609,11 +618,10 @@ fn test_parse_material_set_should_parse_correct_decal_maps() {
     for test in tests.iter() {
         let mut parser = Parser::new(&test.data);
         let result = parser.parse_mtlset().unwrap();
-        for (result_material, expected_material) 
-            in result.materials.iter().zip(test.expected.materials.iter()) {
-
+        for (result_material, expected_material) in
+            result.materials.iter().zip(test.expected.materials.iter())
+        {
             assert_eq!(result_material.map_decal, expected_material.map_decal);
-        } 
+        }
     }
 }
-

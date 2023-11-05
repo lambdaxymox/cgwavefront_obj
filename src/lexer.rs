@@ -37,7 +37,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Read the character at the current position in the byte stream without 
+    /// Read the character at the current position in the byte stream without
     /// advancing the stream.
     #[inline]
     fn peek(&mut self) -> Option<&u8> {
@@ -49,14 +49,14 @@ impl<'a> Lexer<'a> {
         match self.peek() {
             Some(&ch) if is_newline(ch) => {
                 self.current_line_number += 1;
-            },
+            }
             _ => {}
         }
         self.stream_position += 1;
     }
 
-    /// Given a boolean predicate that operates on bytes, advance through the 
-    /// stream while the predicate is still satisfied. 
+    /// Given a boolean predicate that operates on bytes, advance through the
+    /// stream while the predicate is still satisfied.
     ///
     /// This function returns the number of characters skipped.
     fn skip_while<P: Fn(u8) -> bool>(&mut self, predicate: P) -> usize {
@@ -76,11 +76,11 @@ impl<'a> Lexer<'a> {
         skipped
     }
 
-    /// Given a predicate that operates on bytes, advance through stream while 
-    /// the predicates is not satisfied. 
+    /// Given a predicate that operates on bytes, advance through stream while
+    /// the predicates is not satisfied.
     ///
-    /// That is, advance one character at a time unless the predicate is 
-    /// satisfied, and then stop. This function returns the number of characters 
+    /// That is, advance one character at a time unless the predicate is
+    /// satisfied, and then stop. This function returns the number of characters
     /// skipped.
     fn skip_unless<P: Fn(u8) -> bool>(&mut self, not_predicate: P) -> usize {
         self.skip_while(|ch| !not_predicate(ch))
@@ -119,9 +119,7 @@ impl<'a> Lexer<'a> {
                 self.stream.get(start_position..self.stream_position)
             }
             Some(_) => {
-                let skipped = self.skip_unless(|ch| {
-                    is_whitespace_or_newline(ch) || ch == b'#'
-                });
+                let skipped = self.skip_unless(|ch| is_whitespace_or_newline(ch) || ch == b'#');
                 if skipped > 0 {
                     self.stream.get(start_position..self.stream_position)
                 } else {
@@ -166,25 +164,25 @@ impl<'a> PeekableLexer<'a> {
     pub fn next_token(&mut self) -> Option<&'a str> {
         match self.cache.take() {
             Some(token) => token,
-            None => {
-                self.inner.next_token().map(
-                    |t| { unsafe { str::from_utf8_unchecked(t) } 
-                })
-            }
+            None => self
+                .inner
+                .next_token()
+                .map(|t| unsafe { str::from_utf8_unchecked(t) }),
         }
     }
 
-    /// Read the next token from the token stream. 
+    /// Read the next token from the token stream.
     ///
-    /// Calling this function does not advance the state of the stream, but it 
+    /// Calling this function does not advance the state of the stream, but it
     /// may fill the cache on any given call.
     pub fn peek(&mut self) -> Option<&'a str> {
         match self.cache {
             Some(token) => token,
             None => {
-                let next_token = self.inner.next_token().map(
-                    |t| { unsafe { str::from_utf8_unchecked(t) } 
-                });
+                let next_token = self
+                    .inner
+                    .next_token()
+                    .map(|t| unsafe { str::from_utf8_unchecked(t) });
                 self.cache.replace(next_token);
                 next_token
             }
@@ -204,7 +202,7 @@ impl<'a> Iterator for PeekableLexer<'a> {
 #[cfg(test)]
 mod tests {
     use super::{
-        Lexer, 
+        Lexer,
         PeekableLexer,
     };
     use std::slice;
@@ -444,14 +442,14 @@ mod tests {
     fn test_lexer_tokenwise() {
         for test_case in test_cases().iter() {
             let lexer = PeekableLexer::new(Lexer::new(&test_case.data));
-        
+
             for (result, expected) in lexer.zip(test_case.expected.iter()) {
                 assert_eq!(
                     result, expected,
-                    "result = {:?}; expected = {:?}", result, expected
+                    "result = {:?}; expected = {:?}",
+                    result, expected
                 );
             }
         }
     }
 }
-

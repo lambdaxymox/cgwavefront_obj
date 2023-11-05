@@ -80,7 +80,7 @@ pub struct Color {
     /// The green component of a color.
     pub g: f64,
     /// The blue component of a color.
-    pub b: f64
+    pub b: f64,
 }
 
 impl Color {
@@ -89,16 +89,16 @@ impl Color {
         Color {
             r: 0_f64,
             g: 0_f64,
-            b: 0_f64
+            b: 0_f64,
         }
     }
 }
 
-/// The illumination model describes how to illuminate an object with a given 
+/// The illumination model describes how to illuminate an object with a given
 /// material.
-/// 
-/// The illumination model data is based on the original set Wavefront MTL spec 
-/// illumination models. This parameter exists mostly for legacy reasons at this 
+///
+/// The illumination model data is based on the original set Wavefront MTL spec
+/// illumination models. This parameter exists mostly for legacy reasons at this
 /// point.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IlluminationModel {
@@ -111,13 +111,13 @@ pub enum IlluminationModel {
 }
 
 /// A material description associated with an object in a scene describes
-/// how to illuminate the object. 
-/// 
-/// A material can contain multiple texture maps including a diffuse map, a 
-/// specular map, a specular exponent map, and an ambient map. This combination 
-/// of maps allows one to implement some variation or other of a Phong shading 
-/// model. Other maps include bump maps and displacement maps for varying the 
-/// roughness of the material across the surface of an object, as well as 
+/// how to illuminate the object.
+///
+/// A material can contain multiple texture maps including a diffuse map, a
+/// specular map, a specular exponent map, and an ambient map. This combination
+/// of maps allows one to implement some variation or other of a Phong shading
+/// model. Other maps include bump maps and displacement maps for varying the
+/// roughness of the material across the surface of an object, as well as
 /// a dissolve map that descibes how the variation changes across an object.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Material {
@@ -143,13 +143,13 @@ pub struct Material {
     /// A dissolve of 0.0 is a fully transparent material, and a dissolve of 1.0 is
     /// a fully opaque material.
     pub dissolve: f64,
-    /// The index of refaction of the material. This enables transparency 
+    /// The index of refaction of the material. This enables transparency
     /// effects.
     pub optical_density: Option<f64>,
-    /// The illumination model used to render a material. This parameter is 
-    /// based on the original models defined in the MTL spec, and it told the 
-    /// Wavefront software's system how to render the object. Since we do this 
-    /// with programmable shaders on modern workloads anyway, this parameter 
+    /// The illumination model used to render a material. This parameter is
+    /// based on the original models defined in the MTL spec, and it told the
+    /// Wavefront software's system how to render the object. Since we do this
+    /// with programmable shaders on modern workloads anyway, this parameter
     /// may be considered a legacy item.
     pub illumination_model: IlluminationModel,
     /// A texture map describing the ambient color as it varies across an object.
@@ -158,18 +158,18 @@ pub struct Material {
     pub map_diffuse: Option<String>,
     /// A texture map that describes the specular color as it varies across an object.
     pub map_specular: Option<String>,
-    /// A texture map that describes the emissive color as it varies across an object. 
+    /// A texture map that describes the emissive color as it varies across an object.
     pub map_emissive: Option<String>,
     /// A texture map that describes the specular exponent at different locations
     /// on an object.
     pub map_specular_exponent: Option<String>,
     /// A texture map that stores the height data that describes how a normal vector
-    /// gets perturbed across a surface for providing extra surface detail at low 
+    /// gets perturbed across a surface for providing extra surface detail at low
     /// computational cost.
     pub map_bump: Option<String>,
-    /// A texture map that describes the local deformation of the surface of an 
-    /// object, creating surface roughness. Displacement mapping differs from bump 
-    /// mapping in that a displacement map describes how to actually modify the 
+    /// A texture map that describes the local deformation of the surface of an
+    /// object, creating surface roughness. Displacement mapping differs from bump
+    /// mapping in that a displacement map describes how to actually modify the
     /// tesselation of an object's surface. A bump map merely perturbs the normal
     /// vector without modifying the geometry.
     pub map_displacement: Option<String>,
@@ -213,7 +213,7 @@ pub struct MaterialSet {
     pub materials: Vec<Material>,
 }
 
-/// A marker indicating the type of error generated during parsing of a 
+/// A marker indicating the type of error generated during parsing of a
 /// Wavefront MTL file.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ErrorKind {
@@ -228,7 +228,7 @@ pub enum ErrorKind {
     ExpectedInteger,
     /// The parser expected there to be no more input.
     ExpectedEndOfInput,
-    /// The MTL file specified an unsupported or unknown illumination model. 
+    /// The MTL file specified an unsupported or unknown illumination model.
     UnknownIlluminationModel,
     /// A general parsing error occurred.
     ErrorParsingMaterial,
@@ -248,11 +248,7 @@ pub struct ParseError {
 
 impl ParseError {
     /// Construct a new parse error.
-    fn new(
-        line_number: usize, 
-        kind: ErrorKind, 
-        message: String) -> ParseError {
-        
+    fn new(line_number: usize, kind: ErrorKind, message: String) -> ParseError {
         ParseError {
             line_number: line_number,
             kind: kind,
@@ -264,7 +260,9 @@ impl ParseError {
 impl fmt::Display for ParseError {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(
-            formatter, "Parse error at line {}: {}", self.line_number, self.message
+            formatter,
+            "Parse error at line {}: {}",
+            self.line_number, self.message
         )
     }
 }
@@ -311,12 +309,12 @@ impl<'a> Parser<'a> {
         token
     }
 
-    /// Advance the token stream one step without returning the current token. 
+    /// Advance the token stream one step without returning the current token.
     fn advance(&mut self) {
         self.next();
     }
 
-    /// Advance the token stream one step, returning the next token in the 
+    /// Advance the token stream one step, returning the next token in the
     /// stream.
     ///
     /// This function generates an error is it runs out of input.
@@ -324,9 +322,9 @@ impl<'a> Parser<'a> {
         match self.next() {
             Some(st) => Ok(st),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected token but reached end of input.".to_owned()
-            )
+                ErrorKind::EndOfFile,
+                "Expected token but reached end of input.".to_owned(),
+            ),
         }
     }
 
@@ -339,9 +337,9 @@ impl<'a> Parser<'a> {
             None => self.error(ErrorKind::EndOfFile, String::new()),
             Some(st) if st != tag => self.error(
                 ErrorKind::ExpectedTagStatement,
-                format!("Expected statement {} but got statement {}", tag, st)
+                format!("Expected statement {} but got statement {}", tag, st),
             ),
-            _ => Ok(())
+            _ => Ok(()),
         }
     }
 
@@ -357,9 +355,9 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<f64>() {
             Ok(val) => Ok(val),
-            Err(_) => self.error( 
-                ErrorKind::ExpectedFloat, 
-                format!("Expected floating point number but got {}", st)
+            Err(_) => self.error(
+                ErrorKind::ExpectedFloat,
+                format!("Expected floating point number but got {}", st),
             ),
         }
     }
@@ -369,10 +367,10 @@ impl<'a> Parser<'a> {
         let st = self.next_string()?;
         match st.parse::<usize>() {
             Ok(val) => Ok(val),
-            Err(_) => self.error( 
+            Err(_) => self.error(
                 ErrorKind::ExpectedInteger,
-                format!("Expected integer but got {}", st)
-            )
+                format!("Expected integer but got {}", st),
+            ),
         }
     }
 
@@ -431,15 +429,15 @@ impl<'a> Parser<'a> {
     fn parse_map_ambient(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ka") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("map_Ka")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -448,15 +446,15 @@ impl<'a> Parser<'a> {
     fn parse_map_diffuse(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Kd") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("map_Kd")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -465,15 +463,15 @@ impl<'a> Parser<'a> {
     fn parse_map_specular(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ks") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("map_Ks")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -482,15 +480,15 @@ impl<'a> Parser<'a> {
     fn parse_map_emissive(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ke") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("map_Ke")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -504,14 +502,14 @@ impl<'a> Parser<'a> {
             Some("bump") => {
                 self.expect_tag("bump")?;
             }
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -520,15 +518,15 @@ impl<'a> Parser<'a> {
     fn parse_map_displacement(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("disp") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("disp")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -537,15 +535,15 @@ impl<'a> Parser<'a> {
     fn parse_map_dissolve(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_d") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("map_d")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -554,15 +552,15 @@ impl<'a> Parser<'a> {
     fn parse_map_decal(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("decal") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("decal")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -571,15 +569,15 @@ impl<'a> Parser<'a> {
     fn parse_map_specular_exponent(&mut self) -> Result<Option<&'a str>, ParseError> {
         match self.peek() {
             Some("map_Ns") => {}
-            _ => return Ok(None)
+            _ => return Ok(None),
         }
 
         self.expect_tag("map_Ns")?;
         match self.next() {
             Some(st) => Ok(Some(st)),
             None => self.error(
-                ErrorKind::EndOfFile, 
-                "Expected texture map name but got end of input.".to_owned()
+                ErrorKind::EndOfFile,
+                "Expected texture map name but got end of input.".to_owned(),
             ),
         }
     }
@@ -594,8 +592,8 @@ impl<'a> Parser<'a> {
             2 => Ok(IlluminationModel::AmbientDiffuseSpecular),
             n => self.error(
                 ErrorKind::UnknownIlluminationModel,
-                format!("Unknown illumination model: {}.", n)
-            )
+                format!("Unknown illumination model: {}.", n),
+            ),
         }
     }
 
@@ -606,25 +604,23 @@ impl<'a> Parser<'a> {
             Some(st) => {
                 return self.error(
                     ErrorKind::ExpectedTagStatement,
-                    format!("Expected `newmtl` but got {}.", st)
+                    format!("Expected `newmtl` but got {}.", st),
                 )
             }
             None => {
                 return self.error(
                     ErrorKind::EndOfFile,
-                    "Expected `newmtl` but got end of input.".to_owned()
+                    "Expected `newmtl` but got end of input.".to_owned(),
                 )
             }
         }
 
         match self.next() {
             Some(st) => Ok(st),
-            None => {
-                self.error(
-                    ErrorKind::EndOfFile,
-                    "Expected material name but got end of input.".to_owned()
-                )
-            }
+            None => self.error(
+                ErrorKind::EndOfFile,
+                "Expected material name but got end of input.".to_owned(),
+            ),
         }
     }
 
@@ -633,7 +629,7 @@ impl<'a> Parser<'a> {
         let mut material = Material::new();
         let name = self.parse_newmtl()?;
         material.name = String::from(name);
-        
+
         self.skip_zero_or_more_newlines();
         loop {
             match self.peek() {
@@ -704,7 +700,7 @@ impl<'a> Parser<'a> {
                 Some(other_st) => {
                     return self.error(
                         ErrorKind::ErrorParsingMaterial,
-                        format!("Could not parse the token `{}`.", other_st) 
+                        format!("Could not parse the token `{}`.", other_st),
                     );
                 }
             }
@@ -784,12 +780,12 @@ impl<'a> Parser<'a> {
             let material = self.parse_material()?;
             materials.push(material);
         }
-        
+
         if let Some(st) = self.peek() {
             return self.error(
                 ErrorKind::ExpectedEndOfInput,
-                format!("Expected end of input but got `{}`.", st)
-            )
+                format!("Expected end of input but got `{}`.", st),
+            );
         }
 
         Ok(MaterialSet { materials: materials })
@@ -800,8 +796,8 @@ impl<'a> Parser<'a> {
 #[cfg(test)]
 mod mtl_primitive_tests {
     use super::{
-        Parser,
         Color,
+        Parser,
     };
 
 
@@ -820,7 +816,14 @@ mod mtl_primitive_tests {
     #[test]
     fn test_parse_color() {
         let mut parser = Parser::new("    0.1345345 0.63453 0.982430   ");
-        assert_eq!(parser.parse_color(), Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 }));
+        assert_eq!(
+            parser.parse_color(),
+            Ok(Color {
+                r: 0.1345345,
+                g: 0.63453,
+                b: 0.982430
+            })
+        );
     }
 }
 
@@ -828,46 +831,62 @@ mod mtl_primitive_tests {
 mod mtl_illumination_statement_tests {
     use super::{
         Color,
-        Parser,
         ErrorKind,
         IlluminationModel,
+        Parser,
     };
 
 
     #[test]
     fn test_parse_ambient_component() {
         let mut parser = Parser::new("Ka 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color {
+            r: 0.1345345,
+            g: 0.63453,
+            b: 0.982430,
+        });
         let result = parser.parse_ambient_component();
 
-        assert_eq!(result, expected);      
+        assert_eq!(result, expected);
     }
 
     #[test]
     fn test_parse_diffuse_component() {
         let mut parser = Parser::new("Kd 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color {
+            r: 0.1345345,
+            g: 0.63453,
+            b: 0.982430,
+        });
         let result = parser.parse_diffuse_component();
 
-        assert_eq!(result, expected);  
+        assert_eq!(result, expected);
     }
 
     #[test]
     fn test_parse_specular_component() {
         let mut parser = Parser::new("Ks 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color {
+            r: 0.1345345,
+            g: 0.63453,
+            b: 0.982430,
+        });
         let result = parser.parse_specular_component();
 
-        assert_eq!(result, expected);  
+        assert_eq!(result, expected);
     }
 
     #[test]
     fn test_parse_emissive_component() {
         let mut parser = Parser::new("Ke 0.1345345 0.63453 0.982430");
-        let expected = Ok(Color { r: 0.1345345, g: 0.63453, b: 0.982430 });
+        let expected = Ok(Color {
+            r: 0.1345345,
+            g: 0.63453,
+            b: 0.982430,
+        });
         let result = parser.parse_emissive_component();
 
-        assert_eq!(result, expected); 
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -876,7 +895,7 @@ mod mtl_illumination_statement_tests {
         let expected = Ok(0.24325634);
         let result = parser.parse_dissolve_component();
 
-        assert_eq!(result, expected); 
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -885,7 +904,7 @@ mod mtl_illumination_statement_tests {
         let expected = Ok(3.24325634);
         let result = parser.parse_specular_exponent();
 
-        assert_eq!(result, expected); 
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -894,7 +913,7 @@ mod mtl_illumination_statement_tests {
         let expected = Ok(1.24325634);
         let result = parser.parse_optical_density();
 
-        assert_eq!(result, expected); 
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -1259,4 +1278,3 @@ mod mtlset_parser_tests {
         }
     }
 }
-

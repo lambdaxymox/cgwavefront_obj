@@ -1,13 +1,9 @@
 extern crate wavefront_obj;
 
-use wavefront_obj::obj;
-use std::fs::{
-    File, 
-};
+use std::fs::File;
 use std::io;
-use std::io::{
-    Read,
-};
+use std::io::Read;
+use wavefront_obj::obj;
 
 const SAMPLE_DATA: &str = "sample_data/teapot.obj";
 
@@ -21,4 +17,3 @@ fn main() -> io::Result<()> {
     assert!(object_set.is_ok());
     Ok(())
 }
-

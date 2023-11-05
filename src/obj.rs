@@ -62,7 +62,7 @@ use std::fmt;
 /// #         Object {
 /// #             name: String::from("Object001"),
 /// #             vertex_set: vec![
-/// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+/// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 },
 /// #                 Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
 /// #                 Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
 /// #                 Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
@@ -79,7 +79,7 @@ use std::fmt;
 /// #                 NormalVertex { x: 0.531611, y: 0.000000, z: 0.846988 },
 /// #             ],
 /// #             group_set: vec![
-/// #                 Group(String::from("all")), 
+/// #                 Group(String::from("all")),
 /// #             ],
 /// #             smoothing_group_set: vec![
 /// #                 SmoothingGroup(1),
@@ -174,16 +174,16 @@ impl fmt::Display for NormalVertex {
 
 /// A general vertex/texture/normal index representing the indices
 /// of a vertex, texture vertex, and normal vector in an element
-/// of a geometry figure. 
-/// 
-/// A VTN index has the forms of **vertex**, **vertex/texture**, 
-/// **vertex//normal**, or **vertex/texture/normal** indices, 
+/// of a geometry figure.
+///
+/// A VTN index has the forms of **vertex**, **vertex/texture**,
+/// **vertex//normal**, or **vertex/texture/normal** indices,
 /// which indicates which data of vertices, texture vertices, and
 /// normal vectors are bound to each vertex in a shape element.
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub enum VTNIndex { 
+pub enum VTNIndex {
     V(VertexIndex),
-    VT(VertexIndex, TextureVertexIndex), 
+    VT(VertexIndex, TextureVertexIndex),
     VN(VertexIndex, NormalVertexIndex),
     VTN(VertexIndex, TextureVertexIndex, NormalVertexIndex),
 }
@@ -203,9 +203,9 @@ impl VTNIndex {
     /// # };
     /// #
     /// let v_index1 = VTNIndex::V(0);
-    /// let v_index2 = VTNIndex::V(1); 
+    /// let v_index2 = VTNIndex::V(1);
     /// assert!(v_index1.has_same_type_as(&v_index2));
-    /// 
+    ///
     /// let vt_index1 = VTNIndex::VT(2, 3);
     /// let vt_index2 = VTNIndex::VT(4, 5);
     /// assert!(vt_index1.has_same_type_as(&vt_index2));
@@ -228,17 +228,17 @@ impl VTNIndex {
     pub fn has_same_type_as(&self, other: &VTNIndex) -> bool {
         matches!(
             (self, other),
-            (&VTNIndex::V(_),   &VTNIndex::V(_)) |
-            (&VTNIndex::VT(_,_),  &VTNIndex::VT(_,_)) | 
-            (&VTNIndex::VN(_,_),  &VTNIndex::VN(_,_)) | 
-            (&VTNIndex::VTN(_,_,_), &VTNIndex::VTN(_,_,_))
+            (&VTNIndex::V(_), &VTNIndex::V(_))
+                | (&VTNIndex::VT(_, _), &VTNIndex::VT(_, _))
+                | (&VTNIndex::VN(_, _), &VTNIndex::VN(_, _))
+                | (&VTNIndex::VTN(_, _, _), &VTNIndex::VTN(_, _, _))
         )
     }
 }
 
 impl fmt::Display for VTNIndex {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        // NOTE: The library represented VTN indices starting form 0, whereas 
+        // NOTE: The library represented VTN indices starting form 0, whereas
         // *.obj files index starting from 1, so we must add one to each index
         // when displaying the data back in a form that looks like the original
         // file.
@@ -247,7 +247,7 @@ impl fmt::Display for VTNIndex {
                 write!(formatter, "{}", v + 1)
             }
             VTNIndex::VT(v, vt) => {
-                write!(formatter, "{}/{}", v + 1 ,vt + 1)
+                write!(formatter, "{}/{}", v + 1, vt + 1)
             }
             VTNIndex::VN(v, vn) => {
                 write!(formatter, "{}//{}", v + 1, vn + 1)
@@ -287,20 +287,20 @@ impl fmt::Display for Element {
         match *self {
             Element::Point(vtn) => {
                 write!(formatter, "p  {}", vtn)
-            },
+            }
             Element::Line(vtn1, vtn2) => {
                 write!(formatter, "l  {}  {}", vtn1, vtn2)
-            },
+            }
             Element::Face(vtn1, vtn2, vtn3) => {
                 write!(formatter, "f  {}  {}  {}", vtn1, vtn2, vtn3)
-            },
+            }
         }
     }
 }
 
 /// A group is a label for a collection of elements within an object.
 ///
-/// A collection of groups enables one to organize collections of elements 
+/// A collection of groups enables one to organize collections of elements
 /// by group.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Group(pub String);
@@ -312,7 +312,7 @@ impl fmt::Display for Group {
 }
 
 impl Default for Group {
-    fn default() -> Group { 
+    fn default() -> Group {
         Group(String::from("default"))
     }
 }
@@ -333,7 +333,7 @@ impl fmt::Display for SmoothingGroup {
     }
 }
 
-/// A shape entry is a collection of indices grouping together all the 
+/// A shape entry is a collection of indices grouping together all the
 /// organizational information about each element in an object.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ShapeEntry {
@@ -357,10 +357,10 @@ pub struct Shape {
     pub smoothing_groups: Vec<SmoothingGroup>,
 }
 
-/// The geometry inside an object is a collection of elements along with their 
+/// The geometry inside an object is a collection of elements along with their
 /// material description data.
 ///
-/// The material description data describes which material from a corresponding 
+/// The material description data describes which material from a corresponding
 /// material library contains the data for rendering each primitive in the set of
 /// shapes.
 #[derive(Clone, Debug, PartialEq)]
@@ -376,13 +376,13 @@ pub struct Geometry {
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum VTNTriple<'a> {
     V(&'a Vertex),
-    VT(&'a Vertex, &'a TextureVertex), 
+    VT(&'a Vertex, &'a TextureVertex),
     VN(&'a Vertex, &'a NormalVertex),
     VTN(&'a Vertex, &'a TextureVertex, &'a NormalVertex),
 }
 
 /// An object is a collection of vertices, texture vertices, normal vectors,
-/// and geometric primitives composing a unit of geometry in a scene to 
+/// and geometric primitives composing a unit of geometry in a scene to
 /// be rendered.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Object {
@@ -450,15 +450,15 @@ impl Object {
     ///     ## end quad               \
     /// ");
     /// let obj_set = obj::parse(&obj_file).unwrap();
-    /// 
-    /// // The vertex data of an obj file are stored 1-indexed, but the library stores 
+    ///
+    /// // The vertex data of an obj file are stored 1-indexed, but the library stores
     /// // the vertex data 0-indexed, so one must add one to each index to get the indices
     /// // as they would appear in a *.obj file.
     /// let vtn_index0 = VTNIndex::VTN(0, 0, 0);
     /// let vtn_index1 = VTNIndex::VTN(1, 1, 1);
     /// let vtn_index2 = VTNIndex::VTN(2, 2, 2);
     /// let vtn_index3 = VTNIndex::VTN(3, 3, 3);
-    /// 
+    ///
     /// let object = &obj_set.objects[0];
     /// let vtn_triple0 = object.get_vtn_triple(vtn_index0);
     /// let vtn_triple1 = object.get_vtn_triple(vtn_index1);
@@ -482,7 +482,7 @@ impl Object {
     /// let expected1 = Some(VTNTriple::VTN(&vertex1, &texture_vertex1, &normal_vertex1));
     /// let expected2 = Some(VTNTriple::VTN(&vertex2, &texture_vertex2, &normal_vertex2));
     /// let expected3 = Some(VTNTriple::VTN(&vertex3, &texture_vertex3, &normal_vertex3));
-    /// 
+    ///
     /// assert_eq!(vtn_triple0, expected0);
     /// assert_eq!(vtn_triple1, expected1);
     /// assert_eq!(vtn_triple2, expected2);
@@ -498,7 +498,7 @@ impl Object {
 
                 Some(VTNTriple::V(vertex))
             }
-            VTNIndex::VT(v_index, vt_index) => { 
+            VTNIndex::VT(v_index, vt_index) => {
                 let vertex = self.vertex_set.get(v_index)?;
                 let texture_vertex = self.texture_vertex_set.get(vt_index)?;
 
@@ -521,10 +521,12 @@ impl Object {
     }
 }
 
-struct DisplayObjectCompositor { }
+struct DisplayObjectCompositor {}
 
 impl DisplayObjectCompositor {
-    fn new() -> Self { Self {} }
+    fn new() -> Self {
+        Self {}
+    }
 
     fn compose_set<T: fmt::Display>(&self, set: &[T], name: &str) -> String {
         let mut string = format!("    {} set:\n", name);
@@ -535,7 +537,7 @@ impl DisplayObjectCompositor {
         }
         string += &format!("        length: {}\n", set.len());
 
-        string           
+        string
     }
 
     fn compose(&self, object: &Object) -> String {
@@ -550,7 +552,7 @@ impl DisplayObjectCompositor {
         string += &self.compose_set(&object.element_set, "element");
         string += "}}\n";
 
-        string       
+        string
     }
 }
 
@@ -561,7 +563,7 @@ impl fmt::Display for Object {
     }
 }
 
-/// An object set is a collection of objects and material library named obtained 
+/// An object set is a collection of objects and material library named obtained
 /// from parsing an `*.obj` file. An `*.obj` file may contain more that one object.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ObjectSet {
@@ -575,19 +577,19 @@ impl fmt::Display for ObjectSet {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let compositor = DisplayObjectCompositor::new();
         let mut string = String::from("ObjectSet {\n");
-        
+
         for object in self.objects.iter() {
             string += &compositor.compose(object);
             string += &"\n";
         }
 
         string += &"}\n";
-    
+
         write!(formatter, "{}", string)
     }
 }
 
-/// A marker indicating the type of error generated during parsing of a 
+/// A marker indicating the type of error generated during parsing of a
 /// Wavefront OBJ file.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ErrorKind {
@@ -646,7 +648,9 @@ impl ParseError {
 impl fmt::Display for ParseError {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(
-            formatter, "Parse error at line {}: {}", self.line_number, self.message
+            formatter,
+            "Parse error at line {}: {}",
+            self.line_number, self.message
         )
     }
 }
@@ -664,10 +668,10 @@ pub struct Parser<'a> {
     lexer: PeekableLexer<'a>,
 }
 
-/// Triangulate a polygon with a triangle fan. 
+/// Triangulate a polygon with a triangle fan.
 ///
-/// NOTE: the OBJ specification assumes that polygons are coplanar, and 
-/// consequently the parser does not check this. It is up to the model creator 
+/// NOTE: the OBJ specification assumes that polygons are coplanar, and
+/// consequently the parser does not check this. It is up to the model creator
 /// to ensure this.
 #[inline]
 fn triangulate(elements: &mut Vec<Element>, vtn_indices: &[VTNIndex]) -> usize {
@@ -722,12 +726,12 @@ impl<'a> Parser<'a> {
         token
     }
 
-    /// Advance the token stream one step without returning the current token. 
+    /// Advance the token stream one step without returning the current token.
     fn advance(&mut self) {
         self.next();
     }
 
-    /// Advance the token stream one step, returning the next token in the 
+    /// Advance the token stream one step, returning the next token in the
     /// stream.
     ///
     /// This function generates an error is it runs out of input.
@@ -736,8 +740,8 @@ impl<'a> Parser<'a> {
             Some(st) => Ok(st),
             None => self.error(
                 ErrorKind::EndOfFile,
-                "Reached the end of the input in the process of getting the next token.".to_owned()
-            )
+                "Reached the end of the input in the process of getting the next token.".to_owned(),
+            ),
         }
     }
 
@@ -749,13 +753,13 @@ impl<'a> Parser<'a> {
         match self.next() {
             None => self.error(
                 ErrorKind::EndOfFile,
-                "Reached the end of the input in the process of getting the next token.".to_owned()
+                "Reached the end of the input in the process of getting the next token.".to_owned(),
             ),
             Some(st) if st != tag => self.error(
                 ErrorKind::ExpectedTagStatement,
-                format!("Expected `{}` but got `{}` instead.", tag, st)
+                format!("Expected `{}` but got `{}` instead.", tag, st),
             ),
-            _ => Ok(())
+            _ => Ok(()),
         }
     }
 
@@ -766,7 +770,7 @@ impl<'a> Parser<'a> {
             Ok(val) => Ok(val),
             Err(_) => self.error(
                 ErrorKind::ExpectedFloat,
-                format!("Expected a floating point number but got `{}` instead.", st)
+                format!("Expected a floating point number but got `{}` instead.", st),
             ),
         }
     }
@@ -778,21 +782,24 @@ impl<'a> Parser<'a> {
             Ok(val) => Ok(val),
             Err(_) => self.error(
                 ErrorKind::ExpectedInteger,
-                format!("Expected an integer but got `{}` instead.", st)
+                format!("Expected an integer but got `{}` instead.", st),
             ),
         }
     }
 
-    /// Apply a parser to the input stream. 
+    /// Apply a parser to the input stream.
     ///
     /// If the parser `parser` fails to parse the current token in the stream,
-    /// it returns nothing and the stream state does not change. Otherwise, the 
-    /// stream advances and the corresponding result is returned. 
-    fn try_once<P, T>(&mut self, parser: P) -> Option<T> where P: FnOnce(&str) -> Option<T> {
+    /// it returns nothing and the stream state does not change. Otherwise, the
+    /// stream advances and the corresponding result is returned.
+    fn try_once<P, T>(&mut self, parser: P) -> Option<T>
+    where
+        P: FnOnce(&str) -> Option<T>,
+    {
         match self.peek() {
-            Some(st) => parser(st).map(|got| { 
-                self.advance(); 
-                got 
+            Some(st) => parser(st).map(|got| {
+                self.advance();
+                got
             }),
             None => None,
         }
@@ -801,14 +808,19 @@ impl<'a> Parser<'a> {
     /// Parse a vertex from the input.
     fn parse_vertex(&mut self) -> Result<Vertex, ParseError> {
         self.expect_tag("v")?;
- 
+
         let x = self.parse_f64()?;
         let y = self.parse_f64()?;
         let z = self.parse_f64()?;
         let mw = self.try_once(|st| st.parse::<f64>().ok());
         let w = mw.unwrap_or(1_f64);
 
-        Ok(Vertex { x: x, y: y, z: z, w: w })
+        Ok(Vertex {
+            x: x,
+            y: y,
+            z: z,
+            w: w,
+        })
     }
 
     /// Parse a texture vertex from the input.
@@ -858,19 +870,15 @@ impl<'a> Parser<'a> {
                 self.expect_tag("o")?;
                 let object_name = self.next_string();
                 self.skip_one_or_more_newlines()?;
-                
+
                 object_name
             }
-            _ => Ok("")
+            _ => Ok(""),
         }
     }
 
     #[inline(always)]
-    fn calculate_index(
-        &self,
-        value_range: (usize, usize),
-        parsed_value: isize) -> Result<usize, ParseError>
-    {
+    fn calculate_index(&self, value_range: (usize, usize), parsed_value: isize) -> Result<usize, ParseError> {
         let (min_value, max_value) = value_range;
         let actual_value = if parsed_value <= 0 {
             max_value as isize - parsed_value
@@ -883,29 +891,29 @@ impl<'a> Parser<'a> {
             Ok((actual_value - min_value as isize) as usize)
         } else {
             self.error(
-                ErrorKind::VTNIndexOutOfRange, 
+                ErrorKind::VTNIndexOutOfRange,
                 format!(
                     "Expected index in range [{}, {}), but got {}.",
                     min_value, max_value, actual_value
-                )
+                ),
             )
         }
     }
 
     /// Parse a vertex/texture/normal index.
     fn parse_vtn_index(
-        &mut self, 
+        &mut self,
         vertex_index_range: (usize, usize),
         texture_index_range: (usize, usize),
-        normal_index_range: (usize, usize)) -> Result<VTNIndex, ParseError>
-    {
+        normal_index_range: (usize, usize),
+    ) -> Result<VTNIndex, ParseError> {
         let st = self.next_string()?;
         let process_split = |split: &str, value_range: (usize, usize)| -> Result<Option<usize>, ParseError> {
             if !split.is_empty() {
                 let parsed_value = split.parse::<isize>().or_else(|_| {
                     self.error(
                         ErrorKind::ExpectedInteger,
-                        format!("Expected an integer but got `{}` instead.", split)
+                        format!("Expected an integer but got `{}` instead.", split),
                     )
                 })?;
                 let index = self.calculate_index(value_range, parsed_value)?;
@@ -914,7 +922,7 @@ impl<'a> Parser<'a> {
                 Ok(None)
             }
         };
-            
+
         let mut splits_iter = st.split('/');
         let split1 = splits_iter
             .next()
@@ -931,10 +939,13 @@ impl<'a> Parser<'a> {
         if split1.is_none() || splits_iter.next().is_some() {
             return self.error(
                 ErrorKind::ExpectedVTNIndex,
-                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
+                format!(
+                    "Expected a `vertex/texture/normal` index but got `{}` instead.",
+                    st
+                ),
             );
         }
-                
+
         match (split1, split2, split3) {
             (Some(v), None, None) => Ok(VTNIndex::V(v)),
             (Some(v), None, Some(vn)) => Ok(VTNIndex::VN(v, vn)),
@@ -942,7 +953,10 @@ impl<'a> Parser<'a> {
             (Some(v), Some(vt), Some(vn)) => Ok(VTNIndex::VTN(v, vt, vn)),
             _ => self.error(
                 ErrorKind::ExpectedVTNIndex,
-                format!("Expected a `vertex/texture/normal` index but got `{}` instead.", st)
+                format!(
+                    "Expected a `vertex/texture/normal` index but got `{}` instead.",
+                    st
+                ),
             ),
         }
     }
@@ -951,16 +965,16 @@ impl<'a> Parser<'a> {
     ///
     /// Return the number of VTN indices parsed if no errors occurred.
     fn parse_vtn_indices(
-        &mut self, 
+        &mut self,
         vtn_indices: &mut Vec<VTNIndex>,
         vertex_index_range: (usize, usize),
         texture_index_range: (usize, usize),
-        normal_index_range: (usize, usize)) -> Result<usize, ParseError> 
-    {
+        normal_index_range: (usize, usize),
+    ) -> Result<usize, ParseError> {
         let mut indices_parsed = 0;
-        while let Ok(vtn_index) = self.parse_vtn_index(
-            vertex_index_range, texture_index_range, normal_index_range
-        ) {
+        while let Ok(vtn_index) =
+            self.parse_vtn_index(vertex_index_range, texture_index_range, normal_index_range)
+        {
             vtn_indices.push(vtn_index);
             indices_parsed += 1;
         }
@@ -973,10 +987,10 @@ impl<'a> Parser<'a> {
     /// There can be more than one point in a single line of input, so
     /// this parsing rule will attempt to read all of them.
     fn parse_point(
-        &mut self, 
-        elements: &mut Vec<Element>, 
-        vertex_index_range: (usize, usize)) -> Result<usize, ParseError>
-    {
+        &mut self,
+        elements: &mut Vec<Element>,
+        vertex_index_range: (usize, usize),
+    ) -> Result<usize, ParseError> {
         self.expect_tag("p")?;
 
         let parsed_value = self.parse_isize()?;
@@ -994,10 +1008,10 @@ impl<'a> Parser<'a> {
                     Err(_) => {
                         return self.error(
                             ErrorKind::ExpectedInteger,
-                            format!("Expected an integer but got `{}` instead.", st)
+                            format!("Expected an integer but got `{}` instead.", st),
                         )
                     }
-                }
+                },
                 _ => break,
             }
         }
@@ -1010,36 +1024,36 @@ impl<'a> Parser<'a> {
     /// If the parser cannot parse each line element from a line of text input, the
     /// parser returns an error.
     fn parse_line(
-        &mut self, 
-        elements: &mut Vec<Element>, 
+        &mut self,
+        elements: &mut Vec<Element>,
         vertex_index_range: (usize, usize),
         texture_index_range: (usize, usize),
-        normal_index_range: (usize, usize)) -> Result<usize, ParseError>
-    {
+        normal_index_range: (usize, usize),
+    ) -> Result<usize, ParseError> {
         self.expect_tag("l")?;
 
         let mut vtn_indices = vec![];
         vtn_indices.push(self.parse_vtn_index(
-            vertex_index_range, 
-            texture_index_range, 
-            normal_index_range
+            vertex_index_range,
+            texture_index_range,
+            normal_index_range,
         )?);
         vtn_indices.push(self.parse_vtn_index(
-            vertex_index_range, 
-            texture_index_range, 
-            normal_index_range
+            vertex_index_range,
+            texture_index_range,
+            normal_index_range,
         )?);
         self.parse_vtn_indices(
-            &mut vtn_indices, 
-            vertex_index_range, 
-            texture_index_range, 
-            normal_index_range
+            &mut vtn_indices,
+            vertex_index_range,
+            texture_index_range,
+            normal_index_range,
         )?;
 
         if !verify_vtn_indices(&vtn_indices) {
             return self.error(
                 ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-                "Every VTN index for a line must have the same form.".to_owned()
+                "Every VTN index for a line must have the same form.".to_owned(),
             );
         }
 
@@ -1060,35 +1074,35 @@ impl<'a> Parser<'a> {
     ///
     /// The parser returns the number of triangles generated.
     fn parse_face(
-        &mut self, 
-        elements: &mut Vec<Element>, 
+        &mut self,
+        elements: &mut Vec<Element>,
         vertex_index_range: (usize, usize),
         texture_index_range: (usize, usize),
-        normal_index_range: (usize, usize)) -> Result<usize, ParseError>
-    {
+        normal_index_range: (usize, usize),
+    ) -> Result<usize, ParseError> {
         self.expect_tag("f")?;
-        
+
         let mut vtn_indices = vec![];
 
         self.parse_vtn_indices(
-            &mut vtn_indices, 
-            vertex_index_range, 
-            texture_index_range, 
-            normal_index_range
+            &mut vtn_indices,
+            vertex_index_range,
+            texture_index_range,
+            normal_index_range,
         )?;
 
         // Check that there are enough vtn indices.
         if vtn_indices.len() < 3 {
             return self.error(
                 ErrorKind::EveryFaceElementMustHaveAtLeastThreeVertices,
-                "A face primitive must have at least three vertices.".to_owned()
+                "A face primitive must have at least three vertices.".to_owned(),
             );
         }
 
         if !verify_vtn_indices(&vtn_indices) {
             return self.error(
                 ErrorKind::EveryVTNIndexMustHaveTheSameFormForAGivenElement,
-                "Every VTN index for a face must have the same form.".to_owned()
+                "Every VTN index for a face must have the same form.".to_owned(),
             );
         }
 
@@ -1099,32 +1113,29 @@ impl<'a> Parser<'a> {
 
     /// Parse all the elements of a givne type from a line of text input.
     fn parse_elements(
-        &mut self, 
+        &mut self,
         elements: &mut Vec<Element>,
         vertex_index_range: (usize, usize),
         texture_index_range: (usize, usize),
-        normal_index_range: (usize, usize)) -> Result<usize, ParseError> {
-
+        normal_index_range: (usize, usize),
+    ) -> Result<usize, ParseError> {
         match self.peek() {
-            Some("p") => self.parse_point(
-                elements, 
-                vertex_index_range
-            ),
+            Some("p") => self.parse_point(elements, vertex_index_range),
             Some("l") => self.parse_line(
-                elements, 
-                vertex_index_range, 
-                texture_index_range, 
-                normal_index_range
+                elements,
+                vertex_index_range,
+                texture_index_range,
+                normal_index_range,
             ),
             Some("f") => self.parse_face(
-                elements, 
-                vertex_index_range, 
-                texture_index_range, 
-                normal_index_range
+                elements,
+                vertex_index_range,
+                texture_index_range,
+                normal_index_range,
             ),
             _ => self.error(
                 ErrorKind::ElementMustBeAPointLineOrFace,
-                "An element must be a point (`p`), line (`l`), or face (`f`).".to_owned()
+                "An element must be a point (`p`), line (`l`), or face (`f`).".to_owned(),
             ),
         }
     }
@@ -1148,9 +1159,9 @@ impl<'a> Parser<'a> {
 
     /// Parse a smoothing group name from a line of text input.
     fn parse_smoothing_group(
-        &mut self, 
-        smoothing_groups: &mut Vec<SmoothingGroup>) -> Result<usize, ParseError> {
-
+        &mut self,
+        smoothing_groups: &mut Vec<SmoothingGroup>,
+    ) -> Result<usize, ParseError> {
         self.expect_tag("s")?;
         if let Some(name) = self.next() {
             if name == "off" {
@@ -1164,13 +1175,13 @@ impl<'a> Parser<'a> {
                         "A smoothing group name must either be `off`, which denotes that an \
                         object has no smoothing groups, or an integer. The parser got `{}` instead.",
                         name
-                    )
+                    ),
                 );
             }
         } else {
             return self.error(
                 ErrorKind::SmoothingGroupDeclarationHasNoName,
-                "Got a smoothing group declaration without a smoothing group name.".to_owned()
+                "Got a smoothing group declaration without a smoothing group name.".to_owned(),
             );
         }
 
@@ -1179,17 +1190,17 @@ impl<'a> Parser<'a> {
 
     /// Parse a material name from a line of text input.
     fn parse_material_name(
-        &mut self, 
-        material_names: &mut Vec<Option<&'a str>>) -> Result<usize, ParseError> {
-
+        &mut self,
+        material_names: &mut Vec<Option<&'a str>>,
+    ) -> Result<usize, ParseError> {
         self.expect_tag("usemtl")?;
         if let Some(name) = self.next() {
             material_names.push(Some(name));
         } else {
             return self.error(
                 ErrorKind::MaterialStatementHasNoName,
-                "Got a `usemtl` material declaration without a material name.".to_owned()
-            )
+                "Got a `usemtl` material declaration without a material name.".to_owned(),
+            );
         }
 
         Ok(1)
@@ -1203,25 +1214,22 @@ impl<'a> Parser<'a> {
         shape_entry_table: &mut Vec<ShapeEntry>,
         elements: &[Element],
         group_entry_table: &[((usize, usize), (usize, usize))],
-        smoothing_group_entry_table: &[((usize, usize), usize)]) {
-
-        for &((min_element_index, max_element_index), 
-              (min_group_index, max_group_index)) in group_entry_table { 
-            
+        smoothing_group_entry_table: &[((usize, usize), usize)],
+    ) {
+        for &((min_element_index, max_element_index), (min_group_index, max_group_index)) in group_entry_table
+        {
             let groups: Vec<usize> = (min_group_index..max_group_index).collect();
             for i in min_element_index..max_element_index {
-                shape_entry_table.push(ShapeEntry { 
-                    element: i, 
-                    groups: groups.clone(), 
-                    smoothing_group: 0 
+                shape_entry_table.push(ShapeEntry {
+                    element: i,
+                    groups: groups.clone(),
+                    smoothing_group: 0,
                 });
             }
         }
         debug_assert!(shape_entry_table.len() == elements.len());
 
-        for &((min_element_index, max_element_index), 
-               smoothing_group_index) in smoothing_group_entry_table {
-            
+        for &((min_element_index, max_element_index), smoothing_group_index) in smoothing_group_entry_table {
             for i in min_element_index..max_element_index {
                 shape_entry_table[i].smoothing_group = smoothing_group_index;
             }
@@ -1231,17 +1239,18 @@ impl<'a> Parser<'a> {
 
     /// Construct a set of geometries for reach material in an object.
     fn parse_geometries(
-        &self, 
-        geometries: &mut Vec<Geometry>, 
-        material_name_entry_table: &[((usize, usize), usize)], 
-        material_names: &[Option<&'a str>]) {
-
-        for &((min_element_index, max_element_index), material_name_index) 
-            in material_name_entry_table {
-            
+        &self,
+        geometries: &mut Vec<Geometry>,
+        material_name_entry_table: &[((usize, usize), usize)],
+        material_names: &[Option<&'a str>],
+    ) {
+        for &((min_element_index, max_element_index), material_name_index) in material_name_entry_table {
             let shapes: Vec<ShapeEntryIndex> = (min_element_index..max_element_index).collect();
             let material_name = material_names[material_name_index].map(String::from);
-            let geometry = Geometry { material_name: material_name, shapes: shapes };
+            let geometry = Geometry {
+                material_name: material_name,
+                shapes: shapes,
+            };
             geometries.push(geometry);
         }
     }
@@ -1280,19 +1289,20 @@ impl<'a> Parser<'a> {
     */
 
     /// Parse one object from a Wavefront OBJ file.
-    fn parse_object(&mut self,
-        min_vertex_index:  &mut usize,
-        max_vertex_index:  &mut usize,
+    fn parse_object(
+        &mut self,
+        min_vertex_index: &mut usize,
+        max_vertex_index: &mut usize,
         min_texture_index: &mut usize,
         max_texture_index: &mut usize,
-        min_normal_index:  &mut usize,
-        max_normal_index:  &mut usize) -> Result<Object, ParseError> {
-        
+        min_normal_index: &mut usize,
+        max_normal_index: &mut usize,
+    ) -> Result<Object, ParseError> {
         let object_name = self.parse_object_name()?;
 
         let mut vertices: Vec<Vertex> = vec![];
         let mut texture_vertices = vec![];
-        let mut normal_vertices = vec![];        
+        let mut normal_vertices = vec![];
         let mut elements = vec![];
 
         let mut group_entry_table = vec![];
@@ -1302,7 +1312,7 @@ impl<'a> Parser<'a> {
         let mut min_group_index = 0;
         let mut max_group_index = 0;
 
-        let mut smoothing_group_entry_table = vec![];        
+        let mut smoothing_group_entry_table = vec![];
         let mut smoothing_groups = vec![];
         let mut min_element_smoothing_group_index = 0;
         let mut max_element_smoothing_group_index = 0;
@@ -1325,8 +1335,8 @@ impl<'a> Parser<'a> {
                 Some("g") => {
                     // Save the shape entry ranges for the current group.
                     group_entry_table.push((
-                        (min_element_group_index, max_element_group_index), 
-                        (min_group_index, max_group_index)
+                        (min_element_group_index, max_element_group_index),
+                        (min_group_index, max_group_index),
                     ));
 
                     let amount_parsed = self.parse_groups(&mut groups)?;
@@ -1341,8 +1351,11 @@ impl<'a> Parser<'a> {
                 Some("s") => {
                     // Save the shape entry ranges for the current smoothing group.
                     smoothing_group_entry_table.push((
-                        (min_element_smoothing_group_index, max_element_smoothing_group_index),
-                        smoothing_group_index
+                        (
+                            min_element_smoothing_group_index,
+                            max_element_smoothing_group_index,
+                        ),
+                        smoothing_group_index,
                     ));
 
                     self.parse_smoothing_group(&mut smoothing_groups)?;
@@ -1360,7 +1373,7 @@ impl<'a> Parser<'a> {
                     } else {
                         material_name_entry_table.push((
                             (min_element_material_name_index, max_element_material_name_index),
-                            material_name_index
+                            material_name_index,
                         ));
 
                         if material_names.is_empty() {
@@ -1373,7 +1386,7 @@ impl<'a> Parser<'a> {
 
                     min_element_material_name_index = max_element_material_name_index;
                 }
-                Some("v")  => {
+                Some("v") => {
                     let vertex = self.parse_vertex()?;
                     vertices.push(vertex);
                     *max_vertex_index += 1;
@@ -1409,7 +1422,7 @@ impl<'a> Parser<'a> {
                         &mut elements,
                         (*min_vertex_index, *max_vertex_index),
                         (*min_texture_index, *max_texture_index),
-                        (*min_normal_index, *max_normal_index)
+                        (*min_normal_index, *max_normal_index),
                     )?;
                     max_element_group_index += elements_parsed;
                     max_element_smoothing_group_index += elements_parsed;
@@ -1421,18 +1434,21 @@ impl<'a> Parser<'a> {
                 Some("o") | None => {
                     // At the end of file or object, collect any remaining shapes.
                     group_entry_table.push((
-                        (min_element_group_index, max_element_group_index), 
-                        (min_group_index, max_group_index)
+                        (min_element_group_index, max_element_group_index),
+                        (min_group_index, max_group_index),
                     ));
 
                     smoothing_group_entry_table.push((
-                        (min_element_smoothing_group_index, max_element_smoothing_group_index),
-                        smoothing_group_index
+                        (
+                            min_element_smoothing_group_index,
+                            max_element_smoothing_group_index,
+                        ),
+                        smoothing_group_index,
                     ));
 
                     material_name_entry_table.push((
                         (min_element_material_name_index, max_element_material_name_index),
-                        material_name_index
+                        material_name_index,
                     ));
 
                     break;
@@ -1440,7 +1456,7 @@ impl<'a> Parser<'a> {
                 Some(other_st) => {
                     return self.error(
                         ErrorKind::InvalidObjectStatement,
-                        format!("Unsupported or invalid object statement `{}`.", other_st)
+                        format!("Unsupported or invalid object statement `{}`.", other_st),
                     );
                 }
             }
@@ -1448,18 +1464,18 @@ impl<'a> Parser<'a> {
 
         let mut shape_entries = vec![];
         self.parse_shape_entries(
-            &mut shape_entries, 
-            &elements, 
-            &group_entry_table, 
-            &smoothing_group_entry_table
+            &mut shape_entries,
+            &elements,
+            &group_entry_table,
+            &smoothing_group_entry_table,
         );
 
         let mut geometries = vec![];
         self.parse_geometries(&mut geometries, &material_name_entry_table, &material_names);
 
-        *min_vertex_index  += vertices.len();
+        *min_vertex_index += vertices.len();
         *min_texture_index += texture_vertices.len();
-        *min_normal_index  += normal_vertices.len();
+        *min_normal_index += normal_vertices.len();
 
         Ok(Object {
             name: object_name.into(),
@@ -1478,22 +1494,22 @@ impl<'a> Parser<'a> {
     fn parse_objects(&mut self) -> Result<Vec<Object>, ParseError> {
         let mut result = Vec::new();
 
-        let mut min_vertex_index  = 0;
-        let mut max_vertex_index  = 0;
+        let mut min_vertex_index = 0;
+        let mut max_vertex_index = 0;
         let mut min_texture_index = 0;
         let mut max_texture_index = 0;
-        let mut min_normal_index  = 0;
-        let mut max_normal_index  = 0;
+        let mut min_normal_index = 0;
+        let mut max_normal_index = 0;
 
         self.skip_zero_or_more_newlines();
         while self.peek().is_some() {
             result.push(self.parse_object(
-                &mut min_vertex_index, 
+                &mut min_vertex_index,
                 &mut max_vertex_index,
-                &mut min_texture_index,    
+                &mut min_texture_index,
                 &mut max_texture_index,
-                &mut min_normal_index, 
-                &mut max_normal_index
+                &mut min_normal_index,
+                &mut max_normal_index,
             )?);
             self.skip_zero_or_more_newlines();
         }
@@ -1502,7 +1518,10 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse a set of material library file names from a line of text input.
-    fn parse_material_library_line(&mut self, material_libraries: &mut Vec<String>) -> Result<usize, ParseError> {
+    fn parse_material_library_line(
+        &mut self,
+        material_libraries: &mut Vec<String>,
+    ) -> Result<usize, ParseError> {
         self.expect_tag("mtllib")?;
         let mut number_of_libraries_found = 0;
         loop {
@@ -1518,7 +1537,7 @@ impl<'a> Parser<'a> {
         Ok(number_of_libraries_found)
     }
 
-    /// Parse a set of material library names from a Wavefront OBJ file. 
+    /// Parse a set of material library names from a Wavefront OBJ file.
     fn parse_material_libraries(&mut self) -> Result<Vec<String>, ParseError> {
         let mut material_libraries = vec![];
         self.skip_zero_or_more_newlines();
@@ -1594,7 +1613,7 @@ impl<'a> Parser<'a> {
     /// #         Object {
     /// #             name: String::from("object1"),
     /// #             vertex_set: vec![
-    /// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+    /// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 },
     /// #                 Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
     /// #                 Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
     /// #                 Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
@@ -1604,7 +1623,7 @@ impl<'a> Parser<'a> {
     /// #             texture_vertex_set: vec![],
     /// #             normal_vertex_set: vec![],
     /// #             group_set: vec![
-    /// #                 Group(String::from("all")), 
+    /// #                 Group(String::from("all")),
     /// #             ],
     /// #             smoothing_group_set: vec![
     /// #                 SmoothingGroup(1),
@@ -1628,7 +1647,7 @@ impl<'a> Parser<'a> {
     /// #         Object {
     /// #             name: String::from("object2"),
     /// #             vertex_set: vec![
-    /// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 }, 
+    /// #                 Vertex { x: 0.000000, y: 2.000000, z:  0.000000, w: 1.0 },
     /// #                 Vertex { x: 0.000000, y: 0.000000, z:  0.000000, w: 1.0 },
     /// #                 Vertex { x: 2.000000, y: 0.000000, z:  0.000000, w: 1.0 },
     /// #                 Vertex { x: 2.000000, y: 2.000000, z:  0.000000, w: 1.0 },
@@ -1638,7 +1657,7 @@ impl<'a> Parser<'a> {
     /// #             texture_vertex_set: vec![],
     /// #             normal_vertex_set: vec![],
     /// #             group_set: vec![
-    /// #                 Group(String::from("all")), 
+    /// #                 Group(String::from("all")),
     /// #             ],
     /// #             smoothing_group_set: vec![
     /// #                 SmoothingGroup(1),
@@ -1664,7 +1683,7 @@ impl<'a> Parser<'a> {
     /// let mut parser = Parser::new(&obj_file);
     /// let result = parser.parse_objset();
     /// assert!(result.is_ok());
-    /// 
+    ///
     /// let result = result.unwrap();
     /// assert_eq!(result, expected)
     /// ```
@@ -1672,9 +1691,9 @@ impl<'a> Parser<'a> {
         let material_libraries = self.parse_material_libraries()?;
         let objects = self.parse_objects()?;
 
-        Ok(ObjectSet { 
-            material_libraries: material_libraries, 
-            objects: objects 
+        Ok(ObjectSet {
+            material_libraries: material_libraries,
+            objects: objects,
         })
     }
 }
@@ -1709,14 +1728,24 @@ mod vertex_tests {
     #[test]
     fn test_parse_vertex1() {
         let mut parser = Parser::new("v -1.929448 13.329624 -5.221914\n");
-        let vertex = Vertex { x: -1.929448, y: 13.329624, z: -5.221914, w: 1.0 };
+        let vertex = Vertex {
+            x: -1.929448,
+            y: 13.329624,
+            z: -5.221914,
+            w: 1.0,
+        };
         assert_eq!(parser.parse_vertex(), Ok(vertex));
     }
 
     #[test]
     fn test_parse_vertex2() {
         let mut parser = Parser::new("v -1.929448 13.329624 -5.221914 1.329624\n");
-        let vertex = Vertex { x: -1.929448, y: 13.329624, z: -5.221914, w: 1.329624 };
+        let vertex = Vertex {
+            x: -1.929448,
+            y: 13.329624,
+            z: -5.221914,
+            w: 1.329624,
+        };
         assert_eq!(parser.parse_vertex(), Ok(vertex));
     }
 
@@ -1735,17 +1764,27 @@ mod vertex_tests {
     #[test]
     fn test_parse_vertex5() {
         let mut parser = Parser::new(
-             "v -6.207583 1.699077 8.466142
-              v -14.299248 1.700244 8.468981 1.329624"
+            "v -6.207583 1.699077 8.466142
+              v -14.299248 1.700244 8.468981 1.329624",
         );
         assert_eq!(
-            parser.parse_vertex(), 
-            Ok(Vertex { x: -6.207583, y: 1.699077, z: 8.466142, w: 1.0 })
+            parser.parse_vertex(),
+            Ok(Vertex {
+                x: -6.207583,
+                y: 1.699077,
+                z: 8.466142,
+                w: 1.0
+            })
         );
         assert_eq!(parser.next(), Some("\n"));
         assert_eq!(
-            parser.parse_vertex(), 
-            Ok(Vertex { x: -14.299248, y: 1.700244, z: 8.468981, w: 1.329624 })
+            parser.parse_vertex(),
+            Ok(Vertex {
+                x: -14.299248,
+                y: 1.700244,
+                z: 8.468981,
+                w: 1.329624
+            })
         );
     }
 }
@@ -1761,14 +1800,22 @@ mod texture_vertex_tests {
     #[test]
     fn test_parse_texture_vertex1() {
         let mut parser = Parser::new("vt -1.929448");
-        let vt = TextureVertex { u: -1.929448, v: 0.0, w: 0.0 };
+        let vt = TextureVertex {
+            u: -1.929448,
+            v: 0.0,
+            w: 0.0,
+        };
         assert_eq!(parser.parse_texture_vertex(), Ok(vt));
     }
 
     #[test]
     fn test_parse_texture_vertex2() {
         let mut parser = Parser::new("vt -1.929448 13.329624 -5.221914");
-        let vt = TextureVertex { u: -1.929448, v: 13.329624, w: -5.221914 };
+        let vt = TextureVertex {
+            u: -1.929448,
+            v: 13.329624,
+            w: -5.221914,
+        };
         assert_eq!(parser.parse_texture_vertex(), Ok(vt));
     }
 
@@ -1776,16 +1823,24 @@ mod texture_vertex_tests {
     fn test_parse_texture_vertex3() {
         let mut parser = Parser::new(
             "vt -1.929448 13.329624 -5.221914
-             vt -27.6068  31.1438    27.2099"
+             vt -27.6068  31.1438    27.2099",
         );
         assert_eq!(
-            parser.parse_texture_vertex(), 
-            Ok(TextureVertex { u: -1.929448, v: 13.329624, w: -5.221914 })
+            parser.parse_texture_vertex(),
+            Ok(TextureVertex {
+                u: -1.929448,
+                v: 13.329624,
+                w: -5.221914
+            })
         );
         assert_eq!(parser.next(), Some("\n"));
         assert_eq!(
             parser.parse_texture_vertex(),
-            Ok(TextureVertex { u: -27.6068, v: 31.1438, w: 27.2099 })
+            Ok(TextureVertex {
+                u: -27.6068,
+                v: 31.1438,
+                w: 27.2099
+            })
         );
     }
 }
@@ -1793,15 +1848,19 @@ mod texture_vertex_tests {
 #[cfg(test)]
 mod normal_vertex_tests {
     use super::{
-        Parser,
         NormalVertex,
+        Parser,
     };
 
 
     #[test]
     fn test_parse_normal_vertex1() {
         let mut parser = Parser::new("vn  -0.966742  -0.255752  9.97231e-09");
-        let vn = NormalVertex { x: -0.966742, y: -0.255752, z: 9.97231e-09 };
+        let vn = NormalVertex {
+            x: -0.966742,
+            y: -0.255752,
+            z: 9.97231e-09,
+        };
         assert_eq!(parser.parse_normal_vertex(), Ok(vn));
     }
 
@@ -1809,17 +1868,25 @@ mod normal_vertex_tests {
     fn test_parse_normal_vertex2() {
         let mut parser = Parser::new(
             "vn -1.929448 13.329624 -5.221914
-             vn -27.6068  31.1438    27.2099"
+             vn -27.6068  31.1438    27.2099",
         );
         assert_eq!(
-            parser.parse_normal_vertex(), 
-            Ok(NormalVertex { x: -1.929448, y: 13.329624, z: -5.221914 })
+            parser.parse_normal_vertex(),
+            Ok(NormalVertex {
+                x: -1.929448,
+                y: 13.329624,
+                z: -5.221914
+            })
         );
         assert_eq!(parser.next(), Some("\n"));
         assert_eq!(
             parser.parse_normal_vertex(),
-            Ok(NormalVertex { x: -27.6068, y: 31.1438, z: 27.2099 })
-        );        
+            Ok(NormalVertex {
+                x: -27.6068,
+                y: 31.1438,
+                z: 27.2099
+            })
+        );
     }
 }
 
@@ -1885,8 +1952,8 @@ mod vtn_index_tests {
 #[cfg(test)]
 mod element_tests {
     use super::{
+        Element,
         Parser,
-        Element, 
         VTNIndex,
     };
 
@@ -1896,8 +1963,10 @@ mod element_tests {
         let mut parser = Parser::new("p 1 2 3 4 \n");
         let mut result = vec![];
         let expected = vec![
-            Element::Point(VTNIndex::V(0)), Element::Point(VTNIndex::V(1)),
-            Element::Point(VTNIndex::V(2)), Element::Point(VTNIndex::V(3)),
+            Element::Point(VTNIndex::V(0)),
+            Element::Point(VTNIndex::V(1)),
+            Element::Point(VTNIndex::V(2)),
+            Element::Point(VTNIndex::V(3)),
         ];
         assert!(parser.parse_elements(&mut result, (0, 5), (0, 5), (0, 5)).is_ok());
         assert_eq!(result, expected);
@@ -1907,7 +1976,9 @@ mod element_tests {
     fn test_parse_point2() {
         let mut parser = Parser::new("p 1 1/2 3 4/5");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result, (0, 6), (0, 6), (0, 6)).is_err());
+        assert!(parser
+            .parse_elements(&mut result, (0, 6), (0, 6), (0, 6))
+            .is_err());
     }
 
     #[test]
@@ -1915,11 +1986,13 @@ mod element_tests {
         let mut parser = Parser::new("l 297 38 118 108 \n");
         let mut result = vec![];
         let expected = vec![
-            Element::Line(VTNIndex::V(296), VTNIndex::V(37)), 
-            Element::Line(VTNIndex::V(37),  VTNIndex::V(117)),
+            Element::Line(VTNIndex::V(296), VTNIndex::V(37)),
+            Element::Line(VTNIndex::V(37), VTNIndex::V(117)),
             Element::Line(VTNIndex::V(117), VTNIndex::V(107)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 300), (0, 300), (0, 300)).is_ok());
+        assert!(parser
+            .parse_elements(&mut result, (0, 300), (0, 300), (0, 300))
+            .is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1927,10 +2000,10 @@ mod element_tests {
     fn test_parse_line2() {
         let mut parser = Parser::new("l 297/38 118/108 \n");
         let mut result = vec![];
-        let expected = vec![
-            Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
-        ];
-        assert!(parser.parse_elements(&mut result, (0, 300), (0, 300), (0, 300)).is_ok());
+        let expected = vec![Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107))];
+        assert!(parser
+            .parse_elements(&mut result, (0, 300), (0, 300), (0, 300))
+            .is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1942,7 +2015,9 @@ mod element_tests {
             Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
             Element::Line(VTNIndex::VT(117, 107), VTNIndex::VT(323, 397)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 400), (0, 400), (0, 400)).is_ok());
+        assert!(parser
+            .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
+            .is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1950,24 +2025,32 @@ mod element_tests {
     fn test_parse_line4() {
         let mut parser = Parser::new("l 297/38 118 324 \n");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_err());
+        assert!(parser
+            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+            .is_err());
     }
 
     #[test]
     fn test_parse_line5() {
         let mut parser = Parser::new("l 297 118/108 324/398 \n");
         let mut result = vec![];
-        assert!(parser.parse_elements(&mut result, (0, 400), (0, 400), (0, 400)).is_err());
+        assert!(parser
+            .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
+            .is_err());
     }
 
     #[test]
     fn test_parse_face1() {
         let mut parser = Parser::new("f 297 118 108\n");
         let mut result = vec![];
-        let expected = vec![
-            Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
-        ];
-        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_ok());
+        let expected = vec![Element::Face(
+            VTNIndex::V(296),
+            VTNIndex::V(117),
+            VTNIndex::V(107),
+        )];
+        assert!(parser
+            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+            .is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1979,7 +2062,9 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_ok());
+        assert!(parser
+            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+            .is_ok());
         assert_eq!(result, expected);
     }
 
@@ -1992,7 +2077,9 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(323), VTNIndex::V(397)),
         ];
-        assert!(parser.parse_elements(&mut result, (0, 400), (0, 400), (0, 400)).is_ok());
+        assert!(parser
+            .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
+            .is_ok());
         assert_eq!(result, expected);
     }
 
@@ -2000,7 +2087,9 @@ mod element_tests {
     fn test_parse_face4() {
         let mut parser = Parser::new("f 297 118 \n");
         let mut result = vec![];
-        assert!(parser.parse_face(&mut result, (0, 400), (0, 400), (0, 400)).is_err());
+        assert!(parser
+            .parse_face(&mut result, (0, 400), (0, 400), (0, 400))
+            .is_err());
     }
 
     #[test]
@@ -2010,9 +2099,8 @@ mod element_tests {
         let vertex_index_range = (min_index, max_index);
         let texture_index_range = (min_index, max_index);
         let normal_index_range = (min_index, max_index);
-        let mut parser = Parser::new(
-            "f 34184//34184 34088//34088 34079//34079 34084//34084 34091//34091 34076//34076\n"
-        );
+        let mut parser =
+            Parser::new("f 34184//34184 34088//34088 34079//34079 34084//34084 34091//34091 34076//34076\n");
         let mut result = vec![];
         /*
         let expected = vec![
@@ -2023,17 +2111,35 @@ mod element_tests {
         ];
         */
         let expected = vec![
-            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33767, 33767), VTNIndex::VN(33758, 33758)),
-            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33758, 33758), VTNIndex::VN(33763, 33763)),
-            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33763, 33763), VTNIndex::VN(33770, 33770)),
-            Element::Face(VTNIndex::VN(33863, 33863), VTNIndex::VN(33770, 33770), VTNIndex::VN(33755, 33755)),
+            Element::Face(
+                VTNIndex::VN(33863, 33863),
+                VTNIndex::VN(33767, 33767),
+                VTNIndex::VN(33758, 33758),
+            ),
+            Element::Face(
+                VTNIndex::VN(33863, 33863),
+                VTNIndex::VN(33758, 33758),
+                VTNIndex::VN(33763, 33763),
+            ),
+            Element::Face(
+                VTNIndex::VN(33863, 33863),
+                VTNIndex::VN(33763, 33763),
+                VTNIndex::VN(33770, 33770),
+            ),
+            Element::Face(
+                VTNIndex::VN(33863, 33863),
+                VTNIndex::VN(33770, 33770),
+                VTNIndex::VN(33755, 33755),
+            ),
         ];
-        parser.parse_elements(
-            &mut result, 
-            vertex_index_range, 
-            texture_index_range, 
-            normal_index_range
-        ).unwrap();
+        parser
+            .parse_elements(
+                &mut result,
+                vertex_index_range,
+                texture_index_range,
+                normal_index_range,
+            )
+            .unwrap();
 
         assert_eq!(result, expected);
     }
@@ -2042,10 +2148,14 @@ mod element_tests {
     fn test_parse_face6() {
         let mut parser = Parser::new("f 297/13/12 118/124/45 108/93/7\n");
         let mut result = vec![];
-        let expected = vec![
-            Element::Face(VTNIndex::VTN(296, 12, 11), VTNIndex::VTN(117, 123, 44), VTNIndex::VTN(107, 92, 6)),
-        ];
-        assert!(parser.parse_elements(&mut result, (0, 340), (0, 340), (0, 340)).is_ok());
+        let expected = vec![Element::Face(
+            VTNIndex::VTN(296, 12, 11),
+            VTNIndex::VTN(117, 123, 44),
+            VTNIndex::VTN(107, 92, 6),
+        )];
+        assert!(parser
+            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+            .is_ok());
         assert_eq!(result, expected);
     }
 }
@@ -2053,8 +2163,8 @@ mod element_tests {
 #[cfg(test)]
 mod group_tests {
     use super::{
-        Parser,
         Group,
+        Parser,
     };
 
 
@@ -2075,9 +2185,9 @@ mod group_tests {
         let mut result = vec![];
         let parsed = parser.parse_groups(&mut result);
         let expected = vec![
-            Group(String::from("group1")), 
-            Group(String::from("group2")), 
-            Group(String::from("group3"))
+            Group(String::from("group1")),
+            Group(String::from("group2")),
+            Group(String::from("group3")),
         ];
 
         assert!(parsed.is_ok());
@@ -2089,7 +2199,7 @@ mod group_tests {
 mod smoothing_group_tests {
     use super::{
         Parser,
-        SmoothingGroup
+        SmoothingGroup,
     };
 
 
@@ -2110,7 +2220,7 @@ mod smoothing_group_tests {
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
         let expected = vec![SmoothingGroup(0)];
-        
+
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
     }
@@ -2121,7 +2231,7 @@ mod smoothing_group_tests {
         let mut result = vec![];
         let parsed = parser.parse_smoothing_group(&mut result);
         let expected = vec![SmoothingGroup(3434)];
-        
+
         assert!(parsed.is_ok());
         assert_eq!(result, expected);
     }
@@ -2177,18 +2287,18 @@ mod mtllib_tests {
 #[cfg(test)]
 mod objectset_tests {
     use super::{
-        Parser,
-        ParseError,
-        ObjectSet, 
-        Object,
-        Vertex, 
-        NormalVertex, 
-        Element, 
-        VTNIndex, 
-        Group, 
-        SmoothingGroup, 
-        ShapeEntry,
+        Element,
         Geometry,
+        Group,
+        NormalVertex,
+        Object,
+        ObjectSet,
+        ParseError,
+        Parser,
+        ShapeEntry,
+        SmoothingGroup,
+        VTNIndex,
+        Vertex,
     };
 
 
@@ -2329,4 +2439,3 @@ mod objectset_tests {
         }
     }
 }
-
