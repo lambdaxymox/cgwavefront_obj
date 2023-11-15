@@ -1,6 +1,3 @@
-extern crate wavefront_obj;
-
-
 use std::fs::File;
 use std::io::Read;
 use wavefront_obj::obj::{

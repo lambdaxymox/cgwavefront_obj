@@ -1,6 +1,3 @@
-extern crate wavefront_obj;
-
-
 use std::slice;
 use wavefront_obj::obj::{
     Element,
