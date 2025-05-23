@@ -7,7 +7,6 @@ use wavefront_obj::mtl::{
     Parser,
 };
 
-
 struct Test {
     data: String,
     expected: MaterialSet,

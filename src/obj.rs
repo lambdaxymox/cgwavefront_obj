@@ -5,7 +5,6 @@ use crate::lexer::{
 use std::error;
 use std::fmt;
 
-
 /// Parse a set of objects and material library names from a string.
 ///
 /// ## Example
@@ -112,7 +111,6 @@ pub fn parse<T: AsRef<str>>(input: T) -> Result<ObjectSet, ParseError> {
     Parser::new(input.as_ref()).parse_objset()
 }
 
-
 /// A single three dimensional point in an object, or a single
 /// three-dimensional point of an object in homogeneous coordinates
 /// when the w-component is one.
@@ -135,7 +133,6 @@ impl fmt::Display for Vertex {
     }
 }
 
-
 /// A single three-dimensional coordinate in a texture.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct TextureVertex {
@@ -153,7 +150,6 @@ impl fmt::Display for TextureVertex {
     }
 }
 
-
 /// A normal vector at a vertex in an object.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct NormalVertex {
@@ -170,7 +166,6 @@ impl fmt::Display for NormalVertex {
         write!(formatter, "vn  {}  {}  {}", self.x, self.y, self.z)
     }
 }
-
 
 /// A general vertex/texture/normal index representing the indices
 /// of a vertex, texture vertex, and normal vector in an element
@@ -259,7 +254,6 @@ impl fmt::Display for VTNIndex {
     }
 }
 
-
 type ElementIndex = usize;
 type VertexIndex = usize;
 type TextureVertexIndex = usize;
@@ -267,7 +261,6 @@ type NormalVertexIndex = usize;
 type GroupIndex = usize;
 type SmoothingGroupIndex = usize;
 type ShapeEntryIndex = usize;
-
 
 /// An element is the smallest component of a more complex geometric figure.
 ///
@@ -657,7 +650,6 @@ impl fmt::Display for ParseError {
 
 impl error::Error for ParseError {}
 
-
 /// A Wavefront OBJ file parser extracts three-dimensional geometric data
 /// from a `*.obj` file.
 #[derive(Clone)]
@@ -1009,7 +1001,7 @@ impl<'a> Parser<'a> {
                         return self.error(
                             ErrorKind::ExpectedInteger,
                             format!("Expected an integer but got `{}` instead.", st),
-                        )
+                        );
                     }
                 },
                 _ => break,
@@ -1698,11 +1690,9 @@ impl<'a> Parser<'a> {
     }
 }
 
-
 #[cfg(test)]
 mod primitive_tests {
     use super::Parser;
-
 
     #[test]
     fn test_parse_f64() {
@@ -1723,7 +1713,6 @@ mod vertex_tests {
         Parser,
         Vertex,
     };
-
 
     #[test]
     fn test_parse_vertex1() {
@@ -1820,7 +1809,6 @@ mod texture_vertex_tests {
         TextureVertex,
     };
 
-
     #[test]
     fn test_parse_texture_vertex1() {
         let mut parser = Parser::new("vt -1.929448");
@@ -1898,7 +1886,6 @@ mod normal_vertex_tests {
         Parser,
     };
 
-
     #[test]
     fn test_parse_normal_vertex1() {
         let mut parser = Parser::new("vn  -0.966742  -0.255752  9.97231e-09");
@@ -1962,7 +1949,6 @@ mod normal_vertex_tests {
 mod object_tests {
     use super::Parser;
 
-
     #[test]
     fn test_parse_object_name1() {
         let mut parser = Parser::new("o object_name \n\n");
@@ -1982,7 +1968,6 @@ mod vtn_index_tests {
         Parser,
         VTNIndex,
     };
-
 
     #[test]
     fn test_parse_vtn_index1() {
@@ -2025,7 +2010,6 @@ mod element_tests {
         VTNIndex,
     };
 
-
     #[test]
     fn test_parse_point1() {
         let mut parser = Parser::new("p 1 2 3 4 \n");
@@ -2044,9 +2028,11 @@ mod element_tests {
     fn test_parse_point2() {
         let mut parser = Parser::new("p 1 1/2 3 4/5");
         let mut result = vec![];
-        assert!(parser
-            .parse_elements(&mut result, (0, 6), (0, 6), (0, 6))
-            .is_err());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 6), (0, 6), (0, 6))
+                .is_err()
+        );
     }
 
     #[test]
@@ -2058,9 +2044,11 @@ mod element_tests {
             Element::Line(VTNIndex::V(37), VTNIndex::V(117)),
             Element::Line(VTNIndex::V(117), VTNIndex::V(107)),
         ];
-        assert!(parser
-            .parse_elements(&mut result, (0, 300), (0, 300), (0, 300))
-            .is_ok());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 300), (0, 300), (0, 300))
+                .is_ok()
+        );
         assert_eq!(result, expected);
     }
 
@@ -2069,9 +2057,11 @@ mod element_tests {
         let mut parser = Parser::new("l 297/38 118/108 \n");
         let mut result = vec![];
         let expected = vec![Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107))];
-        assert!(parser
-            .parse_elements(&mut result, (0, 300), (0, 300), (0, 300))
-            .is_ok());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 300), (0, 300), (0, 300))
+                .is_ok()
+        );
         assert_eq!(result, expected);
     }
 
@@ -2083,9 +2073,11 @@ mod element_tests {
             Element::Line(VTNIndex::VT(296, 37), VTNIndex::VT(117, 107)),
             Element::Line(VTNIndex::VT(117, 107), VTNIndex::VT(323, 397)),
         ];
-        assert!(parser
-            .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
-            .is_ok());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
+                .is_ok()
+        );
         assert_eq!(result, expected);
     }
 
@@ -2093,18 +2085,22 @@ mod element_tests {
     fn test_parse_line4() {
         let mut parser = Parser::new("l 297/38 118 324 \n");
         let mut result = vec![];
-        assert!(parser
-            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
-            .is_err());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+                .is_err()
+        );
     }
 
     #[test]
     fn test_parse_line5() {
         let mut parser = Parser::new("l 297 118/108 324/398 \n");
         let mut result = vec![];
-        assert!(parser
-            .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
-            .is_err());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
+                .is_err()
+        );
     }
 
     #[test]
@@ -2116,9 +2112,11 @@ mod element_tests {
             VTNIndex::V(117),
             VTNIndex::V(107),
         )];
-        assert!(parser
-            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
-            .is_ok());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+                .is_ok()
+        );
         assert_eq!(result, expected);
     }
 
@@ -2130,9 +2128,11 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(117), VTNIndex::V(107)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
         ];
-        assert!(parser
-            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
-            .is_ok());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+                .is_ok()
+        );
         assert_eq!(result, expected);
     }
 
@@ -2145,9 +2145,11 @@ mod element_tests {
             Element::Face(VTNIndex::V(296), VTNIndex::V(107), VTNIndex::V(323)),
             Element::Face(VTNIndex::V(296), VTNIndex::V(323), VTNIndex::V(397)),
         ];
-        assert!(parser
-            .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
-            .is_ok());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 400), (0, 400), (0, 400))
+                .is_ok()
+        );
         assert_eq!(result, expected);
     }
 
@@ -2155,9 +2157,11 @@ mod element_tests {
     fn test_parse_face4() {
         let mut parser = Parser::new("f 297 118 \n");
         let mut result = vec![];
-        assert!(parser
-            .parse_face(&mut result, (0, 400), (0, 400), (0, 400))
-            .is_err());
+        assert!(
+            parser
+                .parse_face(&mut result, (0, 400), (0, 400), (0, 400))
+                .is_err()
+        );
     }
 
     #[test]
@@ -2221,9 +2225,11 @@ mod element_tests {
             VTNIndex::VTN(117, 123, 44),
             VTNIndex::VTN(107, 92, 6),
         )];
-        assert!(parser
-            .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
-            .is_ok());
+        assert!(
+            parser
+                .parse_elements(&mut result, (0, 340), (0, 340), (0, 340))
+                .is_ok()
+        );
         assert_eq!(result, expected);
     }
 }
@@ -2234,7 +2240,6 @@ mod group_tests {
         Group,
         Parser,
     };
-
 
     #[test]
     fn parse_group_name1() {
@@ -2269,7 +2274,6 @@ mod smoothing_group_tests {
         Parser,
         SmoothingGroup,
     };
-
 
     #[test]
     fn test_smoothing_group_name1() {
@@ -2308,7 +2312,6 @@ mod smoothing_group_tests {
 #[cfg(test)]
 mod mtllib_tests {
     use super::Parser;
-
 
     #[test]
     fn test_mtllib_empty() {
@@ -2351,7 +2354,6 @@ mod mtllib_tests {
     }
 }
 
-
 #[cfg(test)]
 mod objectset_tests {
     use super::{
@@ -2368,7 +2370,6 @@ mod objectset_tests {
         VTNIndex,
         Vertex,
     };
-
 
     #[rustfmt::skip]
     fn test_case() -> (Result<ObjectSet, ParseError>, Result<ObjectSet, ParseError>){

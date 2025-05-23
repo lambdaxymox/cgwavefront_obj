@@ -5,7 +5,6 @@ use crate::lexer::{
 use std::error;
 use std::fmt;
 
-
 /// Parse a material library file from a string.
 ///
 /// ## Example
@@ -268,7 +267,6 @@ impl fmt::Display for ParseError {
 }
 
 impl error::Error for ParseError {}
-
 
 /// A Wavefront MTL file parser.
 pub struct Parser<'a> {
@@ -605,13 +603,13 @@ impl<'a> Parser<'a> {
                 return self.error(
                     ErrorKind::ExpectedTagStatement,
                     format!("Expected `newmtl` but got {}.", st),
-                )
+                );
             }
             None => {
                 return self.error(
                     ErrorKind::EndOfFile,
                     "Expected `newmtl` but got end of input.".to_owned(),
-                )
+                );
             }
         }
 
@@ -792,14 +790,12 @@ impl<'a> Parser<'a> {
     }
 }
 
-
 #[cfg(test)]
 mod mtl_primitive_tests {
     use super::{
         Color,
         Parser,
     };
-
 
     #[test]
     fn test_parse_f64() {
@@ -835,7 +831,6 @@ mod mtl_illumination_statement_tests {
         IlluminationModel,
         Parser,
     };
-
 
     #[test]
     fn test_parse_ambient_component() {
@@ -1053,7 +1048,6 @@ mod mtl_illumination_statement_tests {
     }
 }
 
-
 #[cfg(test)]
 mod mtlset_parser_tests {
     use super::{
@@ -1062,7 +1056,6 @@ mod mtlset_parser_tests {
         Material,
         MaterialSet,
     };
-
 
     #[rustfmt::skip]
     #[test]

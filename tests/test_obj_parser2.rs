@@ -14,7 +14,6 @@ use wavefront_obj::obj::{
     Vertex,
 };
 
-
 struct Test {
     data: String,
     expected: ObjectSet,
@@ -815,10 +814,12 @@ fn test_parse_object_every_element_group_exists() {
         let result_set = parser.parse_objset().unwrap();
         for result in result_set.objects.iter() {
             for shape in result.shape_set.iter() {
-                assert!(shape
-                    .groups
-                    .iter()
-                    .all(|&group_index| { group_index < result.group_set.len() }));
+                assert!(
+                    shape
+                        .groups
+                        .iter()
+                        .all(|&group_index| { group_index < result.group_set.len() })
+                );
             }
         }
     }

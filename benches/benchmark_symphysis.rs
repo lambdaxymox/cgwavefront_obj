@@ -1,16 +1,14 @@
 use criterion::{
+    Criterion,
     black_box,
     criterion_group,
     criterion_main,
-    Criterion,
 };
 use std::fs::File;
 use std::io::Read;
 use wavefront_obj::obj;
 
-
 const SAMPLE_DATA: &str = "assets/symphysis.obj";
-
 
 fn benchmark(c: &mut Criterion) {
     c.bench_function("parse symphysis.obj", |b| {

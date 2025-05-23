@@ -1,6 +1,5 @@
 use std::str;
 
-
 /// A lexer tokenizes an input character stream.
 #[derive(Clone)]
 pub struct Lexer<'a> {
@@ -198,7 +197,6 @@ impl<'a> Iterator for PeekableLexer<'a> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::{
@@ -206,7 +204,6 @@ mod tests {
         PeekableLexer,
     };
     use std::slice;
-
 
     struct TestCase {
         data: String,

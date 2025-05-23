@@ -14,9 +14,7 @@ use wavefront_obj::obj::{
     Vertex,
 };
 
-
 const SAMPLE_DATA: &str = "assets/teapot.obj";
-
 
 struct Test {
     data: String,
@@ -3480,10 +3478,12 @@ fn test_parse_object_every_element_group_exists() {
 
     for result in result_set.objects.iter() {
         for shape in result.shape_set.iter() {
-            assert!(shape
-                .groups
-                .iter()
-                .all(|&group_index| { group_index <= result.group_set.len() }));
+            assert!(
+                shape
+                    .groups
+                    .iter()
+                    .all(|&group_index| { group_index <= result.group_set.len() })
+            );
         }
     }
 }
